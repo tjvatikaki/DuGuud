@@ -105,10 +105,11 @@ app.post('/api/upload', authenticate, requireAdmin, upload.array('images', 20), 
 
 // ─── SEO routes ───
 app.get('/robots.txt', (req, res) => {
+  const base = req.protocol + '://' + req.get('host');
   res.type('text/plain').send(
     'User-agent: *\n' +
     'Allow: /\n' +
-    'Sitemap: http://localhost:' + PORT + '/sitemap.xml\n'
+    'Sitemap: ' + base + '/sitemap.xml\n'
   );
 });
 
