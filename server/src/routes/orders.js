@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { dbAll, dbGet, dbRun, dbTransaction } = require('../db');
+const { dbAll, dbGet, dbRun, dbBatch } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { sendShippingNotification } = require('../email');
 

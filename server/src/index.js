@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { getDb, dbGet, dbAll, dbRun, dbTransaction } = require('./db');
+const { getDb, dbGet, dbAll, dbRun, dbBatch } = require('./db');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
@@ -36,7 +36,7 @@ function bootstrap() {
   const count = dbGet('SELECT COUNT(*) AS c FROM products');
   if (!count || count.c === 0) {
     const { SEED_PRODUCTS } = require('./seed');
-    dbTransaction(() => {
+    dbBatch(() => {
       for (const p of SEED_PRODUCTS) {
         dbRun(
           'INSERT INTO products (id, name, cat, icon, tag, subtag, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',

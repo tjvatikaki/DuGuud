@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { dbRun, dbTransaction } = require('../db');
+const { dbRun, dbBatch } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { SEED_PRODUCTS } = require('../seed');
 
@@ -8,7 +8,7 @@ const router = Router();
 // POST /api/admin/seed — re-seed the database with all default products
 router.post('/seed', authenticate, requireAdmin, (req, res) => {
   try {
-    dbTransaction(() => {
+    dbBatch(() => {
       // Clear existing products (FK cascade handles sizes and images)
       dbRun('DELETE FROM product_images');
       dbRun('DELETE FROM product_sizes');

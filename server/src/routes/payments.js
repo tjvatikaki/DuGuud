@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const crypto = require('crypto');
-const { dbGet, dbAll, dbRun, dbTransaction } = require('../db');
+const { dbGet, dbAll, dbRun, dbBatch } = require('../db');
 const { authenticate } = require('../middleware/auth');
 const { sendOrderConfirmation, sendAdminNotification } = require('../email');
 
@@ -41,7 +41,7 @@ router.post('/api/checkout', authenticate, (req, res) => {
     const total = itemsTotal + shippingFee;
 
     // Create order in DB
-    dbTransaction(() => {
+    dbBatch(() => {
       dbRun(
         'INSERT INTO orders (id, user_id, customer_name, customer_email, customer_phone, customer_address, customer_city, customer_postal, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [orderId, req.user.userId, customer.name, customer.email,
