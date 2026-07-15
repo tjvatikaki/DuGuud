@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.edgars.co.za)",
+      "PowerShell(New-Item *)",
+      "PowerShell($urls = @\\('https://www.edgars.co.za/cdn/shop/files/EDG130220253028_1800x1800.jpg?v=1739518304', 'https://www.edgars.co.za/cdn/shop/files/EDG130220253035_1800x1800.jpg?v=1739518313', 'https://www.edgars.co.za/cdn/shop/files/EDG130220253032_1800x1800.jpg?v=1739518313', 'https://www.edgars.co.za/cdn/shop/files/EDG130220253034_1800x1800.jpg?v=1739518313'\\); $i=1; foreach \\($url in $urls\\) { $out = \"images/polo-$i.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing; Write-Host \"Downloaded: $out \\($\\(\\(Get-Item $out\\).Length\\) bytes\\)\"; $i++ })",
+      "PowerShell($urls = @\\('https://www.edgars.co.za/cdn/shop/files/EDG230720249213_1800x1800.jpg?v=1721809441', 'https://www.edgars.co.za/cdn/shop/files/EDG230720249216_1800x1800.jpg?v=1721809441', 'https://www.edgars.co.za/cdn/shop/files/EDG230720249218_1800x1800.jpg?v=1721809441'\\); $i=1; foreach \\($url in $urls\\) { $out = \"images/polo-black-$i.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing; Write-Host \"Downloaded: $out \\($\\(\\(Get-Item $out\\).Length\\) bytes\\)\"; $i++ })",
+      "PowerShell($urls = @\\('https://www.edgars.co.za/cdn/shop/files/EDG1505265327_1800x1800.jpg?v=1779092680', 'https://www.edgars.co.za/cdn/shop/files/EDG1505265344_1800x1800.jpg?v=1779092680', 'https://www.edgars.co.za/cdn/shop/files/EDG1505265338_1800x1800.jpg?v=1779092680', 'https://www.edgars.co.za/cdn/shop/files/EDG1505265348_1800x1800.jpg?v=1779092680', 'https://www.edgars.co.za/cdn/shop/files/EDG1505265350_1800x1800.jpg?v=1779092680'\\); $i=1; foreach \\($url in $urls\\) { $out = \"images/puma-pants-$i.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing; Write-Host \"Downloaded: $out \\($\\(\\(Get-Item $out\\).Length\\) bytes\\)\"; $i++ })",
+      "PowerShell($urls = @\\('https://www.edgars.co.za/cdn/shop/files/EDG2706202520897_1800x1800.jpg?v=1751276197', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520899_1800x1800.jpg?v=1751276197', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520898_1800x1800.jpg?v=1751276197', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520900_1800x1800.jpg?v=1751276192', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520901_1800x1800.jpg?v=1751276192', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520902_1800x1800.jpg?v=1751276192', 'https://www.edgars.co.za/cdn/shop/files/EDG2706202520903_1800x1800.jpg?v=1751276192'\\); $i=1; foreach \\($url in $urls\\) { $out = \"images/oakley-bag-$i.jpg\"; Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing; Write-Host \"Downloaded: $out \\($\\(\\(Get-Item $out\\).Length\\) bytes\\)\"; $i++ })",
+      "PowerShell(./fetch-product.ps1 \"https://www.edgars.co.za/products/classic-short-sleeve-tee-white-40161801\")",
+      "PowerShell(./fetch-product.ps1 \"https://www.edgars.co.za/products/classic-short-sleeve-tee-white-40161801\" 2>&1 | Select-Object -First 25)",
+      "WebFetch(domain:harmonious-palmier-643965.netlify.app)",
+      "PowerShell(Select-String -Path \"C:\\\\Users\\\\theun\\\\OneDrive\\\\Documents\\\\DuGuud\\\\store.js\" -Pattern \"name:'\" | ForEach-Object { $_.Line.Trim\\(\\) })"
+    ]
+  }
+}

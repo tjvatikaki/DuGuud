@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DuGuud — Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peach:#f4a98c;
+    --peach-dark:#e8875f;
+    --peach-pale:#fbe4d5;
+    --peach-tint:#fdf1ea;
+    --ink:#221e1c;
+    --ink-soft:#4a423e;
+    --paper:#faf8f6;
+    --line:rgba(34,30,28,0.12);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-tag:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  header{
+    background:var(--ink);color:var(--paper);
+    border-bottom:3px solid var(--peach);padding:14px 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .logo{
+    font-family:var(--font-display);font-weight:700;font-size:22px;
+    letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;color:var(--paper);
+  }
+  .logo-mark{flex-shrink:0;}
+
+  .register-wrap{
+    flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;
+  }
+  .register-card{
+    background:#fff;border:1px solid var(--line);border-radius:20px;
+    padding:40px 36px;max-width:440px;width:100%;
+    box-shadow:0 14px 40px rgba(34,30,28,0.06);
+  }
+  .register-card h2{
+    font-family:var(--font-display);font-size:24px;letter-spacing:-0.01em;margin:0 0 6px;
+  }
+  .register-card .sub{font-size:13px;color:var(--ink-soft);margin-bottom:24px;line-height:1.5;}
+
+  .tab-links{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--line);}
+  .tab-links a{padding:10px 20px;font-size:14px;font-weight:500;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+  .tab-links a.active{color:var(--ink);border-bottom-color:var(--peach-dark);font-weight:600;}
+  .tab-links a:hover{color:var(--ink);}
+
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}
+  .field label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);}
+  .field input{
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-size:14px;font-family:var(--font-body);background:var(--paper);
+    transition:border-color .15s ease;
+  }
+  .field input:focus{outline:none;border-color:var(--peach-dark);box-shadow:0 0 0 3px var(--peach-pale);}
+  .btn-submit{
+    width:100%;background:var(--ink);color:var(--peach-pale);border:none;
+    border-radius:14px;padding:15px;font-weight:700;font-size:15px;
+    text-transform:uppercase;letter-spacing:0.04em;margin-top:8px;
+    transition:background .15s ease;
+  }
+  .btn-submit:hover{background:var(--peach-dark);color:#fff;}
+  .btn-submit:disabled{opacity:0.4;cursor:not-allowed;}
+  .links{text-align:center;margin-top:18px;font-size:13px;color:var(--ink-soft);}
+  .links a{color:var(--peach-dark);font-weight:600;}
+  .links a:hover{text-decoration:underline;}
+
+  .success-msg{text-align:center;padding:20px 0;}
+  .success-msg .check{width:64px;height:64px;border-radius:50%;background:var(--peach-pale);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;color:var(--peach-dark);}
+  .success-msg h2{margin:0 0 8px !important;}
+  .success-msg p{margin:0;color:var(--ink-soft);line-height:1.6;}
+
+  .error-text{font-size:12px;color:#c44;margin-top:4px;display:none;}
+  .error-text.show{display:block;}
+
+  .user-card{text-align:center;padding:20px 0;}
+  .user-card .avatar{width:64px;height:64px;border-radius:50%;background:var(--peach-pale);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--peach-dark);margin:0 auto 12px;font-family:var(--font-display);font-weight:700;}
+  .user-card .email{font-size:13px;color:var(--ink-soft);margin:4px 0 20px;}
+  .user-card .btn-ghost{background:none;border:1px solid var(--line);border-radius:30px;padding:10px 24px;font-size:13px;font-weight:600;margin-top:4px;}
+
+  footer{background:var(--ink);color:rgba(250,248,246,0.5);text-align:center;padding:20px 24px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <svg class="logo-mark" viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45, 12, 12)" fill="var(--peach)"/>
+      <circle cx="12" cy="12" r="4.5" fill="var(--ink)"/>
+    </svg>
+    DuGuud
+  </a>
+</header>
+
+<div class="register-wrap">
+  <div class="register-card" id="accountCard">
+    <!-- Dynamically rendered: login, register, or logged-in view -->
+  </div>
+</div>
+
+<footer>
+  <span>&copy; 2026 DuGuud. All rights reserved.</span>
+</footer>
+
+<script src="api.js"></script>
+<script>
+function showView(view){
+  const card = document.getElementById('accountCard');
+
+  if(view === 'logged-in'){
+    getMe().then(function(data){
+      const u = data.user;
+      card.innerHTML =
+        '<div class="user-card">' +
+          '<div class="avatar">' + (u.name ? u.name.charAt(0).toUpperCase() : '?') + '</div>' +
+          '<h2>Welcome, ' + u.name + '</h2>' +
+          '<div class="email">' + u.email + '</div>' +
+          '<p style="font-size:14px;color:var(--ink-soft);margin-bottom:20px;">You\'re signed in as a ' + u.role + '.</p>' +
+          '<a href="index.html" class="btn-submit" style="display:inline-block;width:auto;padding:12px 32px;text-decoration:none;">Browse Store</a>' +
+          '<br><button class="btn-ghost" onclick="logout()" style="margin-top:12px;padding:8px 20px;border:1px solid var(--line);border-radius:20px;background:none;font-size:13px;cursor:pointer;">Sign Out</button>' +
+        '</div>';
+    }).catch(function(){
+      // Token invalid, show login
+      showView('login');
+    });
+    return;
+  }
+
+  if(view === 'register-success'){
+    card.innerHTML =
+      '<div class="success-msg">' +
+        '<div class="check">&#10003;</div>' +
+        '<h2>Account created!</h2>' +
+        '<p>You\'re now signed in. Start shopping or check out your account.</p>' +
+        '<div class="links" style="margin-top:24px;"><a href="index.html">Start shopping &rarr;</a></div>' +
+      '</div>';
+    return;
+  }
+
+  // Login or Register form
+  var isLogin = view === 'login';
+  card.innerHTML =
+    '<div class="tab-links">' +
+      '<a href="#" class="' + (isLogin ? 'active' : '') + '" onclick="showView(\'login\')">Sign In</a>' +
+      '<a href="#" class="' + (isLogin ? '' : 'active') + '" onclick="showView(\'register\')">Create Account</a>' +
+    '</div>' +
+    '<div class="tab-pane active">' +
+      (isLogin ? loginForm() : registerForm()) +
+    '</div>';
+
+  // Focus first input
+  setTimeout(function(){ card.querySelector('input') && card.querySelector('input').focus(); }, 100);
+}
+
+function loginForm(){
+  return '<h2>Welcome back</h2>' +
+    '<p class="sub">Sign in to your DuGuud account to place orders and track your purchases.</p>' +
+    '<div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com"></div>' +
+    '<div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter your password"></div>' +
+    '<span class="error-text" id="loginErr"></span>' +
+    '<button class="btn-submit" id="loginBtn" onclick="handleLogin()">Sign In</button>' +
+    '<div class="links">Don\'t have an account? <a href="#" onclick="showView(\'register\')">Create one</a></div>';
+}
+
+function registerForm(){
+  return '<h2>Create your account</h2>' +
+    '<p class="sub">Join DuGuud so we can keep you updated on your orders.</p>' +
+    '<div class="field"><label>Full name</label><input type="text" id="regName" placeholder="Thandi Nkosi"></div>' +
+    '<div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@email.com"></div>' +
+    '<div class="field"><label>Phone</label><input type="tel" id="regPhone" placeholder="082 123 4567"></div>' +
+    '<div class="field"><label>Password</label><input type="password" id="regPass" placeholder="At least 6 characters"></div>' +
+    '<span class="error-text" id="regErr"></span>' +
+    '<button class="btn-submit" id="registerBtn" onclick="handleRegister()">Create Account</button>' +
+    '<div class="links">Already have an account? <a href="#" onclick="showView(\'login\')">Sign in</a></div>';
+}
+
+async function handleRegister(){
+  var btn = document.getElementById('registerBtn');
+  var errEl = document.getElementById('regErr');
+  errEl.classList.remove('show');
+
+  var name = document.getElementById('regName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var password = document.getElementById('regPass').value;
+
+  if(!name || !email || !password){
+    errEl.textContent = 'Please fill in all required fields';
+    errEl.classList.add('show');
+    return;
+  }
+  if(password.length < 6){
+    errEl.textContent = 'Password must be at least 6 characters';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  try {
+    var data = await registerUser({ name, email, phone, password });
+    setToken(data.token);
+    showView('register-success');
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+}
+
+async function handleLogin(){
+  var btn = document.getElementById('loginBtn');
+  var errEl = document.getElementById('loginErr');
+  errEl.classList.remove('show');
+
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPass').value;
+
+  if(!email || !password){
+    errEl.textContent = 'Please enter your email and password';
+    errEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    var data = await loginUser({ email, password });
+    setToken(data.token);
+    showView('logged-in');
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+function logout(){
+  clearToken();
+  showView('login');
+}
+
+// Init
+(function(){
+  if(isLoggedIn()){
+    showView('logged-in');
+  } else {
+    showView('login');
+  }
+})();
+</script>
+</body>
+</html>
