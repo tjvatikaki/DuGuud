@@ -139,8 +139,9 @@ router.post('/api/payments/itn', (req, res) => {
       // Send data to PayFast for validation
       const isValid = await new Promise((resolve) => {
         const body = querystring.stringify(data);
+        const validateHost = PF_MODE === 'live' ? 'www.payfast.co.za' : 'sandbox.payfast.co.za';
         const opts = {
-          hostname: PF_BASE.replace('https://', ''),
+          hostname: validateHost,
           path: '/eng/query/validate',
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) }
