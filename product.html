@@ -6,6 +6,7 @@
 <title>DuGuud — Product</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCArZiKtL36i1QelfVUZb_wz4UhZ-SkXkk&libraries=places&callback=initAutocomplete" async defer></script>
 <style>
   :root{
     --peach:#f4a98c;
@@ -17,6 +18,7 @@
     --paper:#faf8f6;
     --line:rgba(34,30,28,0.12);
     --ok:#4c7a5d;
+    --bad:#c44;
     --font-display:'Space Grotesk', sans-serif;
     --font-body:'Inter', sans-serif;
     --font-tag:'IBM Plex Mono', monospace;
@@ -252,9 +254,13 @@
   .error-state a{color:var(--peach-dark);font-weight:600;text-decoration:underline;}
 
   @media (max-width:820px){
-    .detail-wrap{grid-template-columns:1fr;padding:20px 16px 60px;gap:24px;}
+    .detail-wrap{grid-template-columns:1fr;padding:16px 12px 60px;gap:16px;}
     .gallery{position:static;}
-    .detail-info h2{font-size:22px;}
+    .gallery-main{aspect-ratio:3/4;max-height:70vh;}
+    .gallery-nav{width:34px;height:34px;font-size:15px;}
+    .gallery-thumb{width:56px;height:70px;}
+    .detail-info h2{font-size:20px;}
+    .detail-desc{font-size:14px;}
     .footer-inner{flex-direction:column;text-align:center;}
   }
 </style>
@@ -320,17 +326,20 @@
     <p class="sub">Pay with credit card, Instant EFT, or mobile money — securely processed by PayFast.</p>
 
     <label>Full name</label>
-    <input type="text" placeholder="Thandi Nkosi">
+    <input type="text" id="deliveryName" placeholder="Thandi Nkosi">
     <div class="form-row">
-      <div><label>Email</label><input type="email" placeholder="you@email.com"></div>
-      <div><label>Phone</label><input type="tel" placeholder="082 123 4567"></div>
+      <div><label>Email</label><input type="email" id="deliveryEmail" placeholder="you@email.com" onblur="validateEmail(this)" oninput="this.style.borderColor=''"></div>
+      <div><label>Phone</label><input type="tel" id="deliveryPhone" placeholder="082 123 4567"></div>
     </div>
     <label>Delivery address</label>
-    <input type="text" placeholder="12 Peach Street, Standerton, Mpumalanga">
+    <input type="text" id="deliveryAddress" placeholder="12 Peach Street, Standerton, Mpumalanga">
     <div class="form-row">
-      <div><label>City</label><input type="text" placeholder="Standerton"></div>
-      <div><label>Postal code</label><input type="text" placeholder="2430"></div>
+      <div><label>City</label><input type="text" id="deliveryCity" placeholder="Standerton"></div>
+      <div><label>Postal code</label><input type="text" id="deliveryPostal" placeholder="2430"></div>
     </div>
+
+    <label style="margin-top:4px;">Note to courier <span style="font-weight:400;color:var(--ink-soft);text-transform:none;letter-spacing:0;">(optional)</span></label>
+    <textarea id="deliveryNotes" placeholder="Gate code, delivery instructions, etc." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:16px;font-family:var(--font-body);resize:vertical;min-height:60px;"></textarea>
 
     <label>Payment method</label>
     <div class="pay-options" id="payOptions">
@@ -352,6 +361,40 @@
 <script src="api.js"></script>
 <script src="store.js"></script>
 <script>
+/* ---------------- EMAIL VALIDATION ---------------- */
+function validateEmail(el) {
+  if (!el || !el.value) return;
+  var ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  el.style.borderColor = ok ? '' : 'var(--bad)';
+}
+
+/* ---------------- GOOGLE PLACES AUTOCOMPLETE ---------------- */
+var autocomplete = null;
+function initAutocomplete() {
+  var addrInput = document.getElementById('deliveryAddress');
+  if (!addrInput || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+  autocomplete = new google.maps.places.Autocomplete(addrInput, { componentRestrictions: { country: 'za' }, fields: ['address_components', 'formatted_address'] });
+  autocomplete.addListener('place_changed', function() {
+    var place = autocomplete.getPlace();
+    if (!place || !place.address_components) return;
+    var street = '', city = '', postal = '';
+    for (var i = 0; i < place.address_components.length; i++) {
+      var comp = place.address_components[i];
+      if (comp.types.indexOf('route') !== -1) street = comp.long_name;
+      if (comp.types.indexOf('sublocality_level_1') !== -1 || comp.types.indexOf('locality') !== -1) city = comp.long_name;
+      if (comp.types.indexOf('postal_code') !== -1) postal = comp.long_name;
+    }
+    var streetNum = '';
+    for (var i = 0; i < place.address_components.length; i++) {
+      if (place.address_components[i].types.indexOf('street_number') !== -1) { streetNum = place.address_components[i].long_name; break; }
+    }
+    if (streetNum && street) document.getElementById('deliveryAddress').value = streetNum + ' ' + street;
+    else if (street) document.getElementById('deliveryAddress').value = street;
+    if (city) document.getElementById('deliveryCity').value = city;
+    if (postal) document.getElementById('deliveryPostal').value = postal;
+  });
+}
+
 /* ========== PRODUCT DETAIL PAGE LOGIC ========== */
 let currentImageIndex = 0;
 let currentProduct = null;
