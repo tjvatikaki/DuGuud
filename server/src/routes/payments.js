@@ -90,6 +90,15 @@ router.post('/api/checkout', authenticate, (req, res) => {
     };
 
     pfData.signature = pfSignature(pfData);
+    // Debug: log the signed string for troubleshooting
+    const keys = Object.keys(pfData).filter(k => k !== 'signature').sort();
+    const sigStr = keys.map(k => k + '=' + encodeURIComponent(String(pfData[k]).trim()).replace(/%20/g, '+')).join('&');
+    console.log('--- PayFast checkout debug ---');
+    console.log('merchant:', PF_MERCHANT_ID, 'key:', PF_MERCHANT_KEY, 'mode:', PF_MODE);
+    console.log('passphrase used:', PF_PASSPHRASE ? PF_PASSPHRASE : '(none)');
+    console.log('signature base string:', sigStr);
+    console.log('signature:', pfData.signature);
+    console.log('--- end debug ---');
 
     // Send email notifications (non-blocking — don't wait for them)
     const orderSummary = {
