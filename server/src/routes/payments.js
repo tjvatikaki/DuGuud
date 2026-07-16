@@ -134,9 +134,7 @@ router.post('/api/payments/itn', (req, res) => {
       const orderId = data.custom_str1 || data.m_payment_id;
       if (!orderId) return;
 
-      console.log('ITN received for order ' + orderId);
-
-      // Send data to PayFast for validation
+      // Validate with PayFast (official recommended approach)
       const isValid = await new Promise((resolve) => {
         const body = querystring.stringify(data);
         const validateHost = PF_MODE === 'live' ? 'www.payfast.co.za' : 'sandbox.payfast.co.za';
@@ -160,7 +158,6 @@ router.post('/api/payments/itn', (req, res) => {
         console.warn('PayFast ITN validation FAILED for order ' + orderId);
         return;
       }
-      console.log('ITN validation PASSED for ' + orderId);
 
       // Verify payment was successful
       if (data.payment_status !== 'COMPLETE') {
