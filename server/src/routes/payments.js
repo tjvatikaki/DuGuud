@@ -133,14 +133,20 @@ router.post('/api/payments/itn', (req, res) => {
 
       if (!orderId) return;
 
+      // Debug: log ITN data keys for troubleshooting
+      console.log('ITN received for order ' + orderId + ', keys: ' + Object.keys(data).join(','));
+
       // Verify signature
       const receivedSig = data.signature;
       delete data.signature;
       const calculatedSig = pfSignature(data);
       if (receivedSig !== calculatedSig) {
-        console.warn('PayFast ITN signature mismatch for order ' + orderId);
+        console.warn('PayFast ITN signature MISMATCH for order ' + orderId);
+        console.warn('  received sig: ' + receivedSig);
+        console.warn('  calculated sig: ' + calculatedSig);
         return;
       }
+      console.log('ITN signature OK for ' + orderId);
 
       // Verify payment was successful
       const paymentStatus = data.payment_status;
@@ -148,6 +154,7 @@ router.post('/api/payments/itn', (req, res) => {
         console.log('PayFast ITN: payment not complete for ' + orderId + ' — status: ' + paymentStatus);
         return;
       }
+      console.log('ITN payment_status COMPLETE for ' + orderId);
 
       // Verify amount matches
       const order = dbGet('SELECT total FROM orders WHERE id = ?', [orderId]);
@@ -155,10 +162,12 @@ router.post('/api/payments/itn', (req, res) => {
         console.warn('PayFast ITN: order not found ' + orderId);
         return;
       }
+      console.log('ITN order found for ' + orderId + ', total=' + order.total);
 
       const paidAmount = parseFloat(data.amount_gross);
+      console.log('ITN amount_gross=' + data.amount_gross + ', order total=' + order.total);
       if (Math.abs(paidAmount - order.total) > 0.01) {
-        console.warn('PayFast ITN: amount mismatch for ' + orderId);
+        console.warn('PayFast ITN: amount mismatch for ' + orderId + ' — paid=' + paidAmount + ' expected=' + order.total);
         return;
       }
 
