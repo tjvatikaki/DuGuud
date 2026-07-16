@@ -7,24 +7,20 @@ const { sendOrderConfirmation, sendAdminNotification } = require('../email');
 const router = Router();
 
 // PayFast config from .env
-const PF_MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID  || '10000100';
-const PF_MERCHANT_KEY  = process.env.PAYFAST_MERCHANT_KEY  || '46f0cd694581a';
-const PF_PASSPHRASE    = process.env.PAYFAST_PASSPHRASE;
-const PF_MODE          = process.env.PAYFAST_MODE          || 'sandbox';
+const PF_MERCHANT_ID   = process.env.PAYFAST_MERCHANT_ID   || '10000100';
+const PF_MERCHANT_KEY   = process.env.PAYFAST_MERCHANT_KEY   || '46f0cd694581a';
+const PF_PASSPHRASE     = process.env.PAYFAST_PASSPHRASE     || 'jt7NOE43FZPn';
+const PF_MODE           = process.env.PAYFAST_MODE           || 'sandbox';
 const PF_BASE          = PF_MODE === 'live'
   ? 'https://www.payfast.co.za/eng'
   : 'https://sandbox.payfast.co.za/eng';
 
 // ─── Helper: generate PayFast signature ───
 function pfSignature(data) {
-  // Build field=value string sorted by key
+  // Build field=value string sorted by key, append passphrase, MD5
   const keys = Object.keys(data).sort();
-  let str = keys.map(k => k + '=' + encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')).join('&');
-  // Only append passphrase if one is set (PayFast requires it to match their end)
-  if (PF_PASSPHRASE && PF_PASSPHRASE !== 'your-passphrase') {
-    str += '&passphrase=' + PF_PASSPHRASE;
-  }
-  return crypto.createHash('md5').update(str).digest('hex');
+  const str = keys.map(k => k + '=' + encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')).join('&');
+  return crypto.createHash('md5').update(str + '&passphrase=' + PF_PASSPHRASE).digest('hex');
 }
 
 // ─── POST /api/checkout — create order + return PayFast redirect data ───
