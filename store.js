@@ -207,12 +207,22 @@ async function placeOrder(){
     return;
   }
 
-  var nameEl = document.querySelector('#checkoutModal input[placeholder="Thandi Nkosi"]');
-  var emailEl = document.querySelector('#checkoutModal input[placeholder="you@email.com"]');
-  var phoneEl = document.querySelector('#checkoutModal input[placeholder="082 123 4567"]');
-  var addrEl = document.querySelector('#checkoutModal input[placeholder="12 Peach Street, Standerton, Mpumalanga"]');
-  var cityEl = document.querySelector('#checkoutModal input[placeholder="Standerton"]');
-  var postalEl = document.querySelector('#checkoutModal input[placeholder="2430"]');
+  var nameEl = document.getElementById('deliveryName');
+  var emailEl = document.getElementById('deliveryEmail');
+  var phoneEl = document.getElementById('deliveryPhone');
+  var addrEl = document.getElementById('deliveryAddress');
+  var cityEl = document.getElementById('deliveryCity');
+  var postalEl = document.getElementById('deliveryPostal');
+  var notesEl = document.getElementById('deliveryNotes');
+
+  // Validate email format
+  var email = emailEl ? emailEl.value.trim() : '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email address');
+    if (emailEl) { emailEl.style.borderColor = 'var(--bad)'; emailEl.focus(); }
+    return;
+  }
+  if (emailEl) emailEl.style.borderColor = '';
 
   var customer = {
     name: nameEl ? nameEl.value : '',
@@ -222,12 +232,13 @@ async function placeOrder(){
     city: cityEl ? cityEl.value : '',
     postal: postalEl ? postalEl.value : ''
   };
+  var notes = notesEl ? notesEl.value : '';
 
   var subtotal = cart.reduce(function(s,c){ return s + c.price*c.qty; }, 0);
   var shipping = getShippingFee(subtotal);
 
   try {
-    const result = await checkoutWithPayFast({ items: cart, customer, shipping });
+    const result = await checkoutWithPayFast({ items: cart, customer, shipping, notes });
 
     closeCheckout();
     closeCart();

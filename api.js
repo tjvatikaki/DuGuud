@@ -123,10 +123,10 @@ async function getMyOrders() {
 }
 
 // ─── PayFast Checkout ───
-async function checkoutWithPayFast({ items, customer, shipping }) {
+async function checkoutWithPayFast({ items, customer, shipping, notes }) {
   return apiFetch('/api/checkout', {
     method: 'POST',
-    body: JSON.stringify({ items, customer, shipping })
+    body: JSON.stringify({ items, customer, shipping, notes })
   });
 }
 

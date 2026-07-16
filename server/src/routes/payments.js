@@ -32,13 +32,16 @@ function pfSignature(data) {
 // ─── POST /api/checkout — create order + return PayFast redirect data ───
 router.post('/api/checkout', authenticate, (req, res) => {
   try {
-    const { items, customer, shipping } = req.body;
+    const { items, customer, shipping, notes } = req.body;
 
     if (!items || !items.length) {
       return res.status(400).json({ error: 'Order must have at least one item' });
     }
     if (!customer || !customer.name || !customer.email) {
       return res.status(400).json({ error: 'Customer name and email are required' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
+      return res.status(400).json({ error: 'Invalid email address format' });
     }
 
     const orderId = 'ord-' + Date.now();
@@ -49,10 +52,10 @@ router.post('/api/checkout', authenticate, (req, res) => {
     // Create order in DB
     dbBatch(() => {
       dbRun(
-        'INSERT INTO orders (id, user_id, customer_name, customer_email, customer_phone, customer_address, customer_city, customer_postal, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO orders (id, user_id, customer_name, customer_email, customer_phone, customer_address, customer_city, customer_postal, notes, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [orderId, req.user.userId, customer.name, customer.email,
          customer.phone || '', customer.address || '', customer.city || '',
-         customer.postal || '', total, 'pending']
+         customer.postal || '', notes || '', total, 'pending']
       );
 
       for (const item of items) {
