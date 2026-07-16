@@ -134,7 +134,15 @@ router.post('/api/payments/itn', (req, res) => {
       if (!orderId) return;
 
       // Debug: log ITN data keys for troubleshooting
-      console.log('ITN received for order ' + orderId + ', keys: ' + Object.keys(data).join(','));
+      console.log('ITN received for order ' + orderId);
+      console.log('ITN keys: ' + Object.keys(data).join(','));
+
+      // Debug: log all values
+      const debugFields = {};
+      for (const k of Object.keys(data).sort()) {
+        if (k !== 'signature') debugFields[k] = data[k];
+      }
+      console.log('ITN data for signature: ' + JSON.stringify(debugFields));
 
       // Verify signature
       const receivedSig = data.signature;
