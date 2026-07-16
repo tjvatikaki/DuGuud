@@ -263,6 +263,13 @@
     <span class="error-text" id="settingsErr" style="display:none;font-size:13px;color:var(--bad);margin-bottom:12px;"></span>
     <button class="btn primary" onclick="handleChangePassword()" style="margin-top:8px;">Update Password</button>
   </div>
+  <hr style="border:none;border-top:1px solid var(--line);margin:30px 0;">
+  <div style="max-width:480px;">
+    <h3 style="font-family:var(--font-display);margin:0 0 16px;">Email Test</h3>
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:20px;">Send a test email to verify your SMTP settings on Render.</p>
+    <button class="btn outline" onclick="testEmail()">Send Test Email</button>
+    <span id="emailTestResult" style="margin-left:12px;font-size:13px;"></span>
+  </div>
 </div>
 
 <div class="toast" id="toast"><span class="dot2"></span><span id="toastMsg"></span></div>
@@ -805,6 +812,23 @@ function showResetPassword(userId){
 }
 
 /* ========== SETTINGS ========== */
+async function testEmail(){
+  var btn = document.querySelector('button[onclick="testEmail()"]');
+  var result = document.getElementById('emailTestResult');
+  if(btn) btn.disabled = true;
+  result.textContent = 'Sending...';
+  result.style.color = 'var(--ink-soft)';
+  try {
+    const r = await apiFetch('/api/admin/test-email');
+    result.textContent = r.success ? '✅ Sent! Check your inbox' : '❌ ' + (r.message || 'Failed');
+    result.style.color = r.success ? 'var(--ok)' : 'var(--bad)';
+  } catch(e) {
+    result.textContent = '❌ ' + e.message;
+    result.style.color = 'var(--bad)';
+  }
+  if(btn) btn.disabled = false;
+}
+
 async function handleChangePassword(){
   var errEl = document.getElementById('settingsErr');
   errEl.style.display = 'none';
