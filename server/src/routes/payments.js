@@ -1,5 +1,7 @@
 const { Router } = require('express');
 const crypto = require('crypto');
+const https = require('https');
+const querystring = require('querystring');
 const { dbGet, dbAll, dbRun, dbBatch } = require('../db');
 const { authenticate } = require('../middleware/auth');
 const { sendOrderConfirmation, sendAdminNotification } = require('../email');
@@ -121,61 +123,60 @@ router.post('/api/checkout', authenticate, (req, res) => {
 });
 
 // ─── POST /api/payments/itn — PayFast Instant Transaction Notification ───
+// Uses PayFast's ITN validation endpoint (official recommended approach)
 router.post('/api/payments/itn', (req, res) => {
   // PayFast expects a 200 OK response quickly
   res.status(200).send('OK');
 
-  // Verify the ITN in background
   setImmediate(async () => {
     try {
       const data = req.body;
       const orderId = data.custom_str1 || data.m_payment_id;
-
       if (!orderId) return;
 
-      // Debug: log ITN data keys for troubleshooting
       console.log('ITN received for order ' + orderId);
-      console.log('ITN keys: ' + Object.keys(data).join(','));
 
-      // Debug: log all values
-      const debugFields = {};
-      for (const k of Object.keys(data).sort()) {
-        if (k !== 'signature') debugFields[k] = data[k];
-      }
-      console.log('ITN data for signature: ' + JSON.stringify(debugFields));
+      // Send data to PayFast for validation
+      const isValid = await new Promise((resolve) => {
+        const body = querystring.stringify(data);
+        const opts = {
+          hostname: PF_BASE.replace('https://', ''),
+          path: '/eng/query/validate',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) }
+        };
+        const req = https.request(opts, (res) => {
+          let resp = '';
+          res.on('data', (c) => resp += c);
+          res.on('end', () => resolve(resp === 'VALID'));
+        });
+        req.on('error', () => resolve(false));
+        req.write(body);
+        req.end();
+      });
 
-      // Verify signature
-      const receivedSig = data.signature;
-      delete data.signature;
-      const calculatedSig = pfSignature(data);
-      if (receivedSig !== calculatedSig) {
-        console.warn('PayFast ITN signature MISMATCH for order ' + orderId);
-        console.warn('  received sig: ' + receivedSig);
-        console.warn('  calculated sig: ' + calculatedSig);
+      if (!isValid) {
+        console.warn('PayFast ITN validation FAILED for order ' + orderId);
         return;
       }
-      console.log('ITN signature OK for ' + orderId);
+      console.log('ITN validation PASSED for ' + orderId);
 
       // Verify payment was successful
-      const paymentStatus = data.payment_status;
-      if (paymentStatus !== 'COMPLETE') {
-        console.log('PayFast ITN: payment not complete for ' + orderId + ' — status: ' + paymentStatus);
+      if (data.payment_status !== 'COMPLETE') {
+        console.log('ITN: payment not complete for ' + orderId + ' — status: ' + data.payment_status);
         return;
       }
-      console.log('ITN payment_status COMPLETE for ' + orderId);
 
       // Verify amount matches
       const order = dbGet('SELECT total FROM orders WHERE id = ?', [orderId]);
       if (!order) {
-        console.warn('PayFast ITN: order not found ' + orderId);
+        console.warn('ITN: order not found ' + orderId);
         return;
       }
-      console.log('ITN order found for ' + orderId + ', total=' + order.total);
 
       const paidAmount = parseFloat(data.amount_gross);
-      console.log('ITN amount_gross=' + data.amount_gross + ', order total=' + order.total);
       if (Math.abs(paidAmount - order.total) > 0.01) {
-        console.warn('PayFast ITN: amount mismatch for ' + orderId + ' — paid=' + paidAmount + ' expected=' + order.total);
+        console.warn('ITN: amount mismatch for ' + orderId + ' — paid=' + paidAmount + ' expected=' + order.total);
         return;
       }
 
