@@ -9,7 +9,7 @@ const router = Router();
 // PayFast config from .env
 const PF_MERCHANT_ID   = process.env.PAYFAST_MERCHANT_ID   || '10000100';
 const PF_MERCHANT_KEY   = process.env.PAYFAST_MERCHANT_KEY   || '46f0cd694581a';
-const PF_PASSPHRASE     = process.env.PAYFAST_PASSPHRASE     || 'jt7NOE43FZPn';
+const PF_PASSPHRASE     = process.env.PAYFAST_PASSPHRASE;
 const PF_MODE           = process.env.PAYFAST_MODE           || 'sandbox';
 const PF_BASE          = PF_MODE === 'live'
   ? 'https://www.payfast.co.za/eng'
@@ -17,10 +17,14 @@ const PF_BASE          = PF_MODE === 'live'
 
 // ─── Helper: generate PayFast signature ───
 function pfSignature(data) {
-  // Build field=value string sorted by key, append passphrase, MD5
+  // Build field=value string sorted by key
   const keys = Object.keys(data).sort();
-  const str = keys.map(k => k + '=' + encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')).join('&');
-  return crypto.createHash('md5').update(str + '&passphrase=' + PF_PASSPHRASE).digest('hex');
+  let str = keys.map(k => k + '=' + encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')).join('&');
+  // Only append passphrase if one is set in env
+  if (PF_PASSPHRASE) {
+    str += '&passphrase=' + PF_PASSPHRASE;
+  }
+  return crypto.createHash('md5').update(str).digest('hex');
 }
 
 // ─── POST /api/checkout — create order + return PayFast redirect data ───
@@ -90,15 +94,6 @@ router.post('/api/checkout', authenticate, (req, res) => {
     };
 
     pfData.signature = pfSignature(pfData);
-    // Debug: log the signed string for troubleshooting
-    const keys = Object.keys(pfData).filter(k => k !== 'signature').sort();
-    const sigStr = keys.map(k => k + '=' + encodeURIComponent(String(pfData[k]).trim()).replace(/%20/g, '+')).join('&');
-    console.log('--- PayFast checkout debug ---');
-    console.log('merchant:', PF_MERCHANT_ID, 'key:', PF_MERCHANT_KEY, 'mode:', PF_MODE);
-    console.log('passphrase used:', PF_PASSPHRASE ? PF_PASSPHRASE : '(none)');
-    console.log('signature base string:', sigStr);
-    console.log('signature:', pfData.signature);
-    console.log('--- end debug ---');
 
     // Send email notifications (non-blocking — don't wait for them)
     const orderSummary = {

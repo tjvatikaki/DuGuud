@@ -68,6 +68,7 @@ function bootstrap() {
 const app = express();
 
 // Middleware
+app.set('trust proxy', true); // Render sits behind a proxy — this gives us real protocol
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true })); // Needed for PayFast ITN (form POST)
