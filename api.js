@@ -116,18 +116,26 @@ async function placeOrder({ items, customer }) {
   });
 }
 
+// ─── My Orders (user's own orders) ───
+async function getMyOrders() {
+  const data = await apiFetch('/api/orders/my');
+  return data.orders || [];
+}
+
 // ─── PayFast Checkout ───
-async function checkoutWithPayFast({ items, customer }) {
+async function checkoutWithPayFast({ items, customer, shipping }) {
   return apiFetch('/api/checkout', {
     method: 'POST',
-    body: JSON.stringify({ items, customer })
+    body: JSON.stringify({ items, customer, shipping })
   });
 }
 
-async function updateOrderStatus(orderId, status) {
+async function updateOrderStatus(orderId, status, tracking_number) {
+  var body = { status: status };
+  if (tracking_number) body.tracking_number = tracking_number;
   return apiFetch('/api/orders/' + encodeURIComponent(orderId) + '/status', {
     method: 'PUT',
-    body: JSON.stringify({ status })
+    body: JSON.stringify(body)
   });
 }
 

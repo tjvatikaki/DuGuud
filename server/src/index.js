@@ -22,7 +22,12 @@ function bootstrap() {
   // Seed admin user if none exists
   if (ADMIN_PASSWORD) {
     const existingAdmin = dbGet("SELECT id FROM users WHERE role = 'admin'");
-    if (!existingAdmin) {
+    if (existingAdmin) {
+      // Always reset admin password from env on startup (prevents lockouts)
+      const hash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+      dbRun('UPDATE users SET password = ?, email = ? WHERE id = ?', [hash, ADMIN_EMAIL, existingAdmin.id]);
+      console.log('✓ Admin password synced from .env');
+    } else {
       const hash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
       dbRun("INSERT INTO users (name, email, phone, password, role) VALUES (?, ?, ?, ?, 'admin')",
             ['Admin', ADMIN_EMAIL, '', hash]);
@@ -65,6 +70,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true })); // Needed for PayFast ITN (form POST)
 
 // Static files — serve the project root so HTML/JS/CSS/images all work
 app.use(express.static(path.join(__dirname, '..', '..')));
