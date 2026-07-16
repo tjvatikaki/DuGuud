@@ -339,11 +339,10 @@
       DuGuud
     </div>
     <nav class="main-links">
-      <a href="#new">Clothing</a>
+      <a href="index.html">Home</a>
     </nav>
     <div class="header-actions">
-      <a href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Register</a>
-      <a href="/track" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Track</a>
+      <a id="navAuthLink" href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Sign In</a>
       <button class="cart-btn" onclick="openCart()">
         Basket <span class="cart-count" id="cartCount">0</span>
       </button>
@@ -406,7 +405,7 @@
         </svg>
         DuGuud
       </div>
-      <p style="font-size:13px;max-width:280px;line-height:1.6;">New clothing today. Second-hand fashion and electronics on the way — one honest South African store.</p>
+      <p style="font-size:13px;max-width:280px;line-height:1.6;">New clothing today — one honest South African store.</p>
     </div>
     <div>
       <h4>Shop</h4>
@@ -414,11 +413,11 @@
     </div>
     <div>
       <h4>Help</h4>
-      <ul><li><a href="#">Sizing Guide</a></li><li><a href="#">Delivery</a></li><li><a href="#">Returns</a></li></ul>
+      <ul><li><a href="delivery.html">Delivery</a></li></ul>
     </div>
     <div>
       <h4>Company</h4>
-      <ul><li><a href="/track">Track Order</a></li><li><a href="register.html">Account</a></li><li><a href="admin.html">Admin</a></li></ul>
+      <ul><li><a href="account.html">Account</a></li></ul>
     </div>
   </div>
   <div class="footer-bottom">
@@ -449,7 +448,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeCheckout()">✕</button>
     <h3>Checkout</h3>
-    <p class="sub">This is a demo checkout — no real payment is processed yet.</p>
+    <p class="sub">Pay with credit card, Instant EFT, or mobile money — securely processed by PayFast.</p>
 
     <label>Full name</label>
     <input type="text" placeholder="Thandi Nkosi">
@@ -551,6 +550,7 @@ function renderGrid(){
   await loadProducts();
   await initStore();
   renderGrid();
+  updateNavAuth();
 })();
 </script>
 </body>

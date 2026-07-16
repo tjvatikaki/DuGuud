@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — DuGuud</title>
+<meta name="description" content="Your DuGuud account — view orders and track deliveries.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peach:#f4a98c; --peach-dark:#e8875f; --peach-pale:#fbe4d5; --peach-tint:#fdf1ea;
+    --ink:#221e1c; --ink-soft:#4a423e; --paper:#faf8f6; --line:rgba(34,30,28,0.12);
+    --ok:#4c7a5d; --warn:#d4822a; --bad:#c44;
+    --font-display:'Space Grotesk', sans-serif; --font-body:'Inter', sans-serif; --font-tag:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  img{display:block;}
+
+  header{background:var(--ink);color:var(--paper);border-bottom:3px solid var(--peach);}
+  .nav-wrap{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .logo{font-family:var(--font-display);font-weight:700;font-size:22px;display:flex;align-items:center;gap:8px;color:var(--paper);}
+  .logo-mark{flex-shrink:0;}
+
+  main{flex:1;max-width:900px;margin:0 auto;padding:40px 24px;width:100%;}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:32px;}
+  .page-head h1{font-family:var(--font-display);font-size:28px;margin:0;}
+  .page-head .sub{font-size:14px;color:var(--ink-soft);margin:4px 0 0;}
+
+  .card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;}
+  .card:not(:last-child){margin-bottom:20px;}
+  .card-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  .card-head h3{font-family:var(--font-display);font-size:18px;margin:0;}
+  .card-body{padding:18px 22px;}
+
+  .user-row{display:flex;align-items:center;gap:16px;}
+  .avatar{width:52px;height:52px;border-radius:50%;background:var(--peach-pale);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--peach-dark);font-family:var(--font-display);font-weight:700;flex-shrink:0;}
+  .user-info{flex:1;}
+  .user-info .name{font-weight:600;font-size:16px;}
+  .user-info .email{font-size:13px;color:var(--ink-soft);}
+
+  .order-item{padding:16px 0;border-bottom:1px solid var(--line);}
+  .order-item:last-child{border-bottom:none;}
+  .order-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .order-id{font-family:var(--font-tag);font-size:12px;color:var(--ink-soft);}
+  .order-date{font-size:12px;color:var(--ink-soft);}
+
+  .badge{display:inline-block;font-family:var(--font-tag);font-size:10px;padding:3px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:0.04em;font-weight:600;}
+  .badge-pending{background:#e0dcd9;color:var(--ink-soft);}
+  .badge-paid{background:var(--peach-pale);color:var(--peach-dark);}
+  .badge-shipped{background:#d4e4d4;color:var(--ok);}
+  .badge-delivered{background:var(--ink);color:var(--peach-pale);}
+  .badge-cancelled{background:rgba(204,68,68,0.1);color:var(--bad);}
+
+  .order-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;}
+  .order-details .label{color:var(--ink-soft);}
+  .order-details .value{font-weight:500;}
+  .order-items{font-size:13px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .order-items table{width:100%;border-collapse:collapse;}
+  .order-items th{text-align:left;padding:6px 0;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);border-bottom:1px solid var(--line);}
+  .order-items td{padding:6px 0;border-bottom:1px solid var(--line);}
+
+  .track-link{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--peach-pale);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+  .track-link:hover{background:var(--peach-dark);color:#fff;}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
+  .empty-state .icon{font-size:48px;margin-bottom:16px;}
+  .empty-state h3{font-family:var(--font-display);margin:0 0 8px;color:var(--ink);}
+  .empty-state p{font-size:14px;margin:0 0 24px;}
+
+  .btn{display:inline-block;background:var(--peach);color:var(--ink);border:none;border-radius:14px;padding:12px 24px;font-weight:600;font-size:14px;cursor:pointer;text-align:center;}
+  .btn:hover{background:var(--peach-dark);color:#fff;}
+  .btn-outline{background:transparent;border:1px solid var(--line);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;}
+  .btn-outline:hover{border-color:var(--ink);}
+
+  footer{background:var(--ink);color:rgba(250,248,246,0.5);text-align:center;padding:20px 24px;font-size:12px;margin-top:auto;}
+
+  .error-msg{font-size:13px;color:var(--bad);margin-top:8px;}
+
+  @media (max-width:600px){
+    .order-details{grid-template-columns:1fr;}
+    .nav-wrap{flex-direction:column;text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45, 12, 12)" fill="var(--peach)"/>
+        <circle cx="12" cy="12" r="4.5" fill="var(--ink)"/>
+      </svg>
+      DuGuud
+    </a>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a id="navAuthLink" href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;">Sign In</a>
+      <a href="index.html" style="font-size:13px;font-weight:500;opacity:0.7;">Store</a>
+    </div>
+  </div>
+</header>
+
+<main id="mainContent">
+  <div class="empty-state" style="padding:80px 20px;">
+    <div class="icon">⏳</div>
+    <h3>Loading your account...</h3>
+  </div>
+</main>
+
+<footer>&copy; 2026 DuGuud. All rights reserved.</footer>
+
+<script src="api.js"></script>
+<script>
+var currentUser = null;
+
+async function loadAccount(){
+  var main = document.getElementById('mainContent');
+
+  // Check auth
+  if(!isLoggedIn()){
+    main.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="icon">&#128274;</div>' +
+        '<h3>Sign in to view your account</h3>' +
+        '<p>You need to be logged in to see your orders and tracking info.</p>' +
+        '<a href="register.html" class="btn">Sign In or Create Account</a>' +
+      '</div>';
+    return;
+  }
+
+  try {
+    var me = await getMe();
+    currentUser = me.user;
+  } catch(e) {
+    clearToken();
+    main.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="icon">&#128274;</div>' +
+        '<h3>Session expired</h3>' +
+        '<p>Please sign in again.</p>' +
+        '<a href="register.html" class="btn">Sign In</a>' +
+      '</div>';
+    return;
+  }
+
+  // Load orders
+  var orders = [];
+  try {
+    orders = await getMyOrders();
+  } catch(e) {
+    console.warn('Failed to load orders:', e.message);
+  }
+
+  renderDashboard(main, orders);
+}
+
+function renderDashboard(main, orders){
+  var user = currentUser;
+  var initial = user.name ? user.name.charAt(0).toUpperCase() : '?';
+
+  main.innerHTML =
+    '<div class="page-head">' +
+      '<div>' +
+        '<h1>My Account</h1>' +
+        '<p class="sub">Your orders and tracking information.</p>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="card">' +
+      '<div class="card-body">' +
+        '<div class="user-row">' +
+          '<div class="avatar">' + initial + '</div>' +
+          '<div class="user-info">' +
+            '<div class="name">' + escHtml(user.name) + '</div>' +
+            '<div class="email">' + escHtml(user.email) + '</div>' +
+          '</div>' +
+          '<button class="btn-outline" onclick="logoutUser()">Sign Out</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="page-head" style="margin-bottom:16px;">' +
+      '<div><h1 style="font-size:22px;">Orders</h1></div>' +
+    '</div>' +
+
+    (orders.length === 0
+      ? '<div class="card"><div class="card-body"><div class="empty-state" style="padding:40px 20px;">' +
+          '<h3>No orders yet</h3>' +
+          '<p>When you place an order, it will show up here with tracking info.</p>' +
+          '<a href="index.html" class="btn">Start Shopping</a>' +
+        '</div></div></div>'
+      : orders.map(function(o){ return renderOrderCard(o); }).join('')
+    );
+}
+
+function renderOrderCard(o){
+  var statusColors = { pending:'badge-pending', paid:'badge-paid', shipped:'badge-shipped', delivered:'badge-delivered', cancelled:'badge-cancelled' };
+  var dateStr = new Date(o.created_at).toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  var items = o.items || [];
+
+  var itemsHtml = items.length > 0
+    ? '<div class="order-items"><table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th></tr></thead><tbody>' +
+      items.map(function(i){
+        return '<tr><td>' + escHtml(i.product_name) + '</td><td>' + escHtml(i.size) + '</td><td>' + i.qty + '</td><td>R ' + i.price + '</td></tr>';
+      }).join('') +
+      '</tbody></table></div>'
+    : '';
+
+  var trackingHtml = o.tracking_number && o.status === 'shipped'
+    ? '<div class="order-details" style="margin-top:10px;"><span class="label">Tracking (Courier Guy):</span><span class="value"><a href="https://www.courierguy.co.za/track/' + encodeURIComponent(o.tracking_number) + '" target="_blank" class="track-link">&#128666; ' + escHtml(o.tracking_number) + '</a></span></div>'
+    : '';
+
+  return '<div class="card">' +
+    '<div class="card-head">' +
+      '<div>' +
+        '<span class="order-id">#' + escHtml(o.id) + '</span>' +
+        '<span class="order-date" style="margin-left:12px;">' + dateStr + '</span>' +
+      '</div>' +
+      '<span class="badge ' + (statusColors[o.status]||'badge-pending') + '">' + escHtml(o.status) + '</span>' +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div class="order-details">' +
+        '<div><span class="label">Total:</span> <span class="value">R ' + o.total + '</span></div>' +
+        '<div><span class="label">Deliver to:</span> <span class="value">' + escHtml(o.customer_address || '—') + '</span></div>' +
+      '</div>' +
+      trackingHtml +
+      itemsHtml +
+    '</div>' +
+  '</div>';
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+(function(){
+  loadAccount();
+})();
+</script>
+</body>
+</html>

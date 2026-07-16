@@ -709,10 +709,18 @@ async function renderOrders(){
       var statusClass = statusColors[o.status] || 'badge-out';
 
       var actions = (statusFlow[o.status] || []).map(function(nextStatus){
+        if(nextStatus === 'shipped'){
+          return '<button class="btn sm outline" onclick="promptTracking(\'' + o.id + '\')" style="font-size:10px;padding:4px 10px;">Ship + Track #</button>';
+        }
         return '<button class="btn sm outline" onclick="setOrderStatus(\'' + o.id + '\',\'' + nextStatus + '\')" style="font-size:10px;padding:4px 10px;">Mark ' + nextStatus + '</button>';
       }).join(' ');
       if(o.status !== 'cancelled' && o.status !== 'delivered'){
         actions += ' <button class="btn sm outline" onclick="setOrderStatus(\'' + o.id + '\',\'cancelled\')" style="font-size:10px;padding:4px 10px;color:var(--bad);">Cancel</button>';
+      }
+
+      var trackingDisplay = '';
+      if(o.tracking_number){
+        trackingDisplay = '<div style="margin-top:4px;"><a href="https://www.courierguy.co.za/track/' + encodeURIComponent(o.tracking_number) + '" target="_blank" style="color:var(--peach-dark);font-size:11px;font-weight:600;text-decoration:underline;">' + esc(o.tracking_number) + '</a></div>';
       }
 
       return '<tr>' +
@@ -722,7 +730,7 @@ async function renderOrders(){
         '<td style="font-size:12px;">' + (contactStr || '—') + '</td>' +
         '<td style="font-size:12px;">' + itemsStr + '</td>' +
         '<td><strong>R ' + o.total + '</strong></td>' +
-        '<td><span class="badge ' + statusClass + '">' + esc(o.status) + '</span></td>' +
+        '<td><span class="badge ' + statusClass + '">' + esc(o.status) + '</span>' + trackingDisplay + '</td>' +
         '<td style="white-space:nowrap;">' + (actions || '—') + '</td>' +
       '</tr>';
     }).join('');
@@ -731,10 +739,16 @@ async function renderOrders(){
   }
 }
 
-async function setOrderStatus(orderId, status){
+function promptTracking(orderId){
+  var tn = prompt('Enter Courier Guy tracking number for this order:');
+  if(!tn || !tn.trim()) return;
+  setOrderStatus(orderId, 'shipped', tn.trim());
+}
+
+async function setOrderStatus(orderId, status, tracking_number){
   try {
-    await updateOrderStatus(orderId, status);
-    toast('Order ' + orderId + ' marked as ' + status);
+    await updateOrderStatus(orderId, status, tracking_number);
+    toast('Order ' + orderId + ' marked as ' + status + (tracking_number ? ' (tracking: ' + tracking_number + ')' : ''));
     renderOrders();
   } catch(e) {
     toast('Failed: ' + e.message, true);

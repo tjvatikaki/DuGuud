@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const { dbAll, dbGet, dbRun, dbBatch } = require('../db');
+
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { sendShippingNotification } = require('../email');
 
@@ -21,7 +22,7 @@ router.post('/', authenticate, (req, res) => {
     const orderId = 'ord-' + Date.now();
     const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-    dbTransaction(() => {
+    dbBatch(() => {
       dbRun(
         'INSERT INTO orders (id, user_id, customer_name, customer_email, customer_phone, customer_address, customer_city, customer_postal, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [orderId, req.user.userId, customer.name, customer.email,
@@ -37,15 +38,14 @@ router.post('/', authenticate, (req, res) => {
         );
 
         // Deduct stock
-        const result = dbRun('UPDATE product_sizes SET stock = stock - ? WHERE product_id = ? AND size = ?',
-                             [item.qty, item.id, item.size]);
-        // sql.js doesn't return changes count, so we check if stock went negative and fix
+        dbRun('UPDATE product_sizes SET stock = stock - ? WHERE product_id = ? AND size = ?',
+              [item.qty, item.id, item.size]);
         const check = dbGet('SELECT stock FROM product_sizes WHERE product_id = ? AND size = ?', [item.id, item.size]);
         if (!check || check.stock < 0) {
-          throw new Error(`Insufficient stock for "${item.name}" size ${item.size}`);
+          throw new Error('Insufficient stock for "' + item.name + '" size ' + item.size);
         }
 
-        dbRun('UPDATE products SET stock = (SELECT COALESCE(SUM(stock), 0) FROM product_sizes WHERE product_id = ?), updated_at = datetime(\'now\') WHERE id = ?',
+        dbRun("UPDATE products SET stock = (SELECT COALESCE(SUM(stock), 0) FROM product_sizes WHERE product_id = ?), updated_at = datetime('now') WHERE id = ?",
               [item.id, item.id]);
       }
     });
@@ -57,7 +57,24 @@ router.post('/', authenticate, (req, res) => {
   }
 });
 
-// GET /api/orders — list orders (admin only)
+// GET /api/orders/my — current user's orders (authenticated)
+router.get('/my', authenticate, (req, res) => {
+  try {
+    const orders = dbAll('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [req.user.userId]);
+
+    const result = orders.map(o => {
+      const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [o.id]);
+      return { ...o, items };
+    });
+
+    res.json({ orders: result });
+  } catch (err) {
+    console.error('Get my orders error:', err);
+    res.status(500).json({ error: 'Failed to load orders' });
+  }
+});
+
+// GET /api/orders — list all orders (admin only)
 router.get('/', authenticate, requireAdmin, (req, res) => {
   try {
     const orders = dbAll('SELECT * FROM orders ORDER BY created_at DESC');
@@ -77,7 +94,7 @@ router.get('/', authenticate, requireAdmin, (req, res) => {
 // PUT /api/orders/:id/status — update order status (admin only)
 router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, tracking_number } = req.body;
     const validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
     if (!status || !validStatuses.includes(status)) {
@@ -87,15 +104,27 @@ router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
     const existing = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
     if (!existing) return res.status(404).json({ error: 'Order not found' });
 
-    dbRun("UPDATE orders SET status = ? WHERE id = ?", [status, req.params.id]);
+    // Require tracking number when marking as shipped
+    if (status === 'shipped' && !tracking_number) {
+      return res.status(400).json({ error: 'Courier Guy tracking number is required when shipping an order' });
+    }
+
+    dbRun('UPDATE orders SET status = ?, tracking_number = ? WHERE id = ?',
+          [status, tracking_number || existing.tracking_number || '', req.params.id]);
 
     // Send shipping notification when marked as shipped
     if (status === 'shipped') {
       const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [req.params.id]);
-      sendShippingNotification({ ...existing, items }, existing.customer_email);
+      const updated = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+      sendShippingNotification({ ...updated, items }, updated.customer_email);
     }
 
-    res.json({ message: 'Order status updated to ' + status, orderId: req.params.id, status });
+    res.json({
+      message: 'Order status updated to ' + status,
+      orderId: req.params.id,
+      status,
+      tracking_number: tracking_number || existing.tracking_number || ''
+    });
   } catch (err) {
     console.error('Update order status error:', err);
     res.status(500).json({ error: 'Failed to update order status' });

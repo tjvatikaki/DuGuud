@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery — DuGuud</title>
+<meta name="description" content="DuGuud delivery information — we use The Courier Guy for all shipments.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peach:#f4a98c; --peach-dark:#e8875f; --peach-pale:#fbe4d5; --peach-tint:#fdf1ea;
+    --ink:#221e1c; --ink-soft:#4a423e; --paper:#faf8f6; --line:rgba(34,30,28,0.12);
+    --font-display:'Space Grotesk', sans-serif; --font-body:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100vh;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  header{background:var(--ink);color:var(--paper);border-bottom:3px solid var(--peach);padding:14px 24px;display:flex;align-items:center;justify-content:center;}
+  .logo{font-family:var(--font-display);font-weight:700;font-size:22px;display:flex;align-items:center;gap:8px;color:var(--paper);}
+  .logo-mark{flex-shrink:0;}
+
+  main{flex:1;max-width:680px;margin:0 auto;padding:60px 24px;width:100%;}
+  h1{font-family:var(--font-display);font-size:32px;margin:0 0 8px;letter-spacing:-0.01em;}
+  .sub{font-size:15px;color:var(--ink-soft);line-height:1.7;margin:0 0 32px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;margin-bottom:20px;}
+  .card h2{font-family:var(--font-display);font-size:18px;margin:0 0 10px;}
+  .card p{font-size:14px;color:var(--ink-soft);line-height:1.7;margin:0;}
+  .card .highlight{display:inline-block;background:var(--peach-pale);color:var(--peach-dark);padding:2px 10px;border-radius:6px;font-weight:600;}
+  .card ul{padding:0;list-style:none;margin:14px 0 0;}
+  .card ul li{padding:8px 0;font-size:14px;color:var(--ink-soft);border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;}
+  .card ul li:last-child{border-bottom:none;}
+  .card ul li .check{color:var(--peach-dark);font-weight:700;flex-shrink:0;}
+  .btn{display:inline-block;background:var(--ink);color:var(--peach-pale);border:none;border-radius:14px;padding:14px 28px;font-weight:600;font-size:14px;margin-top:12px;}
+  .btn:hover{background:var(--peach-dark);color:#fff;}
+
+  footer{background:var(--ink);color:rgba(250,248,246,0.5);text-align:center;padding:20px 24px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <svg class="logo-mark" viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45, 12, 12)" fill="var(--peach)"/>
+      <circle cx="12" cy="12" r="4.5" fill="var(--ink)"/>
+    </svg>
+    DuGuud
+  </a>
+</header>
+
+<main>
+  <h1>Delivery</h1>
+  <p class="sub">We ship all orders with <strong>The Courier Guy</strong> — fast, reliable, and trackable.</p>
+
+  <div class="card">
+    <h2>Shipping policy</h2>
+    <ul>
+      <li><span class="check">✓</span> Orders are dispatched within <span class="highlight">48 working hours</span> after payment is confirmed</li>
+      <li><span class="check">✓</span> We use <strong>The Courier Guy</strong> for all deliveries nationwide</li>
+      <li><span class="check">✓</span> You'll receive a <strong>tracking number</strong> via email as soon as your order ships</li>
+      <li><span class="check">✓</span> Track your delivery anytime by logging into your <a href="account.html" style="color:var(--peach-dark);font-weight:600;">account</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Shipping costs</h2>
+    <p>We charge a flat rate of <strong>R 85</strong> per order. <strong>Free shipping</strong> on all orders over <strong>R 850</strong>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Delivery times</h2>
+    <p>Once dispatched, The Courier Guy typically delivers within <strong>2–5 working days</strong> depending on your location. We'll send your tracking number as soon as it's on its way.</p>
+  </div>
+
+  <a href="index.html" class="btn">&larr; Back to store</a>
+</main>
+
+<footer>&copy; 2026 DuGuud. All rights reserved.</footer>
+
+</body>
+</html>

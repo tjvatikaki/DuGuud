@@ -271,7 +271,7 @@
       DuGuud
     </a>
     <div style="display:flex;align-items:center;gap:20px;">
-      <a href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;color:var(--paper);" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Register</a>
+      <a id="navAuthLink" href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;color:var(--paper);" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Sign In</a>
       <a href="index.html" class="back-link">&#8592; Back to store</a>
       <button class="cart-btn" onclick="openCart()">
         Basket <span class="cart-count" id="cartCount">0</span>
@@ -317,7 +317,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeCheckout()">✕</button>
     <h3>Checkout</h3>
-    <p class="sub">This is a demo checkout — no real payment is processed yet.</p>
+    <p class="sub">Pay with credit card, Instant EFT, or mobile money — securely processed by PayFast.</p>
 
     <label>Full name</label>
     <input type="text" placeholder="Thandi Nkosi">
@@ -540,6 +540,7 @@ document.addEventListener('keydown', function(e){
 (async function(){
   await initStore();
   await loadAndRenderProduct();
+  updateNavAuth();
 })();
 </script>
 </body>

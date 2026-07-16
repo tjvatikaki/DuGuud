@@ -15,6 +15,39 @@ async function checkAuth() {
   }
 }
 
+// ─── Nav auth link (called on every page load) ───
+function updateNavAuth() {
+  var link = document.getElementById('navAuthLink');
+  if (!link) return;
+  if (isLoggedIn()) {
+    link.textContent = 'My Account';
+    link.href = 'account.html';
+    // Also show a sign-out option next to it
+    var parent = link.parentNode;
+    if (parent && !document.getElementById('navLogoutLink')) {
+      var logoutLink = document.createElement('a');
+      logoutLink.id = 'navLogoutLink';
+      logoutLink.textContent = 'Sign Out';
+      logoutLink.href = '#';
+      logoutLink.style.cssText = 'font-size:13px;font-weight:500;opacity:0.5;transition:opacity .15s;';
+      logoutLink.onmouseenter = function(){ this.style.opacity = '1'; };
+      logoutLink.onmouseleave = function(){ this.style.opacity = '0.5'; };
+      logoutLink.onclick = function(e){ e.preventDefault(); logoutUser(); };
+      parent.appendChild(logoutLink);
+    }
+  } else {
+    link.textContent = 'Sign In';
+    link.href = 'register.html';
+  }
+}
+
+// ─── Logout (called from My Account page) ───
+function logoutUser() {
+  clearToken();
+  currentUser = null;
+  window.location.href = 'index.html';
+}
+
 // ─── Products (loaded from API) ───
 let PRODUCTS = [];
 
@@ -120,7 +153,6 @@ function renderCart(){
   const shipping = getShippingFee(subtotal);
   const total = subtotal + shipping;
 
-  // Update drawer
   const subEl = document.getElementById('subtotalAmt');
   const shipEl = document.getElementById('shippingAmt');
   const totalEl = document.getElementById('drawerTotal');
@@ -128,7 +160,6 @@ function renderCart(){
   if(shipEl) shipEl.innerHTML = shipping === 0 ? '<span style="color:var(--ok);">FREE</span>' : fmt(shipping);
   if(totalEl) totalEl.textContent = fmt(total);
 
-  // Update checkout modal
   const modSubEl = document.getElementById('modalSubtotal');
   const modShipEl = document.getElementById('modalShipping');
   const modTotalEl = document.getElementById('modalTotal');
@@ -146,7 +177,6 @@ function removeFromCart(i){
   renderCart();
 }
 
-/* ---------------- DRAWER / MODAL ---------------- */
 function openCart(){
   const d = document.getElementById('drawer');
   const o = document.getElementById('overlay');
@@ -171,7 +201,6 @@ function closeCheckout(){
   if(m) m.classList.remove('show');
 }
 
-/* ---------------- PLACE ORDER (via API) ---------------- */
 async function placeOrder(){
   if(!isLoggedIn()){
     showToast('Please register or log in to place an order');
@@ -200,11 +229,9 @@ async function placeOrder(){
   try {
     const result = await checkoutWithPayFast({ items: cart, customer, shipping });
 
-    // Close modal and show redirect message
     closeCheckout();
     closeCart();
 
-    // Build and auto-submit PayFast form
     var form = document.createElement('form');
     form.method = 'POST';
     form.action = result.actionUrl;
@@ -220,7 +247,6 @@ async function placeOrder(){
     }
     document.body.appendChild(form);
 
-    // Clear cart
     cart = [];
     saveCart();
     renderCart();
@@ -239,7 +265,6 @@ function notifyMe(btn, category){
   showToast("We'll email you when " + category + ' launches');
 }
 
-/* ---------------- TOAST ---------------- */
 function showToast(msg){
   const toast = document.getElementById('toast');
   const msgEl = document.getElementById('toastMsg');
@@ -250,7 +275,6 @@ function showToast(msg){
   window._toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2600);
 }
 
-/* ---------------- INIT (called by each page) ---------------- */
 async function initStore(){
   renderCart();
 

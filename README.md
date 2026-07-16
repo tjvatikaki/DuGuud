@@ -38,11 +38,12 @@
 
 ## To-do before accepting real payments
 1. ✅ ITN URL set to `https://duguud.onrender.com/api/payments/itn`
-2. ☐ Test a sandbox transaction end-to-end to verify ITN callback works
+2. ✅ Sandbox test transaction successful — order marked as **paid** end-to-end
 3. ☐ Switch to live PayFast credentials + set `PAYFAST_MODE=live` in Render env vars
 4. ☐ Set PayFast passphrase on payfast.co.za to match `PAYFAST_PASSPHRASE` in Render env vars
-5. ☐ Verify SMTP email (`admin@duguud.co.za`) can send mail
-6. ☐ Update ITN URL to `https://duguud.co.za/api/payments/itn` once the custom domain is live`
+5. ☐ Add SMTP env vars to Render for email notifications (order confirmations, shipping updates)
+6. ☐ Update ITN URL to `https://duguud.co.za/api/payments/itn` once the custom domain is live
+7. ☐ Manually mark the 3 old test orders as **paid** or **cancelled** in the admin panel
 
 ## Project structure
 ```
