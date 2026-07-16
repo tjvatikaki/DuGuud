@@ -65,10 +65,10 @@ function computeTotalStock(sizes, sizeStock) {
 
 // ─── Routes ───
 
-// GET /api/products — public list
+// GET /api/products — public list (only in-stock products)
 router.get('/', (req, res) => {
   try {
-    const rows = dbAll('SELECT * FROM products ORDER BY id');
+    const rows = dbAll('SELECT * FROM products WHERE stock > 0 ORDER BY id');
     const products = rows.map(assembleProduct);
     res.json({ products });
   } catch (err) {

@@ -101,12 +101,28 @@ router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
       return res.status(400).json({ error: 'Invalid status. Valid: ' + validStatuses.join(', ') });
     }
 
-    const existing = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
-    if (!existing) return res.status(404).json({ error: 'Order not found' });
-
     // Require tracking number when marking as shipped
     if (status === 'shipped' && !tracking_number) {
       return res.status(400).json({ error: 'Courier Guy tracking number is required when shipping an order' });
+    }
+
+    // When cancelling, restore stock to inventory
+    if (status === 'cancelled' && existing.status !== 'cancelled') {
+      const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [req.params.id]);
+      for (const item of items) {
+        // Restore size-level stock
+        const sizeRow = dbGet('SELECT stock FROM product_sizes WHERE product_id = ? AND size = ?', [item.product_id, item.size]);
+        if (sizeRow) {
+          dbRun('UPDATE product_sizes SET stock = stock + ? WHERE product_id = ? AND size = ?',
+                [item.qty, item.product_id, item.size]);
+        }
+        // Recalculate total product stock from all sizes
+        const totalStock = dbGet('SELECT COALESCE(SUM(stock), 0) AS total FROM product_sizes WHERE product_id = ?', [item.product_id]);
+        if (totalStock) {
+          dbRun("UPDATE products SET stock = ?, updated_at = datetime('now') WHERE id = ?",
+                [totalStock.total, item.product_id]);
+        }
+      }
     }
 
     dbRun('UPDATE orders SET status = ?, tracking_number = ? WHERE id = ?',

@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { dbRun, dbBatch } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { SEED_PRODUCTS } = require('../seed');
+const { sendEmail } = require('../email');
 
 const router = Router();
 
@@ -40,6 +41,18 @@ router.post('/seed', authenticate, requireAdmin, (req, res) => {
     console.error('Seed error:', err);
     res.status(500).json({ error: 'Seed failed: ' + err.message });
   }
+});
+
+// GET /api/admin/test-email — send a test email (admin only)
+router.get('/test-email', authenticate, requireAdmin, (req, res) => {
+  const to = req.user && req.user.email ? req.user.email : process.env.ADMIN_EMAIL;
+  sendEmail({
+    to,
+    subject: 'DuGuud — Test email from your store',
+    html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;"><h2 style="color:#221e1c;">✅ Email working!</h2><p style="font-size:14px;color:#4a423e;">This is a test email from your DuGuud store at <strong>' + process.env.SMTP_HOST + '</strong>.</p><hr style="border:none;border-top:1px solid #eee;margin:20px 0;"><p style="font-size:12px;color:#4a423e;">You\'ll now receive order notifications and can send shipping updates to customers.</p></div>'
+  }).then(sent => {
+    res.json({ success: sent, message: sent ? 'Test email sent successfully' : 'Email failed — check SMTP settings' });
+  });
 });
 
 module.exports = router;
