@@ -30,6 +30,13 @@
   .folder-bar .path strong{color:var(--ok);}
   .folder-bar .path .none{color:var(--warn);}
 
+  /* ---- STATS BAR ---- */
+  .stats-bar{max-width:1240px;margin:16px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .stat{border:1px solid var(--line);border-radius:14px;background:#fff;padding:18px 20px;display:flex;flex-direction:column;gap:4px;}
+  .stat-label{font-size:12px;color:var(--ink-soft);}
+  .stat-value{font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;}
+  @media (max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+
   /* ---- BUTTONS ---- */
   .btn{font-weight:600;border:none;border-radius:12px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:var(--font-body);transition:background .15s ease, transform .1s ease;}
   .btn.primary{background:var(--peach);color:var(--ink);}
@@ -141,6 +148,13 @@
 
 <div class="folder-bar" id="folderBar" style="display:none;">
   <span class="path" id="folderPath"><strong>✓ Products stored in database</strong> — use the form below to manage them</span>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><span class="stat-label">👀 Views</span><span class="stat-value" id="statViews">—</span></div>
+  <div class="stat"><span class="stat-label">📦 Orders</span><span class="stat-value" id="statOrders">—</span></div>
+  <div class="stat"><span class="stat-label">👥 Users</span><span class="stat-value" id="statUsers">—</span></div>
+  <div class="stat"><span class="stat-label">💰 Revenue</span><span class="stat-value" id="statRevenue">—</span></div>
 </div>
 
 <div class="tabs" id="adminTabs">
@@ -393,6 +407,17 @@ async function showAdminPanel(){
   switchTab('inventory');
   await loadAdminProducts();
   renderOrders();
+  loadStats();
+}
+
+async function loadStats(){
+  try {
+    var s = await apiFetch('/api/stats');
+    document.getElementById('statViews').textContent = s.page_views.toLocaleString();
+    document.getElementById('statOrders').textContent = s.total_orders;
+    document.getElementById('statUsers').textContent = s.total_users;
+    document.getElementById('statRevenue').textContent = 'R ' + Number(s.revenue).toLocaleString();
+  } catch(e) {}
 }
 
 /* ========== PRODUCTS ========== */

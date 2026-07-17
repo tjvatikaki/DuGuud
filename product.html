@@ -370,6 +370,9 @@
 <script src="api.js"></script>
 <script src="store.js"></script>
 <script>
+/* ---------------- PAGE VIEW TRACKING ---------------- */
+fetch('/api/stats/track').catch(function(){});
+
 /* ---------------- EMAIL VALIDATION ---------------- */
 function validateEmail(el) {
   if (!el || !el.value) return;

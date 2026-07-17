@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/orders');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
 const trackingRoutes = require('./routes/tracking');
+const statsRoutes = require('./routes/stats');
 const { authenticate, requireAdmin } = require('./middleware/auth');
 
 const PORT = process.env.PORT || 3000;
@@ -83,6 +84,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use(paymentRoutes); // mounts /api/checkout, /api/payments/itn, /payment/success, /payment/cancel
 app.use(trackingRoutes); // mounts /api/tracking/lookup, /track
+app.use(statsRoutes); // mounts /api/stats
 
 // Image upload route (admin only)
 const multer = require('multer');

@@ -46,6 +46,8 @@ function initSchema() {
   db.run("CREATE TABLE IF NOT EXISTS product_images (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, url TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0)");
   db.run("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, user_id INTEGER REFERENCES users(id), customer_name TEXT NOT NULL, customer_email TEXT NOT NULL, customer_phone TEXT DEFAULT '', customer_address TEXT DEFAULT '', customer_city TEXT DEFAULT '', customer_postal TEXT DEFAULT '', notes TEXT DEFAULT '', total INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', tracking_number TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE, product_id TEXT NOT NULL, product_name TEXT NOT NULL, product_icon TEXT DEFAULT '', product_image TEXT DEFAULT '', size TEXT NOT NULL, qty INTEGER NOT NULL, price INTEGER NOT NULL)");
+  db.run("CREATE TABLE IF NOT EXISTS stats (key TEXT PRIMARY KEY, value INTEGER NOT NULL DEFAULT 0)");
+  dbRun("INSERT OR IGNORE INTO stats (key, value) VALUES ('page_views', 0)");
 }
 
 // ─── Query helpers ───

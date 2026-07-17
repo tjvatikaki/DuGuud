@@ -124,6 +124,8 @@
 
 <script src="api.js"></script>
 <script>
+fetch('/api/stats/track').catch(function(){});
+
 function showView(view){
   const card = document.getElementById('accountCard');
 
