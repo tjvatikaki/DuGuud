@@ -315,7 +315,7 @@
     <div class="subtotal-row" style="font-size:12px;"><span>Shipping</span><span id="shippingAmt">R 0.00</span></div>
     <div class="subtotal-row" style="font-weight:700;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;"><span>Total</span><span id="drawerTotal">R 0.00</span></div>
     <button class="checkout-btn" id="checkoutBtn" onclick="openCheckout()">Checkout</button>
-    <p class="drawer-note">Free delivery on orders over R 850</p>
+    <p class="drawer-note">Free delivery on orders over R 1 000</p>
   </div>
 </div>
 
@@ -525,7 +525,7 @@ async function loadAndRenderProduct(){
         '<button class="detail-add-btn" id="detailAddBtn" ' + (p.stock===0?'disabled':'') + ' onclick="addFromDetail()">' +
           (p.stock === 0 ? 'Sold Out' : 'Add to Basket') +
         '</button>' +
-        '<p class="detail-stock-note">Free delivery on orders over R 850</p>' +
+        '<p class="detail-stock-note">Free delivery on orders over R 1 000</p>' +
       '</div>' +
     '</div>';
 }

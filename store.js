@@ -91,7 +91,7 @@ function saveOrders(orders){ localStorage.setItem(ORDERS_KEY, JSON.stringify(ord
 
 /* ---------------- HELPERS ---------------- */
 const SHIPPING_FEE = 85;
-const FREE_SHIPPING_MIN = 850;
+const FREE_SHIPPING_MIN = 1000;
 
 function getShippingFee(subtotal) {
   return subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING_FEE;
