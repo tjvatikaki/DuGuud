@@ -14,7 +14,7 @@ const trackingRoutes = require('./routes/tracking');
 const { authenticate, requireAdmin } = require('./middleware/auth');
 
 const PORT = process.env.PORT || 3000;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@duguud.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@duguud.co.za';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // ─── Bootstrap: seed admin + products on first start ───
