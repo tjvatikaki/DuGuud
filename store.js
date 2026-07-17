@@ -92,9 +92,17 @@ function saveOrders(orders){ localStorage.setItem(ORDERS_KEY, JSON.stringify(ord
 /* ---------------- HELPERS ---------------- */
 const SHIPPING_FEE = 85;
 const FREE_SHIPPING_MIN = 1000;
+const PICKUP_LOCATION = 'Gardeniapark, Bloemfontein';
+let selectedShipping = 'delivery'; // 'delivery' or 'pickup'
 
 function getShippingFee(subtotal) {
+  if (selectedShipping === 'pickup') return 0;
   return subtotal >= FREE_SHIPPING_MIN ? 0 : SHIPPING_FEE;
+}
+
+function setShipping(method) {
+  selectedShipping = method;
+  renderCart();
 }
 
 function fmt(n){ return 'R ' + n.toLocaleString('en-ZA', {minimumFractionDigits:2}); }
@@ -157,7 +165,9 @@ function renderCart(){
   const shipEl = document.getElementById('shippingAmt');
   const totalEl = document.getElementById('drawerTotal');
   if(subEl) subEl.textContent = fmt(subtotal);
-  if(shipEl) shipEl.innerHTML = shipping === 0 ? '<span style="color:var(--ok);">FREE</span>' : fmt(shipping);
+  if(shipEl) shipEl.innerHTML = shipping === 0
+    ? (selectedShipping === 'pickup' ? '<span style="color:var(--ok);">FREE — Local pickup</span>' : '<span style="color:var(--ok);">FREE</span>')
+    : fmt(shipping);
   if(totalEl) totalEl.textContent = fmt(total);
 
   const modSubEl = document.getElementById('modalSubtotal');
@@ -224,15 +234,17 @@ async function placeOrder(){
   }
   if (emailEl) emailEl.style.borderColor = '';
 
+  var deliveryNote = selectedShipping === 'pickup' ? 'LOCAL PICKUP — ' + PICKUP_LOCATION + ' (free shipping)' : '';
+
   var customer = {
     name: nameEl ? nameEl.value : '',
     email: emailEl ? emailEl.value : '',
     phone: phoneEl ? phoneEl.value : '',
-    address: addrEl ? addrEl.value : '',
-    city: cityEl ? cityEl.value : '',
-    postal: postalEl ? postalEl.value : ''
+    address: selectedShipping === 'pickup' ? ('Local pickup: ' + PICKUP_LOCATION) : (addrEl ? addrEl.value : ''),
+    city: selectedShipping === 'pickup' ? 'Bloemfontein' : (cityEl ? cityEl.value : ''),
+    postal: selectedShipping === 'pickup' ? '9301' : (postalEl ? postalEl.value : '')
   };
-  var notes = notesEl ? notesEl.value : '';
+  var notes = (notesEl ? notesEl.value : '') + (deliveryNote ? '\n---\n' + deliveryNote : '');
 
   var subtotal = cart.reduce(function(s,c){ return s + c.price*c.qty; }, 0);
   var shipping = getShippingFee(subtotal);
@@ -297,6 +309,19 @@ async function initStore(){
       payOpts.querySelectorAll('.pay-option').forEach(function(o){ o.classList.remove('selected'); });
       label.classList.add('selected');
       label.querySelector('input').checked = true;
+    });
+  }
+
+  // Shipping option selector
+  var shipOpts = document.getElementById('shipOptions');
+  if(shipOpts){
+    shipOpts.addEventListener('click', function(e){
+      var label = e.target.closest('.pay-option');
+      if(!label) return;
+      shipOpts.querySelectorAll('.pay-option').forEach(function(o){ o.classList.remove('selected'); });
+      label.classList.add('selected');
+      label.querySelector('input').checked = true;
+      setShipping(label.querySelector('input').value);
     });
   }
 

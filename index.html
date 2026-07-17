@@ -488,6 +488,12 @@
     <label style="margin-top:4px;">Note to courier <span style="font-weight:400;color:var(--ink-soft);text-transform:none;letter-spacing:0;">(optional)</span></label>
     <textarea id="deliveryNotes" placeholder="Gate code, delivery instructions, etc." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:16px;font-family:var(--font-body);resize:vertical;min-height:60px;"></textarea>
 
+    <label>Shipping method</label>
+    <div class="pay-options" id="shipOptions" style="margin-bottom:16px;">
+      <label class="pay-option selected"><input type="radio" name="ship" value="delivery" checked> 🚚 Delivery — R85 (free over R1 000)</label>
+      <label class="pay-option"><input type="radio" name="ship" value="pickup"> 📍 Local pickup — Gardeniapark, Bloemfontein (free)</label>
+    </div>
+
     <label>Payment method</label>
     <div class="pay-options" id="payOptions">
       <label class="pay-option selected"><input type="radio" name="pay" checked> 💳 PayFast — Credit Card / Instant EFT / Mobile</label>
