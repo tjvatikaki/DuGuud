@@ -55,17 +55,16 @@
     position:sticky;top:0;z-index:50;
     background:var(--ink);
     color:var(--paper);
-    border-bottom:3px solid var(--peach);
+    border-bottom:3px solid var(--peach);overflow:visible;
   }
   .nav-wrap{
     max-width:1240px;margin:0 auto;padding:14px 24px;
     display:flex;align-items:center;justify-content:space-between;gap:20px;
   }
   .logo{
-    font-family:var(--font-display);font-weight:700;font-size:26px;
-    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; line-height:0;
   }
-  .logo-mark{flex-shrink:0;}
+  .logo-mark{flex-shrink:0;display:block;height:58px;width:auto;margin-bottom:-10px;}
   nav.main-links{display:flex;gap:26px;font-size:14px;font-weight:500;}
   nav.main-links a{opacity:0.85;position:relative;padding:4px 0;}
   nav.main-links a:hover{opacity:1;}
@@ -349,10 +348,9 @@
 
 <header>
   <div class="nav-wrap">
-    <div class="logo">
-      <img src="images/logo.png" class="logo-mark" alt="DuGuud" style="height:32px;width:auto;">
-      DuGuud
-    </div>
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" class="logo-mark" alt="DuGuud">
+    </a>
     <nav class="main-links">
       <a href="index.html">Home</a>
     </nav>

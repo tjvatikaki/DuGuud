@@ -40,17 +40,14 @@
     position:sticky;top:0;z-index:50;
     background:var(--ink);
     color:var(--paper);
-    border-bottom:3px solid var(--peach);
+    border-bottom:3px solid var(--peach);overflow:visible;
   }
   .nav-wrap{
     max-width:1240px;margin:0 auto;padding:14px 24px;
     display:flex;align-items:center;justify-content:space-between;gap:20px;
   }
-  .logo{
-    font-family:var(--font-display);font-weight:700;font-size:22px;
-    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;color:var(--paper);
-  }
-  .logo-mark{flex-shrink:0;}
+  .logo{display:flex; align-items:center; line-height:0;}
+  .logo-mark{flex-shrink:0;display:block;height:58px;width:auto;margin-bottom:-10px;}
   .back-link{
     font-size:13px;font-weight:500;opacity:0.7;display:flex;align-items:center;gap:6px;
     transition:opacity .15s ease;
@@ -272,8 +269,7 @@
 <header>
   <div class="nav-wrap">
     <a href="index.html" class="logo">
-      <img src="images/logo.png" class="logo-mark" alt="DuGuud" style="height:32px;width:auto;">
-      DuGuud
+      <img src="images/logo.png" class="logo-mark" alt="DuGuud">
     </a>
     <div style="display:flex;align-items:center;gap:20px;">
       <a id="navAuthLink" href="register.html" style="font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;color:var(--paper);" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.7'">Sign In</a>
