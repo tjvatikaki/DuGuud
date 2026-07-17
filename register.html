@@ -131,14 +131,13 @@ function showView(view){
     getMe().then(function(data){
       const u = data.user;
       card.innerHTML =
-        '<div class="user-card">' +
-          '<div class="avatar">' + (u.name ? u.name.charAt(0).toUpperCase() : '?') + '</div>' +
-          '<h2>Welcome, ' + u.name + '</h2>' +
-          '<div class="email">' + u.email + '</div>' +
-          '<p style="font-size:14px;color:var(--ink-soft);margin-bottom:20px;">You\'re signed in as a ' + u.role + '.</p>' +
-          '<a href="index.html" class="btn-submit" style="display:inline-block;width:auto;padding:12px 32px;text-decoration:none;">Browse Store</a>' +
-          '<br><button class="btn-ghost" onclick="logout()" style="margin-top:12px;padding:8px 20px;border:1px solid var(--line);border-radius:20px;background:none;font-size:13px;cursor:pointer;">Sign Out</button>' +
+        '<div class="success-msg">' +
+          '<div class="check">&#10003;</div>' +
+          '<h2>Welcome back, ' + u.name + '</h2>' +
+          '<p>Redirecting you to the store...</p>' +
+          '<div class="links" style="margin-top:24px;"><a href="index.html">Continue to store &rarr;</a></div>' +
         '</div>';
+      setTimeout(function(){ window.location.href = 'index.html'; }, 2000);
     }).catch(function(){
       // Token invalid, show login
       showView('login');
@@ -151,9 +150,10 @@ function showView(view){
       '<div class="success-msg">' +
         '<div class="check">&#10003;</div>' +
         '<h2>Account created!</h2>' +
-        '<p>You\'re now signed in. Start shopping or check out your account.</p>' +
+        '<p>You\'re now signed in. Redirecting you to the store...</p>' +
         '<div class="links" style="margin-top:24px;"><a href="index.html">Start shopping &rarr;</a></div>' +
       '</div>';
+    setTimeout(function(){ window.location.href = 'index.html'; }, 3000);
     return;
   }
 
@@ -174,9 +174,10 @@ function showView(view){
       '<div class="success-msg">' +
         '<div class="check">&#10003;</div>' +
         '<h2>Password reset!</h2>' +
-        '<p>Your password has been updated. You can now sign in with your new password.</p>' +
+        '<p>Your password has been updated. Redirecting you to sign in...</p>' +
         '<div class="links" style="margin-top:24px;"><a href="#" onclick="showView(\'login\')">Sign in &rarr;</a></div>' +
       '</div>';
+    setTimeout(function(){ showView('login'); }, 3000);
     return;
   }
 

@@ -67,6 +67,7 @@
     background:var(--ink);color:var(--peach);border-radius:50%;
     width:20px;height:20px;display:flex;align-items:center;justify-content:center;
     font-size:11px;font-family:var(--font-tag);
+    transition:transform .2s ease;
   }
 
   /* ---------- PRODUCT DETAIL ---------- */
@@ -239,13 +240,14 @@
 
   /* ---------- TOAST ---------- */
   .toast{
-    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--ink);color:var(--peach-pale);padding:14px 22px;border-radius:30px;
-    font-size:14px;font-weight:600;z-index:110;opacity:0;pointer-events:none;
-    transition:all .25s ease;display:flex;align-items:center;gap:10px;
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
+    background:var(--ink);color:var(--peach-pale);padding:16px 28px;border-radius:16px;
+    font-size:15px;font-weight:600;z-index:999;opacity:0;pointer-events:none;
+    transition:all .35s ease;display:flex;align-items:center;gap:12px;
+    box-shadow:0 8px 30px rgba(34,30,28,0.2);
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .toast .dot2{width:8px;height:8px;border-radius:50%;background:var(--peach);}
+  .toast .dot2{width:10px;height:10px;border-radius:50%;background:var(--peach);flex-shrink:0;}
 
   /* ---------- ERROR STATE ---------- */
   .error-state{text-align:center;padding:100px 24px;}

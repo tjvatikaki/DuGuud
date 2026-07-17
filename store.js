@@ -130,7 +130,10 @@ function addToCart(id){
   }
   saveCart();
   renderCart();
-  showToast('Added ' + product.name + ' (' + size + ') to your basket');
+  // Animate cart count
+  var cc = document.getElementById('cartCount');
+  if(cc){ cc.style.transform = 'scale(1.3)'; setTimeout(function(){ cc.style.transform = ''; }, 300); }
+  showToast('✓ Added to basket — ' + product.name + ' (' + size + ')', '✓');
 }
 
 function renderCart(){
@@ -288,14 +291,16 @@ function notifyMe(btn, category){
   showToast("We'll email you when " + category + ' launches');
 }
 
-function showToast(msg){
+function showToast(msg, icon){
   const toast = document.getElementById('toast');
   const msgEl = document.getElementById('toastMsg');
+  const dotEl = document.querySelector('.toast .dot2');
   if(!toast || !msgEl) return;
   msgEl.textContent = msg;
+  if(dotEl) dotEl.textContent = icon || '●';
   toast.classList.add('show');
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2600);
+  window._toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 3000);
 }
 
 async function initStore(){
