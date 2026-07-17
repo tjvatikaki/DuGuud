@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { dbGet, dbAll, dbRun, dbLastInsertId } = require('../db');
 const { signToken, authenticate, requireAdmin } = require('../middleware/auth');
@@ -149,6 +150,66 @@ router.put('/reset-password', authenticate, requireAdmin, (req, res) => {
     dbRun('UPDATE users SET password = ? WHERE id = ?', [hash, userId]);
 
     res.json({ message: `Password reset for ${user.name} (${user.email})` });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+// POST /api/auth/forgot-password — send reset link
+router.post('/forgot-password', (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const user = dbGet('SELECT id, name, email FROM users WHERE email = ?', [email]);
+    // Always return success to prevent email enumeration
+    if (!user) return res.json({ message: 'If that email exists, a reset link has been sent.' });
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+    dbRun('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [token, expires, user.id]);
+
+    sendEmail({
+      to: email,
+      subject: 'Reset your DuGuud password',
+      html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid rgba(34,30,28,0.12);padding:40px;">' +
+        '<div style="text-align:center;margin-bottom:24px;">' +
+          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#221e1c"/></svg>' +
+          '<h1 style="font-family:\'Space Grotesk\',sans-serif;color:#221e1c;font-size:24px;margin:12px 0 4px;">Reset your password</h1>' +
+        '</div>' +
+        '<p style="color:#221e1c;font-size:15px;line-height:1.6;">Hi <strong>' + user.name + '</strong>,</p>' +
+        '<p style="color:#4a423e;font-size:14px;line-height:1.6;">Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>' +
+        '<div style="text-align:center;margin:28px 0;">' +
+          '<a href="https://www.duguud.co.za/register.html?reset=' + token + '" style="display:inline-block;background:#f4a98c;color:#221e1c;padding:14px 32px;border-radius:30px;font-weight:600;font-size:14px;text-decoration:none;">Reset Password</a>' +
+        '</div>' +
+        '<p style="color:#4a423e;font-size:13px;line-height:1.6;">If you didn\'t request this, you can ignore this email.</p>' +
+        '<hr style="border:none;border-top:1px solid rgba(34,30,28,0.1);margin:24px 0;">' +
+        '<p style="color:#8a8480;font-size:12px;text-align:center;margin:0;">DuGuud — South Africa</p>' +
+      '</div>'
+    });
+
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
+// POST /api/auth/reset-password — use reset token
+router.post('/reset-password', (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token and new password are required' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    const user = dbGet('SELECT id, email FROM users WHERE reset_token = ? AND reset_token_expires > datetime(\'now\')', [token]);
+    if (!user) return res.status(400).json({ error: 'Invalid or expired reset link' });
+
+    const hash = bcrypt.hashSync(password, 10);
+    dbRun('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [hash, user.id]);
+
+    res.json({ message: 'Password has been reset. You can now sign in.' });
   } catch (err) {
     console.error('Reset password error:', err);
     res.status(500).json({ error: 'Failed to reset password' });

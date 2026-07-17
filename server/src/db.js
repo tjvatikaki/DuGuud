@@ -40,7 +40,7 @@ function persist() {
 
 // ─── Schema ───
 function initSchema() {
-  db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, phone TEXT DEFAULT '', password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'customer', created_at TEXT DEFAULT (datetime('now')))");
+  db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, phone TEXT DEFAULT '', password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'customer', reset_token TEXT DEFAULT '', reset_token_expires TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, name TEXT NOT NULL, cat TEXT NOT NULL DEFAULT 'men', icon TEXT NOT NULL DEFAULT 'tee', tag TEXT NOT NULL DEFAULT 'Tops', subtag TEXT NOT NULL DEFAULT '', price INTEGER NOT NULL, stock INTEGER NOT NULL DEFAULT 0, desc TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS product_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, size TEXT NOT NULL, stock INTEGER NOT NULL DEFAULT 0, UNIQUE(product_id, size))");
   db.run("CREATE TABLE IF NOT EXISTS product_images (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, url TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0)");

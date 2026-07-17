@@ -157,6 +157,41 @@ function showView(view){
     return;
   }
 
+  if (view === 'forgot') {
+    card.innerHTML =
+      '<h2>Reset password</h2>' +
+      '<p class="sub">Enter your email and we\'ll send you a reset link.</p>' +
+      '<div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="you@email.com"></div>' +
+      '<span class="error-text" id="forgotErr"></span>' +
+      '<span class="error-text" id="forgotSent" style="color:var(--ok);display:none;"></span>' +
+      '<button class="btn-submit" id="forgotBtn" onclick="handleForgotPassword()">Send Reset Link</button>' +
+      '<div class="links"><a href="#" onclick="showView(\'login\')">Back to sign in</a></div>';
+    return;
+  }
+
+  if (view === 'reset-success') {
+    card.innerHTML =
+      '<div class="success-msg">' +
+        '<div class="check">&#10003;</div>' +
+        '<h2>Password reset!</h2>' +
+        '<p>Your password has been updated. You can now sign in with your new password.</p>' +
+        '<div class="links" style="margin-top:24px;"><a href="#" onclick="showView(\'login\')">Sign in &rarr;</a></div>' +
+      '</div>';
+    return;
+  }
+
+  if (view === 'reset-form') {
+    card.innerHTML =
+      '<h2>Set new password</h2>' +
+      '<p class="sub">Enter your new password below.</p>' +
+      '<div class="field"><label>New password</label><input type="password" id="resetNewPass" placeholder="At least 6 characters"></div>' +
+      '<div class="field"><label>Confirm password</label><input type="password" id="resetConfirmPass" placeholder="Repeat your password"></div>' +
+      '<span class="error-text" id="resetErr"></span>' +
+      '<button class="btn-submit" id="resetBtn" onclick="handleResetPassword()">Reset Password</button>' +
+      '<div class="links"><a href="#" onclick="showView(\'login\')">Back to sign in</a></div>';
+    return;
+  }
+
   // Login or Register form
   var isLogin = view === 'login';
   card.innerHTML =
@@ -179,6 +214,7 @@ function loginForm(){
     '<div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter your password"></div>' +
     '<span class="error-text" id="loginErr"></span>' +
     '<button class="btn-submit" id="loginBtn" onclick="handleLogin()">Sign In</button>' +
+    '<div class="links" style="margin-top:12px;"><a href="#" onclick="showView(\'forgot\')">Forgot password?</a></div>' +
     '<div class="links">Don\'t have an account? <a href="#" onclick="showView(\'register\')">Create one</a></div>';
 }
 
@@ -264,9 +300,63 @@ function logout(){
   showView('login');
 }
 
+async function handleForgotPassword(){
+  var btn = document.getElementById('forgotBtn');
+  var errEl = document.getElementById('forgotErr');
+  var sentEl = document.getElementById('forgotSent');
+  errEl.classList.remove('show');
+  sentEl.style.display = 'none';
+
+  var email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ errEl.textContent = 'Please enter your email'; errEl.classList.add('show'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    await apiFetch('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+    sentEl.textContent = '✅ If that email exists, a reset link has been sent.';
+    sentEl.style.display = 'block';
+    btn.textContent = 'Send Another';
+    btn.disabled = false;
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+  }
+}
+
+async function handleResetPassword(){
+  var token = new URLSearchParams(window.location.search).get('reset');
+  var btn = document.getElementById('resetBtn');
+  var errEl = document.getElementById('resetErr');
+  errEl.classList.remove('show');
+
+  var pass = document.getElementById('resetNewPass').value;
+  var confirm = document.getElementById('resetConfirmPass').value;
+
+  if(!pass || pass.length < 6){ errEl.textContent = 'Password must be at least 6 characters'; errEl.classList.add('show'); return; }
+  if(pass !== confirm){ errEl.textContent = 'Passwords do not match'; errEl.classList.add('show'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Resetting...';
+  try {
+    await apiFetch('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password: pass }) });
+    showView('reset-success');
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Reset Password';
+  }
+}
+
 // Init
 (function(){
-  if(isLoggedIn()){
+  var resetToken = new URLSearchParams(window.location.search).get('reset');
+  if(resetToken){
+    showView('reset-form');
+  } else if(isLoggedIn()){
     showView('logged-in');
   } else {
     showView('login');
