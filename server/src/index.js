@@ -84,7 +84,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use(paymentRoutes); // mounts /api/checkout, /api/payments/itn, /payment/success, /payment/cancel
 app.use(trackingRoutes); // mounts /api/tracking/lookup, /track
-app.use(statsRoutes); // mounts /api/stats
+app.use('/api/stats', statsRoutes); // mounts /api/stats
 
 // Image upload route (admin only)
 const multer = require('multer');

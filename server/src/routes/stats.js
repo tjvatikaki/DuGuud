@@ -17,13 +17,15 @@ router.get('/', authenticate, requireAdmin, (req, res) => {
   const users = dbGet("SELECT COUNT(*) AS count FROM users");
   const products = dbGet("SELECT COUNT(*) AS count FROM products WHERE stock > 0");
   const revenue = dbGet("SELECT COALESCE(SUM(total), 0) AS total FROM orders WHERE status != 'cancelled'");
+  const totalStock = dbGet("SELECT COALESCE(SUM(stock), 0) AS total FROM products");
 
   res.json({
     page_views: views ? views.value : 0,
     total_orders: orders ? orders.count : 0,
     total_users: users ? users.count : 0,
     active_products: products ? products.count : 0,
-    revenue: revenue ? revenue.total : 0
+    revenue: revenue ? revenue.total : 0,
+    total_stock: totalStock ? totalStock.total : 0
   });
 });
 
