@@ -31,11 +31,20 @@
   .folder-bar .path .none{color:var(--warn);}
 
   /* ---- STATS BAR ---- */
-  .stats-bar{max-width:1240px;margin:16px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .stats-bar{max-width:1240px;margin:16px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
   .stat{border:1px solid var(--line);border-radius:14px;background:#fff;padding:18px 20px;display:flex;flex-direction:column;gap:4px;}
   .stat-label{font-size:12px;color:var(--ink-soft);}
   .stat-value{font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;}
-  @media (max-width:700px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---- FINANCE ROW ---- */
+  .finance-row{max-width:1240px;margin:12px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .finance-row .stat{border-color:rgba(76,122,93,0.2);background:linear-gradient(135deg,rgba(76,122,93,0.04),#fff);}
+  .finance-row .stat-label{font-size:11px;letter-spacing:0.02em;}
+  .finance-row .stat-value{font-size:22px;}
+  .finance-row .stat.profit .stat-value{color:var(--ok);}
+  .finance-row .stat.loss .stat-value{color:var(--bad);}
+
+  @media (max-width:700px){.stats-bar{grid-template-columns:repeat(2,1fr);}.finance-row{grid-template-columns:1fr;}}
 
   /* ---- BUTTONS ---- */
   .btn{font-weight:600;border:none;border-radius:12px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:var(--font-body);transition:background .15s ease, transform .1s ease;}
@@ -155,7 +164,11 @@
   <div class="stat"><span class="stat-label">📦 Orders</span><span class="stat-value" id="statOrders">—</span></div>
   <div class="stat"><span class="stat-label">👥 Users</span><span class="stat-value" id="statUsers">—</span></div>
   <div class="stat"><span class="stat-label">💰 Revenue</span><span class="stat-value" id="statRevenue">—</span></div>
-  <div class="stat"><span class="stat-label">📦 Total Stock Estimate</span><span class="stat-value" id="statStock">—</span></div>
+</div>
+<div class="finance-row" id="financeRow">
+  <div class="stat"><span class="stat-label">💰 Potential Revenue <span style="font-weight:400;color:var(--ink-soft);">(if all sells)</span></span><span class="stat-value" id="statPotentialRevenue">—</span></div>
+  <div class="stat"><span class="stat-label">📉 Total Cost Paid</span><span class="stat-value" id="statTotalCost">—</span></div>
+  <div class="stat profit" id="statProfitCard"><span class="stat-label">📈 Potential Profit</span><span class="stat-value" id="statProfit">—</span></div>
 </div>
 
 <div class="tabs" id="adminTabs">
@@ -177,7 +190,7 @@
     </div>
   </div>
   <div style="overflow-x:auto;">
-    <table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>
+    <table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>
     <tbody id="invBody"></tbody></table>
   </div>
 </div>
@@ -189,6 +202,7 @@
     <div class="field full"><label>Product name</label><input type="text" id="fName" placeholder="GUESS Tipped Core Polo Golfer — White"></div>
     <div class="field full"><label>Description</label><textarea id="fDesc" placeholder="A short, punchy description..."></textarea></div>
     <div class="field"><label>Price (ZAR)</label><input type="number" id="fPrice" placeholder="299" min="1"></div>
+    <div class="field"><label>What I Paid (Cost)</label><input type="number" id="fCost" placeholder="150" min="0"><span class="hint">Admin-only — what you paid for this item</span></div>
     <div class="field"><label>Category</label><select id="fCat"><option value="men">Men</option><option value="unisex">Unisex</option></select></div>
     <div class="field"><label>Tag</label><select id="fTag"><option value="Tops">Tops</option><option value="Bottoms">Bottoms</option><option value="Shoes">Shoes</option><option value="Accessories">Accessories</option></select></div>
     <div class="field"><label>Season</label><select id="fSubtag"><option value="Summer">Summer</option><option value="Winter">Winter</option><option value="">N/A</option></select></div>
@@ -400,7 +414,7 @@ async function showAdminPanel(){
         '</div>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-        '<table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>' +
+        '<table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>' +
         '<tbody id="invBody"></tbody></table>' +
       '</div>';
   }
@@ -418,7 +432,28 @@ async function loadStats(){
     document.getElementById('statOrders').textContent = s.total_orders;
     document.getElementById('statUsers').textContent = s.total_users;
     document.getElementById('statRevenue').textContent = 'R ' + Number(s.revenue).toLocaleString();
-    document.getElementById('statStock').textContent = s.total_stock + ' items';
+
+    // Financial row
+    document.getElementById('statPotentialRevenue').textContent = 'R ' + Number(s.potential_revenue).toLocaleString();
+    var costEl = document.getElementById('statTotalCost');
+    if (s.total_cost > 0) {
+      costEl.textContent = 'R ' + Number(s.total_cost).toLocaleString();
+    } else {
+      costEl.textContent = '—';
+      costEl.style.color = 'var(--ink-soft)';
+      costEl.style.fontSize = '16px';
+    }
+    var profitEl = document.getElementById('statProfit');
+    var profitCard = document.getElementById('statProfitCard');
+    if (s.total_cost > 0) {
+      profitEl.textContent = 'R ' + Number(s.potential_profit).toLocaleString();
+      profitCard.className = 'stat ' + (s.potential_profit >= 0 ? 'profit' : 'loss');
+    } else {
+      profitEl.textContent = 'Set cost prices first';
+      profitEl.style.fontSize = '14px';
+      profitEl.style.fontWeight = '400';
+      profitCard.className = 'stat';
+    }
   } catch(e) {
     console.warn('Stats load failed:', e.message);
   }
@@ -427,7 +462,7 @@ async function loadStats(){
 /* ========== PRODUCTS ========== */
 async function loadAdminProducts(){
   try {
-    adminProducts = await getProducts();
+    adminProducts = await getAdminProducts();
   } catch(e) {
     adminProducts = [];
     toast('Failed to load products: ' + e.message, true);
@@ -442,7 +477,7 @@ function renderInventory(){
   document.getElementById('invStats').textContent = products.length + ' product' + (products.length!==1?'s':'') + ' · stored in database';
 
   if(!products.length){
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--ink-soft);">No products yet. <a href="#" onclick="openNewListing();return false;">Create your first listing →</a></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--ink-soft);">No products yet. <a href="#" onclick="openNewListing();return false;">Create your first listing →</a></td></tr>';
     return;
   }
 
@@ -450,11 +485,19 @@ function renderInventory(){
     const img = p.images && p.images.length ? p.images[0] : '';
     const stockClass = p.stock === 0 ? 'badge-out' : (p.stock <= 3 ? 'badge-low' : 'badge-stock');
     const catClass = p.cat === 'men' ? 'badge-men' : 'badge-unisex';
+    var costDisplay = p.cost ? 'R ' + p.cost : '<span style="color:var(--ink-soft);">—</span>';
+    var marginPct = '';
+    if (p.cost && p.price > 0) {
+      var m = Math.round(((p.price - p.cost) / p.price) * 100);
+      marginPct = '<span style="color:' + (m >= 40 ? 'var(--ok)' : 'var(--warn)') + ';font-weight:600;">' + m + '%</span>';
+    }
     return '<tr>' +
       '<td>' + (img ? '<img src="' + img + '" class="prod-thumb" onerror="this.style.display=\'none\'">' : '') + '</td>' +
       '<td><span class="prod-name">' + esc(p.name) + '</span></td>' +
       '<td><span class="prod-desc">' + esc(p.desc||'') + '</span></td>' +
       '<td><strong>R ' + p.price + '</strong></td>' +
+      '<td style="font-size:12px;">' + costDisplay + '</td>' +
+      '<td style="font-size:12px;">' + (marginPct || '<span style="color:var(--ink-soft);">—</span>') + '</td>' +
       '<td><span class="badge ' + catClass + '">' + esc(p.tag||'Tops') + '</span></td>' +
       '<td>' + (p.sizes||[]).map(function(s){ var q = (p.sizeStock&&p.sizeStock[s])?p.sizeStock[s]:'?'; return s+':'+q; }).join(', ') + '</td>' +
       '<td><span class="badge ' + stockClass + '">' + (p.stock===0?'Sold out':p.stock) + '</span></td>' +
@@ -605,11 +648,14 @@ async function saveProduct(){
       }
     }
 
+    var cost = parseInt(document.getElementById('fCost').value) || 0;
+
     var product = {
       id: productId,
       name: name,
       desc: document.getElementById('fDesc').value.trim(),
       price: price,
+      cost: cost,
       cat: document.getElementById('fCat').value,
       tag: document.getElementById('fTag').value,
       subtag: document.getElementById('fSubtag').value,
@@ -642,7 +688,7 @@ async function saveProduct(){
 
 /* ========== FORM HELPERS ========== */
 function clearForm(){
-  ['fName','fDesc','fPrice','fSizes'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fName','fDesc','fPrice','fCost','fSizes'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fStock').value = '0';
   document.getElementById('fCat').value = 'men';
   document.getElementById('fTag').value = 'Tops';
@@ -670,6 +716,7 @@ function editProduct(i){
   document.getElementById('fName').value = p.name;
   document.getElementById('fDesc').value = p.desc || '';
   document.getElementById('fPrice').value = p.price;
+  document.getElementById('fCost').value = p.cost || '';
   document.getElementById('fCat').value = p.cat;
   document.getElementById('fTag').value = p.tag || 'Tops';
   document.getElementById('fSubtag').value = p.subtag || 'Summer';
@@ -696,22 +743,30 @@ function cancelEdit(){ clearForm(); }
 /* ========== EXPORT CSV ========== */
 function exportCSV(){
   var products = adminProducts;
-  var csv = 'Name,Tag,Season,Category,Sizes,Total Stock,Price (ZAR),Total Value,Description\n';
+  var csv = 'Name,Tag,Season,Category,Sizes,Total Stock,Cost (ZAR),Price (ZAR),Margin %,Total Value,Total Cost,Profit,Description\n';
   products.forEach(function(p){
     var sizesStr = (p.sizes||[]).map(function(s){ return s + ':' + ((p.sizeStock&&p.sizeStock[s])||'?'); }).join('; ');
+    var cost = p.cost || 0;
+    var margin = (p.price > 0) ? Math.round(((p.price - cost) / p.price) * 100) : 0;
     csv += '"' + (p.name||'').replace(/"/g,'""') + '",' +
       '"' + (p.tag||'') + '",' +
       '"' + (p.subtag||'') + '",' +
       '"' + (p.cat||'') + '",' +
       '"' + sizesStr + '",' +
       p.stock + ',' +
+      cost + ',' +
       p.price + ',' +
+      margin + '%,' +
       (p.price * p.stock) + ',' +
+      (cost * p.stock) + ',' +
+      ((p.price - cost) * p.stock) + ',' +
       '"' + (p.desc||'').replace(/"/g,'""') + '"\n';
   });
   var totalItems = products.reduce(function(s,p){ return s + p.stock; }, 0);
   var grandTotal = products.reduce(function(s,p){ return s + (p.price * p.stock); }, 0);
-  csv += '\nTOTAL ITEMS,,,,' + totalItems + ',,R ' + grandTotal + ',,\n';
+  var totalCost = products.reduce(function(s,p){ return s + ((p.cost||0) * p.stock); }, 0);
+  var profit = grandTotal - totalCost;
+  csv += '\nTOTAL ITEMS,,,,' + totalItems + ',,,,R ' + grandTotal + ',R ' + totalCost + ',R ' + profit + ',\n';
 
   var blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
   var a = document.createElement('a');

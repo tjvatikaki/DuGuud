@@ -1,10 +1,39 @@
 const { Router } = require('express');
-const { dbRun, dbBatch } = require('../db');
+const { dbAll, dbGet, dbRun, dbBatch } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { SEED_PRODUCTS } = require('../seed');
 const { sendEmail } = require('../email');
 
 const router = Router();
+
+// GET /api/admin/products — list all products WITH cost (admin only)
+router.get('/products', authenticate, requireAdmin, (req, res) => {
+  try {
+    const rows = dbAll('SELECT * FROM products ORDER BY id');
+    const products = rows.map(row => {
+      const sizes = dbAll('SELECT size, stock FROM product_sizes WHERE product_id = ? ORDER BY id', [row.id]);
+      const images = dbAll('SELECT url FROM product_images WHERE product_id = ? ORDER BY sort_order', [row.id]);
+      const sizeStock = {};
+      const sizeList = [];
+      for (const s of sizes) {
+        sizeList.push(s.size);
+        sizeStock[s.size] = s.stock;
+      }
+      return {
+        id: row.id, name: row.name, cat: row.cat, icon: row.icon,
+        tag: row.tag, subtag: row.subtag,
+        price: row.price, cost: row.cost || 0, stock: row.stock,
+        sizes: sizeList, sizeStock,
+        images: images.map(i => i.url),
+        desc: row.desc || ''
+      };
+    });
+    res.json({ products });
+  } catch (err) {
+    console.error('Admin products error:', err);
+    res.status(500).json({ error: 'Failed to load products' });
+  }
+});
 
 // POST /api/admin/seed — re-seed the database with all default products
 router.post('/seed', authenticate, requireAdmin, (req, res) => {

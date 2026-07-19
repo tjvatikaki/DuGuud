@@ -48,6 +48,13 @@ function initSchema() {
   db.run("CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE, product_id TEXT NOT NULL, product_name TEXT NOT NULL, product_icon TEXT DEFAULT '', product_image TEXT DEFAULT '', size TEXT NOT NULL, qty INTEGER NOT NULL, price INTEGER NOT NULL)");
   db.run("CREATE TABLE IF NOT EXISTS stats (key TEXT PRIMARY KEY, value INTEGER NOT NULL DEFAULT 0)");
   dbRun("INSERT OR IGNORE INTO stats (key, value) VALUES ('page_views', 0)");
+
+  // Migration: add cost column (if not already present)
+  try {
+    db.run("ALTER TABLE products ADD COLUMN cost INTEGER NOT NULL DEFAULT 0");
+  } catch(e) {
+    // column already exists — ignore
+  }
 }
 
 // ─── Query helpers ───

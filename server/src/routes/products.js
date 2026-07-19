@@ -34,6 +34,13 @@ function assembleProduct(row) {
   };
 }
 
+// Admin-only version that includes cost (never exposed via public endpoints)
+function assembleAdminProduct(row) {
+  const p = assembleProduct(row);
+  if (p) p.cost = row.cost || 0;
+  return p;
+}
+
 function deleteProductSizesAndImages(productId) {
   dbRun('DELETE FROM product_images WHERE product_id = ?', [productId]);
   dbRun('DELETE FROM product_sizes WHERE product_id = ?', [productId]);
@@ -97,9 +104,9 @@ router.post('/', authenticate, requireAdmin, (req, res) => {
     const totalStock = computeTotalStock(p.sizes, p.sizeStock);
 
     dbRun(
-      'INSERT INTO products (id, name, cat, icon, tag, subtag, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO products (id, name, cat, icon, tag, subtag, price, cost, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [productId, p.name, p.cat || 'men', p.icon || 'tee', p.tag || 'Tops',
-       p.subtag || '', p.price, totalStock, p.desc || '']
+       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '']
     );
 
     insertSizes(productId, p.sizes, p.sizeStock);
@@ -125,9 +132,9 @@ router.put('/:id', authenticate, requireAdmin, (req, res) => {
     const totalStock = computeTotalStock(p.sizes, p.sizeStock);
 
     dbRun(
-      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, price=?, stock=?, desc=?, updated_at=datetime('now') WHERE id=?",
+      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, price=?, cost=?, stock=?, desc=?, updated_at=datetime('now') WHERE id=?",
       [p.name, p.cat || 'men', p.icon || 'tee', p.tag || 'Tops',
-       p.subtag || '', p.price, totalStock, p.desc || '', productId]
+       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '', productId]
     );
 
     // Replace sizes and images

@@ -83,6 +83,12 @@ async function getProducts() {
   return data.products || [];
 }
 
+/** Admin-only: get all products including cost (hidden from public) */
+async function getAdminProducts() {
+  const data = await apiFetch('/api/admin/products');
+  return data.products || [];
+}
+
 async function getProduct(id) {
   const data = await apiFetch('/api/products/' + encodeURIComponent(id));
   return data.product || null;
