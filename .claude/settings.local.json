@@ -73,7 +73,15 @@
       "Bash(Select-Object Mode, Length, Name)",
       "Bash(Format-Table -AutoSize)",
       "Bash(timeout 8 node src/index.js)",
-      "Bash(git commit -m 'Add newsletter subscription + contact form features *)"
+      "Bash(git commit -m 'Add newsletter subscription + contact form features *)",
+      "Bash(pythonw --version)",
+      "Bash(where pythonw *)",
+      "Bash(pip show *)",
+      "Bash(python -c \"import telegram; print\\('telegram ok'\\)\")",
+      "PowerShell(Start-ScheduledTask *)",
+      "Bash(python *)",
+      "PowerShell(Stop-ScheduledTask *)",
+      "PowerShell(Get-ScheduledTask *)"
     ]
   }
 }

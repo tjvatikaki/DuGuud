@@ -646,7 +646,14 @@ async function saveProduct(){
 
     // Upload new images if any
     var images = [];
-    if(pendingImages.length > 0){
+
+    // Use server-downloaded images (from URL fetch) first
+    if (window._fetchedImages && window._fetchedImages.length > 0) {
+      images = window._fetchedImages.slice();
+    }
+
+    // Upload client-picked images (from file picker/drag-drop)
+    if (pendingImages.length > 0){
       try {
         var uploadData = await uploadImages(pendingImages.map(function(p){ return p.file; }));
         images = uploadData.files || [];
@@ -714,6 +721,7 @@ function clearForm(){
   document.getElementById('formTitle').textContent = 'New Listing';
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('saveBtn').textContent = 'Save Product';
+  window._fetchedImages = []; // clear server-downloaded images
   clearAllImages();
 }
 
@@ -1177,20 +1185,40 @@ async function applyFetched(){
 
     var selImgs = [...document.querySelectorAll('#fetchImgs img.sel')];
     if(selImgs.length > 0){
-      // Try downloading selected images via server-side proxy
-      for(var ii = 0; ii < selImgs.length; ii++){
-        try {
-          var blobResp = await fetch(selImgs[ii].src);
-          if(blobResp.ok){
-            var blob = await blobResp.blob();
-            var ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg','jpg');
-            var fname = 'img-' + Date.now() + '-' + ii + '.' + ext;
-            pendingImages.push({ file: new File([blob], fname, {type: blob.type}), name: fname, previewUrl: URL.createObjectURL(blob) });
-          }
-        } catch(e){ /* skip failed downloads */ }
+      // Download images via server (bypasses CORS)
+      toast('Downloading ' + selImgs.length + ' image(s) via server...');
+      try {
+        var urls = selImgs.map(function(img){ return img.src; });
+        var resp = await fetch('/api/fetch-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ urls: urls })
+        });
+        var result = await resp.json();
+        if(result.files && result.files.length > 0){
+          toast('Downloaded ' + result.files.length + ' image(s) successfully');
+          // Store the downloaded file URLs directly — no need to re-upload
+          // We'll track them as "already on server"
+          window._fetchedImages = (window._fetchedImages || []).concat(result.files);
+          // Show previews of the downloaded images
+          var container = document.getElementById('imgPreviews');
+          var noMsg = document.getElementById('noImgMsg');
+          noMsg.style.display = 'none';
+          document.getElementById('removeAllImgBtn').style.display = 'inline-flex';
+          document.getElementById('imgCount').textContent = (window._fetchedImages.length) + ' image(s) from URL';
+          container.innerHTML = window._fetchedImages.map(function(f, i){
+            return '<div class="img-thumb">' +
+              '<img src="' + f + '" alt="Downloaded image">' +
+              '<div class="img-label">' + f.split('/').pop().substring(0,18) + '</div>' +
+            '</div>';
+          }).join('');
+        } else {
+          var failed = (result.results || []).filter(function(r){ return !r.ok; });
+          toast('Downloaded 0 images' + (failed.length ? ' (' + failed.length + ' failed)' : ''), true);
+        }
+      } catch(e) {
+        toast('Server download failed: ' + e.message + ' — save product without images, then edit to upload manually', true);
       }
-      renderImagePreviews();
-      toast('Downloaded ' + pendingImages.length + ' image(s) — save the product to upload them to the server');
     }
 
     if(data.description){
@@ -1199,7 +1227,7 @@ async function applyFetched(){
 
     document.getElementById('fetchResult').style.display = 'none';
     switchTab('add');
-    toast('Fetched data applied — add images or fill in missing details');
+    toast('Fetched data applied — images downloaded, fill in remaining details');
   } catch(e) {
     toast('Error: ' + e.message, true);
   }

@@ -116,6 +116,64 @@ app.post('/api/upload', authenticate, requireAdmin, upload.array('images', 20), 
   res.json({ files: urls });
 });
 
+// POST /api/fetch-images — download images from external URLs to the server (admin only)
+const https = require('https');
+const http = require('http');
+app.post('/api/fetch-images', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { urls } = req.body;
+    if (!urls || !Array.isArray(urls) || !urls.length) {
+      return res.status(400).json({ error: 'Provide an array of image URLs' });
+    }
+
+    const results = [];
+    const destDir = path.join(__dirname, '..', '..', 'images');
+
+    for (const url of urls.slice(0, 10)) { // max 10 images per request
+      try {
+        const filename = Date.now() + '-' + Math.random().toString(36).slice(2, 6) + '.jpg';
+        const dest = path.join(destDir, filename);
+
+        const imgData = await new Promise((resolve, reject) => {
+          const client = url.startsWith('https') ? https : http;
+          client.get(url, { timeout: 15000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (resp) => {
+            // Follow redirects
+            if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
+              const redirectClient = resp.headers.location.startsWith('https') ? https : http;
+              redirectClient.get(resp.headers.location, { timeout: 15000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (r2) => {
+                const chunks = [];
+                r2.on('data', (c) => chunks.push(c));
+                r2.on('end', () => resolve(Buffer.concat(chunks)));
+                r2.on('error', reject);
+              }).on('error', reject);
+              return;
+            }
+            if (resp.statusCode !== 200) {
+              reject(new Error(`HTTP ${resp.statusCode}`));
+              return;
+            }
+            const chunks = [];
+            resp.on('data', (c) => chunks.push(c));
+            resp.on('end', () => resolve(Buffer.concat(chunks)));
+            resp.on('error', reject);
+          }).on('error', reject);
+        });
+
+        require('fs').writeFileSync(dest, imgData);
+        results.push({ url, file: 'images/' + filename, ok: true });
+      } catch (e) {
+        results.push({ url, error: e.message, ok: false });
+      }
+    }
+
+    const files = results.filter(r => r.ok).map(r => r.file);
+    res.json({ files, results });
+  } catch (err) {
+    console.error('Fetch images error:', err);
+    res.status(500).json({ error: 'Failed to download images: ' + err.message });
+  }
+});
+
 // ─── SEO routes ───
 app.get('/robots.txt', (req, res) => {
   const base = req.protocol + '://' + req.get('host');
