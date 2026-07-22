@@ -503,7 +503,7 @@ function renderInventory(){
       '<td><span class="badge ' + stockClass + '">' + (p.stock===0?'Sold out':p.stock) + '</span></td>' +
       '<td class="actions-cell">' +
         '<button class="icon-btn edit" onclick="editProduct(' + i + ')">✎ Edit</button>' +
-        '<button class="icon-btn del" onclick="deleteProduct(' + i + ')">✕</button>' +
+        '<button class="icon-btn del" onclick="handleDeleteProduct(' + i + ')">✕</button>' +
       '</td>' +
     '</tr>';
   }).join('');
@@ -512,13 +512,14 @@ function renderInventory(){
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 /* ========== CRUD ========== */
-async function deleteProduct(i){
+async function handleDeleteProduct(i){
   const p = adminProducts[i];
   if(!p || !confirm('Delete "' + p.name + '"? This can\'t be undone.')) return;
   try {
-    await deleteProduct(p.id);
+    await apiFetch('/api/products/' + encodeURIComponent(p.id), { method: 'DELETE' });
     toast('Deleted: ' + p.name);
     await loadAdminProducts();
+    loadStats();
   } catch(e) {
     toast('Delete failed: ' + e.message, true);
   }
@@ -610,7 +611,8 @@ async function saveProduct(){
       var colonIdx = part.lastIndexOf(':');
       if(colonIdx > 0){
         var sz = part.substring(0, colonIdx).trim();
-        var qty = parseInt(part.substring(colonIdx+1).trim()) || 1;
+        var parsed = parseInt(part.substring(colonIdx+1).trim());
+        var qty = (!isNaN(parsed) && parsed >= 0) ? parsed : 1;
         sizes.push(sz);
         sizeStock[sz] = qty;
         totalStock += qty;
