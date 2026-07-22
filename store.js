@@ -202,7 +202,19 @@ function closeCart(){
   if(d) d.classList.remove('show');
   if(o) o.classList.remove('show');
 }
-function closeAll(){ closeCart(); }
+/* ---------------- MOBILE NAV ---------------- */
+function openMobileNav(){
+  var nav = document.getElementById('mobileNav');
+  if(nav) nav.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileNav(){
+  var nav = document.getElementById('mobileNav');
+  if(nav) nav.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeAll(){ closeCart(); closeMobileNav(); }
 
 function openCheckout(){
   if(cart.length === 0) return;
