@@ -177,6 +177,7 @@
   <button class="tab-btn" data-tab="fetch">🔗 Fetch from URL</button>
   <button class="tab-btn" data-tab="orders">📋 Orders</button>
   <button class="tab-btn" data-tab="users">👥 Users</button>
+  <button class="tab-btn" data-tab="subscribers">📬 Subscribers</button>
   <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
 </div>
 
@@ -277,6 +278,18 @@
   <div style="overflow-x:auto;">
     <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead>
     <tbody id="userBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== SUBSCRIBERS ===== -->
+<div class="tab-panel" id="tab-subscribers">
+  <div class="toolbar">
+    <div><h2>Newsletter Subscribers</h2><span class="stats" id="subscriberStats"></span></div>
+    <button class="btn outline sm" onclick="exportSubscribersCSV()">📥 Export CSV</button>
+  </div>
+  <div style="overflow-x:auto;">
+    <table><thead><tr><th>#</th><th>Email</th><th>Subscribed</th></tr></thead>
+    <tbody id="subscriberBody"></tbody></table>
   </div>
 </div>
 
@@ -897,6 +910,51 @@ function showResetPassword(userId){
     });
 }
 
+/* ========== SUBSCRIBERS ========== */
+async function renderSubscribers(){
+  var tbody = document.getElementById('subscriberBody');
+  if(!tbody) return;
+  try {
+    var data = await getNewsletterSubscribers();
+    var subs = data.subscribers || [];
+    document.getElementById('subscriberStats').textContent = subs.length + ' subscriber' + (subs.length!==1?'s':'');
+
+    if(!subs.length){
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--ink-soft);">No subscribers yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = subs.map(function(s, i){
+      var dateStr = new Date(s.subscribed_at + 'Z').toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td><a href="mailto:' + esc(s.email) + '" style="color:var(--peach-dark);font-weight:500;">' + esc(s.email) + '</a></td>' +
+        '<td style="font-size:12px;color:var(--ink-soft);">' + dateStr + '</td>' +
+      '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:40px;color:var(--bad);">Failed to load subscribers: ' + esc(e.message) + '</td></tr>';
+  }
+}
+
+function exportSubscribersCSV(){
+  fetch('/api/newsletter/subscribers')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var subs = data.subscribers || [];
+      if(!subs.length){ toast('No subscribers to export'); return; }
+      var csv = 'Email,Subscribed Date\n';
+      subs.forEach(function(s){ csv += '"' + esc(s.email) + '","' + s.subscribed_at + '"\n'; });
+      var blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'duguud-subscribers-' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+      toast('Exported ' + subs.length + ' subscribers');
+    })
+    .catch(function(e){ toast('Export failed: ' + e.message, true); });
+}
+
 /* ========== SETTINGS ========== */
 async function testEmail(){
   var btn = document.querySelector('button[onclick="testEmail()"]');
@@ -962,6 +1020,7 @@ document.querySelectorAll('.tab-btn').forEach(function(b){
     if(b.dataset.tab === 'inventory') renderInventory();
     if(b.dataset.tab === 'orders') renderOrders();
     if(b.dataset.tab === 'users') renderUsers();
+    if(b.dataset.tab === 'subscribers') renderSubscribers();
   });
 });
 

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — DuGuud</title>
+<meta name="description" content="Get in touch with DuGuud. Send us a message and we'll get back to you within 24 hours.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peach:#f4a98c;--peach-dark:#e8875f;--peach-pale:#fbe4d5;--peach-tint:#fdf1ea;
+    --ink:#221e1c;--ink-soft:#4a423e;--paper:#faf8f6;--line:rgba(34,30,28,0.12);
+    --ok:#4c7a5d;--bad:#c44;
+    --font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;--font-tag:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* HEADER */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:var(--ink);color:var(--paper);
+    border-bottom:3px solid var(--peach);
+  }
+  .nav-wrap{
+    max-width:1240px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+  }
+  .logo{display:flex;align-items:center;}
+  .logo-mark{flex-shrink:0;display:block;height:250px;width:auto;margin-top:-50px;margin-bottom:-170px;}
+  .header-actions{display:flex;align-items:center;gap:18px;}
+  .nav-back{font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;}
+  .nav-back:hover{opacity:1;}
+
+  /* MAIN */
+  .page-wrap{max-width:640px;margin:0 auto;padding:60px 24px 100px;}
+  .page-wrap h1{font-family:var(--font-display);font-size:clamp(28px,4vw,36px);margin:0 0 8px;letter-spacing:-0.02em;}
+  .page-wrap .sub{font-size:14px;color:var(--ink-soft);margin:0 0 36px;line-height:1.6;}
+
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:var(--font-body);background:#fff;transition:border-color .15s;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--peach-dark);box-shadow:0 0 0 3px var(--peach-pale);}
+  .field textarea{resize:vertical;min-height:140px;}
+  .field .hint{font-size:11px;color:var(--ink-soft);margin-top:4px;display:block;}
+
+  .btn-primary{
+    background:var(--peach);color:var(--ink);border:none;border-radius:30px;
+    padding:14px 32px;font-weight:600;font-size:15px;transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn-primary:hover{background:var(--peach-dark);color:#fff;transform:translateY(-1px);}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  .status{font-size:14px;margin-top:16px;display:none;padding:14px 18px;border-radius:12px;line-height:1.5;}
+  .status.show{display:block;}
+  .status.ok{background:var(--peach-tint);color:var(--ok);border:1px solid rgba(76,122,93,0.2);}
+  .status.err{background:#fef0f0;color:var(--bad);border:1px solid rgba(204,68,68,0.15);}
+
+  .contact-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:48px;padding-top:32px;border-top:1px solid var(--line);}
+  .contact-info .item{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .contact-info .item strong{display:block;color:var(--ink);font-weight:600;margin-bottom:3px;}
+
+  @media (max-width:700px){
+    .page-wrap{padding:30px 16px 60px;}
+    .logo-mark{height:120px;margin-top:-20px;margin-bottom:-80px;}
+    .contact-info{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" class="logo-mark" alt="DuGuud">
+    </a>
+    <div class="header-actions">
+      <a href="index.html" class="nav-back">← Back to Store</a>
+    </div>
+  </div>
+</header>
+
+<main class="page-wrap">
+  <h1>Contact Us</h1>
+  <p class="sub">Have a question about an order, a product, or just want to chat? Drop us a message and we'll get back to you within 24 hours.</p>
+
+  <div class="field">
+    <label for="contactName">Your name</label>
+    <input type="text" id="contactName" placeholder="Thandi Nkosi">
+  </div>
+  <div class="field">
+    <label for="contactEmail">Email address</label>
+    <input type="email" id="contactEmail" placeholder="you@email.com">
+  </div>
+  <div class="field">
+    <label for="contactMessage">Message</label>
+    <textarea id="contactMessage" placeholder="How can we help?"></textarea>
+    <span class="hint">Max 5 000 characters</span>
+  </div>
+
+  <button class="btn-primary" id="contactSubmitBtn" onclick="sendContactMessage()">Send Message →</button>
+  <div class="status" id="contactStatus"></div>
+
+  <div class="contact-info">
+    <div class="item">
+      <strong>📧 Email</strong>
+      <a href="mailto:admin@duguud.co.za" style="color:var(--peach-dark);font-weight:600;">admin@duguud.co.za</a>
+    </div>
+    <div class="item">
+      <strong>📍 Location</strong>
+      Gardeniapark, Bloemfontein<br>South Africa
+    </div>
+    <div class="item">
+      <strong>🕐 Business hours</strong>
+      Mon – Fri, 9am – 5pm<br>We reply within 24 hours
+    </div>
+    <div class="item">
+      <strong>📦 Orders</strong>
+      <a href="account.html" style="color:var(--peach-dark);font-weight:600;">Track your order</a><br>
+      <a href="delivery.html" style="color:var(--peach-dark);font-weight:600;">Delivery info</a>
+    </div>
+  </div>
+</main>
+
+<script>
+async function sendContactMessage() {
+  var name = document.getElementById('contactName').value.trim();
+  var email = document.getElementById('contactEmail').value.trim();
+  var message = document.getElementById('contactMessage').value.trim();
+  var status = document.getElementById('contactStatus');
+  var btn = document.getElementById('contactSubmitBtn');
+
+  status.classList.remove('show', 'ok', 'err');
+
+  if (!name) { showStatus('Please enter your name', true); document.getElementById('contactName').focus(); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showStatus('Please enter a valid email address', true); document.getElementById('contactEmail').focus(); return; }
+  if (!message) { showStatus('Please write a message', true); document.getElementById('contactMessage').focus(); return; }
+  if (message.length > 5000) { showStatus('Message is too long (max 5 000 characters)', true); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    var resp = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, message: message })
+    });
+
+    var data = await resp.json();
+
+    if (resp.ok) {
+      showStatus(data.message || 'Message sent! We\'ll be in touch soon.', false);
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactMessage').value = '';
+    } else {
+      showStatus(data.error || 'Failed to send message', true);
+    }
+  } catch(e) {
+    showStatus('Network error — please try again', true);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send Message →';
+}
+
+function showStatus(msg, isError) {
+  var el = document.getElementById('contactStatus');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.className = 'status show ' + (isError ? 'err' : 'ok');
+}
+</script>
+</body>
+</html>

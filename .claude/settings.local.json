@@ -62,7 +62,18 @@
       "WebFetch(domain:www.domains.co.za)",
       "Bash(timeout 5 node src/index.js)",
       "Bash(node -e ' *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git add *)",
+      "Bash(git reset *)",
+      "Bash(git commit -m 'Fix stats route mounting, add stock estimate to admin *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Mobile responsiveness: shrink logo, add working nav drawer, compact product cards *)",
+      "Bash(git commit -m 'Fix admin delete + stock update bugs *)",
+      "Bash(Get-ChildItem -Recurse -Depth 1 \"C:\\\\Users\\\\theun\\\\OneDrive\\\\Documents\\\\DuGuud\")",
+      "Bash(Select-Object Mode, Length, Name)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(timeout 8 node src/index.js)",
+      "Bash(git commit -m 'Add newsletter subscription + contact form features *)"
     ]
   }
 }

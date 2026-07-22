@@ -155,6 +155,26 @@ async function seedProducts() {
   return apiFetch('/api/admin/seed', { method: 'POST' });
 }
 
+// ─── Newsletter ───
+async function subscribeNewsletter(email) {
+  return apiFetch('/api/newsletter/subscribe', {
+    method: 'POST',
+    body: JSON.stringify({ email })
+  });
+}
+
+async function getNewsletterSubscribers() {
+  return apiFetch('/api/newsletter/subscribers');
+}
+
+// ─── Contact ───
+async function sendContactMessage({ name, email, message }) {
+  return apiFetch('/api/contact', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, message })
+  });
+}
+
 // ─── Image Upload ───
 async function uploadImages(files) {
   const fd = new FormData();
