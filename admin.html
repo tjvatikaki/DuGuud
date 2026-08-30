@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DuGuud — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --peach:#f4a98c; --peach-dark:#e8875f; --peach-pale:#fbe4d5; --peach-tint:#fdf1ea;
-    --ink:#221e1c; --ink-soft:#4a423e; --paper:#faf8f6; --line:rgba(34,30,28,0.12);
+    --ink:#16130f; --ink-soft:#5c564e; --paper:#f2eee6; --line:rgba(22,19,15,0.14);
     --ok:#4c7a5d; --warn:#d4822a; --bad:#c44;
-    --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-tag:'IBM Plex Mono',monospace;
+    --font-display:'Saira Condensed',sans-serif; --font-body:'Archivo',sans-serif; --font-tag:'Space Mono',monospace;
   }
   *{box-sizing:border-box;} html,body{margin:0;padding:0;}
   body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
@@ -32,7 +32,7 @@
 
   /* ---- STATS BAR ---- */
   .stats-bar{max-width:1240px;margin:16px auto 0;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-  .stat{border:1px solid var(--line);border-radius:14px;background:#fff;padding:18px 20px;display:flex;flex-direction:column;gap:4px;}
+  .stat{border:1px solid var(--line);border-radius:3px;background:#fff;padding:18px 20px;display:flex;flex-direction:column;gap:4px;}
   .stat-label{font-size:12px;color:var(--ink-soft);}
   .stat-value{font-family:var(--font-display);font-size:26px;letter-spacing:-0.02em;}
 
@@ -47,7 +47,7 @@
   @media (max-width:700px){.stats-bar{grid-template-columns:repeat(2,1fr);}.finance-row{grid-template-columns:1fr;}}
 
   /* ---- BUTTONS ---- */
-  .btn{font-weight:600;border:none;border-radius:12px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:var(--font-body);transition:background .15s ease, transform .1s ease;}
+  .btn{font-weight:600;border:none;border-radius:2px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:var(--font-body);transition:background .15s ease;}
   .btn.primary{background:var(--peach);color:var(--ink);}
   .btn.primary:hover{background:var(--peach-dark);color:#fff;}
   .btn.dark{background:var(--ink);color:var(--peach-pale);}
@@ -55,12 +55,12 @@
   .btn.outline{background:transparent;border:1px solid var(--line);color:var(--ink);}
   .btn.outline:hover{border-color:var(--ink);}
   .btn.danger{background:var(--bad);color:#fff;}
-  .btn.sm{font-size:12px;padding:7px 14px;border-radius:20px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn.sm{font-size:12px;padding:7px 14px;border-radius:2px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
   .btn.sm.primary{background:var(--peach);color:var(--ink);}
-  .btn.sm.ghost{background:transparent;color:var(--paper);border:1px solid rgba(250,248,246,0.35);}
+  .btn.sm.ghost{background:transparent;color:var(--paper);border:1px solid rgba(242,238,230,0.35);}
 
   /* ---- TABS ---- */
-  .tabs{max-width:1240px;margin:0 auto;padding:16px 24px 0;display:flex;gap:6px;border-bottom:1px solid var(--line);}
+  .tabs{max-width:1240px;margin:0 auto;padding:16px 24px 0;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);}
   .tab-btn{padding:10px 20px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--ink-soft);cursor:pointer;border-radius:10px 10px 0 0;font-family:var(--font-body);}
   .tab-btn.active{color:var(--ink);background:#fff;border:1px solid var(--line);border-bottom-color:#fff;margin-bottom:-1px;font-weight:600;}
   .tab-panel{display:none;max-width:1240px;margin:0 auto;padding:24px;}
@@ -73,56 +73,80 @@
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--ink);font-family:var(--font-tag);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-soft);white-space:nowrap;}
   td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;}
-  .prod-thumb{width:44px;height:56px;border-radius:6px;object-fit:cover;background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));}
+  .prod-thumb{width:44px;height:56px;border-radius:2px;object-fit:cover;background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));}
   .prod-name{font-weight:600;}
   .prod-desc{max-width:240px;font-size:12px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;}
-  .badge{display:inline-block;font-family:var(--font-tag);font-size:10px;padding:2px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:0.04em;}
+  .badge{display:inline-block;font-family:var(--font-tag);font-size:10px;padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:0.04em;}
   .badge-men{background:var(--ink);color:var(--peach-pale);}
   .badge-unisex{background:var(--peach-pale);color:var(--peach-dark);}
   .badge-stock{background:var(--ok);color:#fff;}
   .badge-low{background:var(--warn);color:#fff;}
   .badge-out{background:#8a8480;color:#fff;}
   .actions-cell{display:flex;gap:6px;}
-  .icon-btn{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-weight:500;}
+  .icon-btn{background:none;border:1px solid var(--line);border-radius:2px;padding:6px 10px;font-size:12px;cursor:pointer;font-weight:500;}
   .icon-btn.edit:hover{background:var(--ink);color:var(--peach-pale);border-color:var(--ink);}
   .icon-btn.del:hover{background:var(--bad);color:#fff;border-color:var(--bad);}
+  .icon-btn.hide:hover{background:var(--ink);color:var(--peach-pale);border-color:var(--ink);}
+  .icon-btn.show:hover{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .badge-hidden{background:var(--ink);color:var(--peach);border:1px solid var(--peach);}
+
+  /* ---- MESSAGES ---- */
+  .msg-layout{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start;}
+  @media (max-width:860px){.msg-layout{grid-template-columns:1fr;}}
+  .msg-list{border:1px solid var(--line);border-radius:3px;background:#fff;overflow:hidden;max-height:640px;overflow-y:auto;}
+  .msg-item{display:block;width:100%;text-align:left;padding:12px 14px;border:none;border-bottom:1px solid var(--line);background:none;cursor:pointer;font-family:var(--font-body);font-size:13px;color:var(--ink);}
+  .msg-item:last-child{border-bottom:none;}
+  .msg-item:hover{background:var(--peach-tint);}
+  .msg-item.unread{background:var(--peach-tint);}
+  .msg-item.unread .msg-name{font-weight:700;}
+  .msg-item.selected{box-shadow:inset 3px 0 0 var(--peach);background:#fff;}
+  .msg-item .msg-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+  .msg-name{font-weight:600;font-size:13px;}
+  .msg-date{font-size:10px;color:var(--ink-soft);font-family:var(--font-tag);white-space:nowrap;}
+  .msg-snippet{font-size:12px;color:var(--ink-soft);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .msg-detail{border:1px solid var(--line);border-radius:3px;background:#fff;padding:20px;min-height:240px;}
+  .msg-detail .meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .msg-detail-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:4px;}
+  .msg-body{margin:14px 0;padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:2px;white-space:pre-wrap;font-size:14px;line-height:1.6;}
+  .msg-reply-recd{margin:0 0 14px;padding:12px 14px;background:var(--peach-tint);border-left:3px solid var(--peach);font-size:13px;line-height:1.5;border-radius:2px;}
+  .msg-empty{color:var(--ink-soft);text-align:center;padding:48px 20px;font-size:14px;}
 
   /* ---- FORMS ---- */
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .form-grid .full{grid-column:1/-1;}
   .field{display:flex;flex-direction:column;gap:5px;}
   .field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);}
-  .field input,.field textarea,.field select{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:var(--font-body);background:#fff;color:var(--ink);}
+  .field input,.field textarea,.field select{border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-size:14px;font-family:var(--font-body);background:#fff;color:var(--ink);}
   .field textarea{resize:vertical;min-height:80px;}
   .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--peach-dark);box-shadow:0 0 0 3px var(--peach-pale);}
   .field .hint{font-size:11px;color:var(--ink-soft);}
 
   /* ---- IMAGE UPLOADER ---- */
-  .img-uploader{border:2px dashed var(--line);border-radius:14px;padding:16px;background:#fff;min-height:130px;transition:border-color .2s;}
+  .img-uploader{border:2px dashed var(--line);border-radius:3px;padding:16px;background:#fff;min-height:130px;transition:border-color .2s;}
   .img-uploader.drag-over{border-color:var(--peach-dark);background:var(--peach-tint);}
   .img-previews{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;}
-  .img-thumb{width:110px;height:130px;border-radius:10px;overflow:hidden;border:1px solid var(--line);position:relative;background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));flex-shrink:0;}
+  .img-thumb{width:110px;height:130px;border-radius:2px;overflow:hidden;border:1px solid var(--line);position:relative;background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));flex-shrink:0;}
   .img-thumb img{width:100%;height:100%;object-fit:cover;}
   .img-thumb .rm-btn{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:none;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;opacity:0;transition:opacity .15s;}
   .img-thumb:hover .rm-btn{opacity:1;}
-  .img-thumb .img-label{position:absolute;bottom:0;left:0;right:0;background:rgba(34,30,28,0.7);color:#fff;font-size:9px;padding:3px 6px;text-align:center;font-family:var(--font-tag);}
-  .add-img-btn{width:110px;height:130px;border:2px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--ink-soft);font-size:12px;font-weight:500;flex-shrink:0;background:transparent;}
+  .img-thumb .img-label{position:absolute;bottom:0;left:0;right:0;background:rgba(22,19,15,0.7);color:#fff;font-size:9px;padding:3px 6px;text-align:center;font-family:var(--font-tag);}
+  .add-img-btn{width:110px;height:130px;border:2px dashed var(--line);border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--ink-soft);font-size:12px;font-weight:500;flex-shrink:0;background:transparent;}
   .add-img-btn:hover{border-color:var(--peach-dark);color:var(--peach-dark);}
   .add-img-btn .plus{font-size:28px;line-height:1;}
   .no-images-msg{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px;}
 
   /* ---- FETCH ---- */
   .url-box{display:flex;gap:10px;flex-wrap:wrap;}
-  .url-box input{flex:1;min-width:280px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:var(--font-body);}
+  .url-box input{flex:1;min-width:280px;border:1px solid var(--line);border-radius:2px;padding:12px;font-size:14px;font-family:var(--font-body);}
   .url-box input:focus{outline:none;border-color:var(--peach-dark);}
-  .fetch-result{border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px;background:#fff;display:none;}
+  .fetch-result{border:1px solid var(--line);border-radius:3px;padding:20px;margin-top:16px;background:#fff;display:none;}
   .fetch-result h4{font-family:var(--font-display);margin:0 0 10px;}
   .fetch-imgs{display:flex;gap:8px;flex-wrap:wrap;}
-  .fetch-imgs img{width:80px;height:100px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer;}
+  .fetch-imgs img{width:80px;height:100px;object-fit:cover;border-radius:2px;border:2px solid transparent;cursor:pointer;}
   .fetch-imgs img.sel{border-color:var(--peach-dark);box-shadow:0 0 0 2px var(--peach-pale);}
 
   /* ---- TOAST ---- */
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--peach-pale);padding:14px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:110;opacity:0;pointer-events:none;transition:all .25s ease;display:flex;align-items:center;gap:10px;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--peach-pale);padding:14px 22px;border-radius:3px;font-size:14px;font-weight:600;z-index:110;opacity:0;pointer-events:none;transition:all .25s ease;display:flex;align-items:center;gap:10px;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .toast .dot2{width:8px;height:8px;border-radius:50%;background:var(--peach);}
   .toast.error{background:var(--bad);color:#fff;}
@@ -160,25 +184,26 @@
 </div>
 
 <div class="stats-bar" id="statsBar">
-  <div class="stat"><span class="stat-label">👀 Views</span><span class="stat-value" id="statViews">—</span></div>
-  <div class="stat"><span class="stat-label">📦 Orders</span><span class="stat-value" id="statOrders">—</span></div>
-  <div class="stat"><span class="stat-label">👥 Users</span><span class="stat-value" id="statUsers">—</span></div>
-  <div class="stat"><span class="stat-label">💰 Revenue</span><span class="stat-value" id="statRevenue">—</span></div>
+  <div class="stat"><span class="stat-label">Views</span><span class="stat-value" id="statViews">—</span></div>
+  <div class="stat"><span class="stat-label">Orders</span><span class="stat-value" id="statOrders">—</span></div>
+  <div class="stat"><span class="stat-label">Users</span><span class="stat-value" id="statUsers">—</span></div>
+  <div class="stat"><span class="stat-label">Revenue</span><span class="stat-value" id="statRevenue">—</span></div>
 </div>
 <div class="finance-row" id="financeRow">
-  <div class="stat"><span class="stat-label">💰 Potential Revenue <span style="font-weight:400;color:var(--ink-soft);">(if all sells)</span></span><span class="stat-value" id="statPotentialRevenue">—</span></div>
-  <div class="stat"><span class="stat-label">📉 Total Cost Paid</span><span class="stat-value" id="statTotalCost">—</span></div>
-  <div class="stat profit" id="statProfitCard"><span class="stat-label">📈 Potential Profit</span><span class="stat-value" id="statProfit">—</span></div>
+  <div class="stat"><span class="stat-label">Potential Revenue <span style="font-weight:400;color:var(--ink-soft);">(if all sells)</span></span><span class="stat-value" id="statPotentialRevenue">—</span></div>
+  <div class="stat"><span class="stat-label">Total Cost Paid</span><span class="stat-value" id="statTotalCost">—</span></div>
+  <div class="stat profit" id="statProfitCard"><span class="stat-label">Potential Profit</span><span class="stat-value" id="statProfit">—</span></div>
 </div>
 
 <div class="tabs" id="adminTabs">
-  <button class="tab-btn active" data-tab="inventory">📦 Inventory</button>
-  <button class="tab-btn" data-tab="add">✚ New Listing</button>
-  <button class="tab-btn" data-tab="fetch">🔗 Fetch from URL</button>
-  <button class="tab-btn" data-tab="orders">📋 Orders</button>
-  <button class="tab-btn" data-tab="users">👥 Users</button>
-  <button class="tab-btn" data-tab="subscribers">📬 Subscribers</button>
-  <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+  <button class="tab-btn active" data-tab="inventory">Inventory</button>
+  <button class="tab-btn" data-tab="add">+ New Listing</button>
+  <button class="tab-btn" data-tab="fetch">Fetch from URL</button>
+  <button class="tab-btn" data-tab="orders">Orders</button>
+  <button class="tab-btn" data-tab="users">Users</button>
+  <button class="tab-btn" data-tab="subscribers">Subscribers</button>
+  <button class="tab-btn" data-tab="messages">Messages</button>
+  <button class="tab-btn" data-tab="settings">Settings</button>
 </div>
 
 <!-- ===== INVENTORY ===== -->
@@ -186,8 +211,8 @@
   <div class="toolbar">
     <div><h2>All Products</h2><span class="stats" id="invStats"></span></div>
     <div style="display:flex;gap:8px;">
-      <button class="btn outline sm" onclick="exportCSV()">📥 Export CSV</button>
-      <button class="btn primary" onclick="openNewListing()">✚ Add Product</button>
+      <button class="btn outline sm" onclick="exportCSV()">Export CSV</button>
+      <button class="btn primary" onclick="openNewListing()">+ Add Product</button>
     </div>
   </div>
   <div style="overflow-x:auto;">
@@ -245,7 +270,7 @@
   </p>
   <div class="url-box">
     <input type="text" id="fetchUrl" placeholder="https://www.adidas.com.ph/... or superbalist.com/... or edgars.co.za/...">
-    <button class="btn dark" id="fetchBtn" onclick="fetchProduct()">🔍 Fetch Product</button>
+    <button class="btn dark" id="fetchBtn" onclick="fetchProduct()">Fetch Product</button>
   </div>
   <div id="fetchStatus" style="margin-top:12px;"></div>
   <div class="fetch-result" id="fetchResult">
@@ -285,11 +310,22 @@
 <div class="tab-panel" id="tab-subscribers">
   <div class="toolbar">
     <div><h2>Newsletter Subscribers</h2><span class="stats" id="subscriberStats"></span></div>
-    <button class="btn outline sm" onclick="exportSubscribersCSV()">📥 Export CSV</button>
+    <button class="btn outline sm" onclick="exportSubscribersCSV()">Export CSV</button>
   </div>
   <div style="overflow-x:auto;">
     <table><thead><tr><th>#</th><th>Email</th><th>Subscribed</th></tr></thead>
     <tbody id="subscriberBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== MESSAGES ===== -->
+<div class="tab-panel" id="tab-messages">
+  <div class="toolbar">
+    <div><h2>Messages</h2><span class="stats" id="msgStats"></span></div>
+  </div>
+  <div class="msg-layout">
+    <div class="msg-list" id="msgList"></div>
+    <div class="msg-detail" id="msgDetail"></div>
   </div>
 </div>
 
@@ -347,7 +383,7 @@ function renderAdminLogin(){
   container.style.display = 'block';
   container.innerHTML =
     '<div style="max-width:400px;margin:60px auto;text-align:center;">' +
-      '<div style="width:64px;height:64px;border-radius:50%;background:var(--peach-pale);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;color:var(--peach-dark);">&#128274;</div>' +
+      '<div style="width:64px;height:64px;border-radius:50%;background:var(--peach-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--peach-dark);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>' +
       '<h2 style="font-family:var(--font-display);margin:0 0 6px;">Admin Access</h2>' +
       '<p style="font-size:14px;color:var(--ink-soft);margin-bottom:24px;">Sign in with your admin credentials.</p>' +
       '<div class="field" style="text-align:left;"><label>Email</label><input type="email" id="adminLoginEmail" placeholder="admin@duguud.com" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:14px;"></div>' +
@@ -422,8 +458,8 @@ async function showAdminPanel(){
       '<div class="toolbar">' +
         '<div><h2>All Products</h2><span class="stats" id="invStats"></span></div>' +
         '<div style="display:flex;gap:8px;">' +
-          '<button class="btn outline sm" onclick="exportCSV()">📥 Export CSV</button>' +
-          '<button class="btn primary" onclick="openNewListing()">✚ Add Product</button>' +
+          '<button class="btn outline sm" onclick="exportCSV()">Export CSV</button>' +
+          '<button class="btn primary" onclick="openNewListing()">+ Add Product</button>' +
         '</div>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
@@ -436,6 +472,7 @@ async function showAdminPanel(){
   await loadAdminProducts();
   renderOrders();
   loadStats();
+  loadMessages();
 }
 
 async function loadStats(){
@@ -506,7 +543,7 @@ function renderInventory(){
     }
     return '<tr>' +
       '<td>' + (img ? '<img src="' + img + '" class="prod-thumb" onerror="this.style.display=\'none\'">' : '') + '</td>' +
-      '<td><span class="prod-name">' + esc(p.name) + '</span></td>' +
+      '<td><span class="prod-name">' + esc(p.name) + '</span>' + (p.hidden ? ' <span class="badge badge-hidden">Hidden</span>' : '') + '</td>' +
       '<td><span class="prod-desc">' + esc(p.desc||'') + '</span></td>' +
       '<td><strong>R ' + p.price + '</strong></td>' +
       '<td style="font-size:12px;">' + costDisplay + '</td>' +
@@ -515,7 +552,8 @@ function renderInventory(){
       '<td>' + (p.sizes||[]).map(function(s){ var q = (p.sizeStock&&p.sizeStock[s])?p.sizeStock[s]:'?'; return s+':'+q; }).join(', ') + '</td>' +
       '<td><span class="badge ' + stockClass + '">' + (p.stock===0?'Sold out':p.stock) + '</span></td>' +
       '<td class="actions-cell">' +
-        '<button class="icon-btn edit" onclick="editProduct(' + i + ')">✎ Edit</button>' +
+        '<button class="icon-btn ' + (p.hidden ? 'show' : 'hide') + '" onclick="toggleHidden(' + i + ')">' + (p.hidden ? 'Show' : 'Hide') + '</button>' +
+        '<button class="icon-btn edit" onclick="editProduct(' + i + ')">Edit</button>' +
         '<button class="icon-btn del" onclick="handleDeleteProduct(' + i + ')">✕</button>' +
       '</td>' +
     '</tr>';
@@ -535,6 +573,20 @@ async function handleDeleteProduct(i){
     loadStats();
   } catch(e) {
     toast('Delete failed: ' + e.message, true);
+  }
+}
+
+async function toggleHidden(i){
+  var p = adminProducts[i];
+  if(!p) return;
+  var next = !p.hidden;
+  try {
+    var r = await setProductHidden(p.id, next);
+    p.hidden = r.hidden ? 1 : 0;
+    renderInventory();
+    toast(p.hidden ? 'Hidden from store: ' + p.name : 'Visible again: ' + p.name);
+  } catch(e) {
+    toast('Failed to update: ' + e.message, true);
   }
 }
 
@@ -564,12 +616,16 @@ function renderImagePreviews(){
   } else {
     noMsg.style.display = 'none';
     removeAllBtn.style.display = 'inline-flex';
-    imgCount.textContent = pendingImages.length + ' image(s) selected';
+    var nNew = pendingImages.filter(function(i){ return i.file; }).length;
+    imgCount.textContent = pendingImages.length + ' image(s)' + (nNew ? ' (' + nNew + ' new)' : '');
     container.innerHTML = pendingImages.map(function(img,i){
+      var label = img.file
+        ? (img.file.name.length > 18 ? img.file.name.substring(0,16) + '…' : img.file.name)
+        : 'photo ' + (i + 1);
       return '<div class="img-thumb">' +
-        '<img src="' + img.previewUrl + '" alt="' + img.name + '">' +
+        '<img src="' + img.url + '" alt="' + label + '">' +
         '<button class="rm-btn" onclick="removeImage(' + i + ')" title="Remove">✕</button>' +
-        '<div class="img-label">' + (img.name.length > 18 ? img.name.substring(0,16)+'…' : img.name) + '</div>' +
+        '<div class="img-label">' + label + '</div>' +
       '</div>';
     }).join('');
   }
@@ -580,21 +636,21 @@ function handleFileSelect(files){
   for(var fi = 0; fi < files.length; fi++){
     var f = files[fi];
     if(!f.type.startsWith('image/')) continue;
-    if(pendingImages.some(function(p){ return p.name === f.name && p.file.size === f.size; })) continue;
-    pendingImages.push({ file: f, name: f.name, previewUrl: URL.createObjectURL(f) });
+    if(pendingImages.some(function(p){ return p.file && p.file.name === f.name && p.file.size === f.size; })) continue;
+    pendingImages.push({ file: f, url: URL.createObjectURL(f) });
   }
   renderImagePreviews();
   document.getElementById('imgFileInput').value = '';
 }
 
 function removeImage(i){
-  URL.revokeObjectURL(pendingImages[i].previewUrl);
+  if(pendingImages[i].file) URL.revokeObjectURL(pendingImages[i].url);
   pendingImages.splice(i,1);
   renderImagePreviews();
 }
 
 function clearAllImages(){
-  pendingImages.forEach(function(p){ URL.revokeObjectURL(p.previewUrl); });
+  pendingImages.forEach(function(p){ if(p.file) URL.revokeObjectURL(p.url); });
   pendingImages = [];
   renderImagePreviews();
 }
@@ -644,29 +700,25 @@ async function saveProduct(){
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    // Upload new images if any
-    var images = [];
+    // Build the final image list: existing server URLs (minus any removed) plus
+    // newly uploaded files, preserving the on-screen order
+    var images = pendingImages.filter(function(i){ return !i.file; }).map(function(i){ return i.url; });
 
-    // Use server-downloaded images (from URL fetch) first
-    if (window._fetchedImages && window._fetchedImages.length > 0) {
-      images = window._fetchedImages.slice();
-    }
-
-    // Upload client-picked images (from file picker/drag-drop)
-    if (pendingImages.length > 0){
+    var fileItems = pendingImages.filter(function(i){ return i.file; });
+    if (fileItems.length > 0){
       try {
-        var uploadData = await uploadImages(pendingImages.map(function(p){ return p.file; }));
-        images = uploadData.files || [];
+        var uploadData = await uploadImages(fileItems.map(function(i){ return i.file; }));
+        var newUrls = (uploadData.files || []).slice();
+        // Re-merge in the original display order so removed/kept/new line up
+        images = pendingImages.map(function(item){
+          if (item.file){
+            var u = newUrls.shift();
+            return u || null;
+          }
+          return item.url;
+        }).filter(Boolean);
       } catch(e) {
-        toast('Image upload failed: ' + e.message + ' — saving product without images', true);
-      }
-    }
-
-    // For edits, keep existing images if no new ones uploaded
-    if(editId !== '' && images.length === 0){
-      var idx = parseInt(editId);
-      if(adminProducts[idx] && adminProducts[idx].images){
-        images = adminProducts[idx].images;
+        toast('Image upload failed: ' + e.message + ' — saved without new images', true);
       }
     }
 
@@ -721,7 +773,6 @@ function clearForm(){
   document.getElementById('formTitle').textContent = 'New Listing';
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('saveBtn').textContent = 'Save Product';
-  window._fetchedImages = []; // clear server-downloaded images
   clearAllImages();
 }
 
@@ -755,8 +806,8 @@ function editProduct(i){
   document.getElementById('cancelEditBtn').style.display = 'inline-block';
 
   if(p.images && p.images.length){
-    document.getElementById('noImgMsg').innerHTML = 'Existing images: <strong>' + p.images.join(', ') + '</strong><br><small>Add new images to replace them, or leave empty to keep</small>';
-    document.getElementById('noImgMsg').style.display = 'block';
+    pendingImages = p.images.map(function(url){ return { url: url }; });
+    renderImagePreviews();
   }
   switchTab('add');
 }
@@ -893,7 +944,7 @@ async function renderUsers(){
         '<td>' + esc(u.phone||'—') + '</td>' +
         '<td><span class="badge ' + (u.role==='admin'?'badge-men':'badge-stock') + '">' + u.role + '</span></td>' +
         '<td>' + dateStr + '</td>' +
-        '<td>' + (u.role !== 'admin' ? '<button class="icon-btn edit" onclick="showResetPassword(' + u.id + ')">🔑 Reset</button>' : '—') + '</td>' +
+        '<td>' + (u.role !== 'admin' ? '<button class="icon-btn edit" onclick="showResetPassword(' + u.id + ')">Reset</button>' : '—') + '</td>' +
       '</tr>';
     }).join('');
   } catch(e) {
@@ -963,6 +1014,147 @@ function exportSubscribersCSV(){
     .catch(function(e){ toast('Export failed: ' + e.message, true); });
 }
 
+/* ========== MESSAGES ========== */
+var messages = [];
+var selectedMsgId = null;
+
+async function loadMessages(){
+  try {
+    messages = await getMessages();
+  } catch(e) {
+    messages = [];
+  }
+  var unread = messages.filter(function(m){ return !m.read; }).length;
+  var btn = document.querySelector('.tab-btn[data-tab="messages"]');
+  if(btn) btn.textContent = 'Messages' + (unread ? ' (' + unread + ')' : '');
+  var stats = document.getElementById('msgStats');
+  if(stats) stats.textContent = messages.length + ' message' + (messages.length!==1?'s':'') + (unread ? ' · ' + unread + ' unread' : '');
+  renderMessages();
+  if(selectedMsgId){
+    var cur = messages.find(function(m){ return m.id === selectedMsgId; });
+    if(cur) renderMessageDetail(cur);
+    else document.getElementById('msgDetail').innerHTML = '<div class="msg-empty">Select a message to read and reply.</div>';
+  }
+}
+
+function formatMsgDate(iso){
+  if(!iso) return '';
+  try {
+    return new Date(String(iso).replace(' ','T') + 'Z').toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    return String(iso);
+  }
+}
+
+function renderMessages(){
+  var list = document.getElementById('msgList');
+  if(!list) return;
+  if(!messages.length){
+    list.innerHTML = '<div class="msg-empty">No messages yet. Messages sent via the Contact form will appear here.</div>';
+    document.getElementById('msgDetail').innerHTML = '';
+    return;
+  }
+  list.innerHTML = messages.map(function(m){
+    var snippet = (m.message||'').replace(/\s+/g,' ').substring(0,72);
+    return '<button class="msg-item ' + (m.read ? '' : 'unread') + (selectedMsgId === m.id ? ' selected' : '') + '" onclick="openMessage(' + m.id + ')">' +
+      '<div class="msg-top"><span class="msg-name">' + esc(m.name) + '</span><span class="msg-date">' + formatMsgDate(m.created_at) + '</span></div>' +
+      '<div class="msg-snippet">' + esc(snippet) + '</div>' +
+    '</button>';
+  }).join('');
+}
+
+async function openMessage(id){
+  selectedMsgId = id;
+  var m = messages.find(function(x){ return x.id === id; });
+  if(!m) return;
+  renderMessages();
+  if(!m.read){
+    m.read = 1;
+    markMessageRead(id).catch(function(){});
+    var unread = messages.filter(function(x){ return !x.read; }).length;
+    var btn = document.querySelector('.tab-btn[data-tab="messages"]');
+    if(btn) btn.textContent = 'Messages' + (unread ? ' (' + unread + ')' : '');
+    var stats = document.getElementById('msgStats');
+    if(stats) stats.textContent = messages.length + ' message' + (messages.length!==1?'s':'') + (unread ? ' · ' + unread + ' unread' : '');
+  }
+  renderMessageDetail(m);
+}
+
+function renderMessageDetail(m){
+  var detail = document.getElementById('msgDetail');
+  if(!m){
+    detail.innerHTML = '<div class="msg-empty">Select a message to read and reply.</div>';
+    return;
+  }
+  var replyBlock = m.reply
+    ? '<div class="msg-reply-recd"><strong style="font-size:11px;">Your reply sent ' + formatMsgDate(m.replied_at) + '</strong><br>' + esc(m.reply) + '</div>'
+    : '';
+  detail.innerHTML =
+    '<div class="msg-detail-top">' +
+      '<div><h3 style="font-family:var(--font-display);margin:0 0 2px;font-size:20px;">' + esc(m.name) + '</h3>' +
+      '<div class="meta"><a href="mailto:' + esc(m.email) + '" style="color:var(--peach-dark);font-weight:600;">' + esc(m.email) + '</a> · ' + formatMsgDate(m.created_at) + '</div></div>' +
+      '<button class="icon-btn del" onclick="deleteMessage(' + m.id + ')">Delete</button>' +
+    '</div>' +
+    '<div class="msg-body">' + esc(m.message) + '</div>' +
+    replyBlock +
+    '<div style="margin-top:14px;">' +
+      '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);display:block;margin-bottom:6px;">Reply by email</label>' +
+      '<textarea id="replyBox" placeholder="Write your reply — it will be emailed to ' + esc(m.email) + '" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-size:14px;font-family:var(--font-body);resize:vertical;background:#fff;color:var(--ink);"></textarea>' +
+      '<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">' +
+        '<button class="btn primary" id="replyBtn" onclick="sendReply(' + m.id + ')">Send Reply</button>' +
+        '<span class="hint" id="replyStatus"></span>' +
+      '</div>' +
+    '</div>';
+}
+
+async function sendReply(id){
+  var box = document.getElementById('replyBox');
+  var btn = document.getElementById('replyBtn');
+  var status = document.getElementById('replyStatus');
+  var reply = box ? box.value.trim() : '';
+  if(!reply){ toast('Write a reply first', true); return; }
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  if(status) status.textContent = 'Sending email…';
+  try {
+    var r = await replyToMessage(id, reply);
+    var m = r && r.message;
+    if(m){
+      var idx = messages.findIndex(function(x){ return x.id === m.id; });
+      if(idx > -1) messages[idx] = m;
+      renderMessageDetail(m);
+      renderMessages();
+    }
+    if(r.emailSent){
+      toast('Reply sent to ' + (m ? m.email : 'client'));
+      if(status) status.textContent = 'Sent · ' + (m && m.replied_at ? formatMsgDate(m.replied_at) : '');
+    } else {
+      toast('Reply saved, but email could not be sent (check SMTP settings)', true);
+      if(status) status.textContent = 'Saved — email send failed';
+    }
+    var unread = messages.filter(function(x){ return !x.read; }).length;
+    var tabBtn = document.querySelector('.tab-btn[data-tab="messages"]');
+    if(tabBtn) tabBtn.textContent = 'Messages' + (unread ? ' (' + unread + ')' : '');
+  } catch(e) {
+    toast('Reply failed: ' + e.message, true);
+    if(status) status.textContent = '';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Reply';
+}
+
+async function deleteMessage(id){
+  if(!confirm('Delete this message?')) return;
+  try {
+    await deleteMessage(id);
+    if(selectedMsgId === id) selectedMsgId = null;
+    toast('Message deleted');
+    await loadMessages();
+  } catch(e) {
+    toast('Delete failed: ' + e.message, true);
+  }
+}
+
 /* ========== SETTINGS ========== */
 async function testEmail(){
   var btn = document.querySelector('button[onclick="testEmail()"]');
@@ -972,10 +1164,10 @@ async function testEmail(){
   result.style.color = 'var(--ink-soft)';
   try {
     const r = await apiFetch('/api/admin/test-email');
-    result.textContent = r.success ? '✅ Sent! Check your inbox' : '❌ ' + (r.message || 'Failed');
+    result.textContent = r.success ? 'Sent! Check your inbox' : (r.message || 'Failed');
     result.style.color = r.success ? 'var(--ok)' : 'var(--bad)';
   } catch(e) {
-    result.textContent = '❌ ' + e.message;
+    result.textContent = e.message;
     result.style.color = 'var(--bad)';
   }
   if(btn) btn.disabled = false;
@@ -1029,6 +1221,7 @@ document.querySelectorAll('.tab-btn').forEach(function(b){
     if(b.dataset.tab === 'orders') renderOrders();
     if(b.dataset.tab === 'users') renderUsers();
     if(b.dataset.tab === 'subscribers') renderSubscribers();
+    if(b.dataset.tab === 'messages') loadMessages();
   });
 });
 
@@ -1153,7 +1346,7 @@ async function fetchProduct(){
       '<p><strong>Name:</strong> ' + esc(productName||'Not found') + '</p>' +
       (price ? '<p><strong>Price:</strong> ' + esc(price) + '</p>' : '') +
       (description ? '<p><strong>Description:</strong> ' + esc(description.substring(0,200)) + '…</p>' : '') +
-      '<p style="font-size:11px;color:var(--ink-soft);margin-top:8px;">📷 ' + imgSet.length + ' image(s) · Click to select</p>';
+      '<p style="font-size:11px;color:var(--ink-soft);margin-top:8px;">' + imgSet.length + ' image(s) · Click to select</p>';
 
     result._fetched = { name: productName, price: price, description: description, images: imgSet };
     result.style.display = 'block';
@@ -1162,7 +1355,7 @@ async function fetchProduct(){
     status.innerHTML = '<span style="color:var(--bad);font-size:13px;">✕ Fetch failed: ' + esc(e.message) + '</span>';
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🔍 Fetch Product';
+    btn.innerHTML = 'Fetch Product';
   }
 }
 
@@ -1198,20 +1391,8 @@ async function applyFetched(){
         if(result.files && result.files.length > 0){
           toast('Downloaded ' + result.files.length + ' image(s) successfully');
           // Store the downloaded file URLs directly — no need to re-upload
-          // We'll track them as "already on server"
-          window._fetchedImages = (window._fetchedImages || []).concat(result.files);
-          // Show previews of the downloaded images
-          var container = document.getElementById('imgPreviews');
-          var noMsg = document.getElementById('noImgMsg');
-          noMsg.style.display = 'none';
-          document.getElementById('removeAllImgBtn').style.display = 'inline-flex';
-          document.getElementById('imgCount').textContent = (window._fetchedImages.length) + ' image(s) from URL';
-          container.innerHTML = window._fetchedImages.map(function(f, i){
-            return '<div class="img-thumb">' +
-              '<img src="' + f + '" alt="Downloaded image">' +
-              '<div class="img-label">' + f.split('/').pop().substring(0,18) + '</div>' +
-            '</div>';
-          }).join('');
+          pendingImages = result.files.map(function(f){ return { url: f }; });
+          renderImagePreviews();
         } else {
           var failed = (result.results || []).filter(function(r){ return !r.ok; });
           toast('Downloaded 0 images' + (failed.length ? ' (' + failed.length + ' failed)' : ''), true);

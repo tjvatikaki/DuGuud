@@ -47,9 +47,9 @@ router.get('/track', (req, res) => {
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
     '<title>Track Your Order — DuGuud</title>' +
     '<link rel="preconnect" href="https://fonts.googleapis.com">' +
-    '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">' +
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">' +
     '<style>' +
-      ':root{--peach:#f4a98c;--peach-dark:#e8875f;--peach-pale:#fbe4d5;--peach-tint:#fdf1ea;--ink:#221e1c;--ink-soft:#4a423e;--paper:#faf8f6;--line:rgba(34,30,28,0.12);--ok:#4c7a5d;--font-display:"Space Grotesk",sans-serif;--font-body:"Inter",sans-serif;}' +
+      ':root{--peach:#f4a98c;--peach-dark:#e8875f;--peach-pale:#fbe4d5;--peach-tint:#fdf1ea;--ink:#16130f;--ink-soft:#5c564e;--paper:#f2eee6;--line:rgba(22,19,15,0.14);--ok:#4c7a5d;--font-display:"Saira Condensed",sans-serif;--font-body:"Archivo",sans-serif;}' +
       '*{box-sizing:border-box;}body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}' +
       'header{background:var(--ink);color:var(--paper);border-bottom:3px solid var(--peach);padding:14px 24px;text-align:center;}' +
       'header .logo{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--paper);text-decoration:none;}' +
@@ -58,12 +58,12 @@ router.get('/track', (req, res) => {
       '.sub{font-size:14px;color:var(--ink-soft);margin-bottom:24px;}' +
       '.field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;}' +
       '.field label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);}' +
-      '.field input{border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;font-family:var(--font-body);background:#fff;}' +
+      '.field input{border:1px solid var(--line);border-radius:2px;padding:12px 14px;font-size:14px;font-family:var(--font-body);background:#fff;}' +
       '.field input:focus{outline:none;border-color:var(--peach-dark);box-shadow:0 0 0 3px var(--peach-pale);}' +
-      '.btn{width:100%;background:var(--ink);color:var(--peach-pale);border:none;border-radius:14px;padding:15px;font-weight:700;font-size:15px;cursor:pointer;font-family:var(--font-body);}' +
+      '.btn{width:100%;background:var(--ink);color:var(--peach-pale);border:none;border-radius:2px;padding:15px;font-weight:700;font-size:15px;cursor:pointer;font-family:var(--font-body);}' +
       '.btn:hover{background:var(--peach-dark);color:#fff;}' +
-      '.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:20px;}' +
-      '.status-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;text-transform:capitalize;}' +
+      '.card{background:#fff;border:1px solid var(--line);border-radius:3px;padding:24px;margin-top:20px;}' +
+      '.status-badge{display:inline-block;padding:4px 14px;border-radius:2px;font-size:12px;font-weight:600;text-transform:capitalize;}' +
       '.badge-pending{background:#e0dcd9;color:var(--ink-soft);}' +
       '.badge-paid{background:var(--peach-pale);color:var(--peach-dark);}' +
       '.badge-shipped{background:#d4e4d4;color:var(--ok);}' +

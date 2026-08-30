@@ -6,13 +6,13 @@
 <title>My Account — DuGuud</title>
 <meta name="description" content="Your DuGuud account — view orders and track deliveries.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --peach:#f4a98c; --peach-dark:#e8875f; --peach-pale:#fbe4d5; --peach-tint:#fdf1ea;
-    --ink:#221e1c; --ink-soft:#4a423e; --paper:#faf8f6; --line:rgba(34,30,28,0.12);
+    --ink:#16130f; --ink-soft:#5c564e; --paper:#f2eee6; --line:rgba(22,19,15,0.14);
     --ok:#4c7a5d; --warn:#d4822a; --bad:#c44;
-    --font-display:'Space Grotesk', sans-serif; --font-body:'Inter', sans-serif; --font-tag:'IBM Plex Mono', monospace;
+    --font-display:'Saira Condensed', sans-serif; --font-body:'Archivo', sans-serif; --font-tag:'Space Mono', monospace;
   }
   *{box-sizing:border-box;} html,body{margin:0;padding:0;}
   body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
@@ -23,16 +23,16 @@
   header{background:var(--ink);color:var(--paper);border-bottom:3px solid var(--peach);overflow:visible;}
   .nav-wrap{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
   .logo{display:flex;align-items:center;line-height:0;}
-  .logo-mark{flex-shrink:0;display:block;height:200px;width:auto;transform:translateY(30px);}
-  @media (max-width:820px){.logo-mark{height:100px;transform:translateY(10px);}}
-  @media (max-width:450px){.logo-mark{height:70px;transform:translateY(5px);}}
+  .logo-mark{flex-shrink:0;display:block;height:60px;width:auto;}
+  @media (max-width:820px){.logo-mark{height:48px;}}
+  @media (max-width:450px){.logo-mark{height:40px;}}
 
   main{flex:1;max-width:900px;margin:0 auto;padding:40px 24px;width:100%;}
   .page-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:32px;}
   .page-head h1{font-family:var(--font-display);font-size:28px;margin:0;}
   .page-head .sub{font-size:14px;color:var(--ink-soft);margin:4px 0 0;}
 
-  .card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;}
+  .card{border:1px solid var(--line);border-radius:3px;background:#fff;overflow:hidden;}
   .card:not(:last-child){margin-bottom:20px;}
   .card-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
   .card-head h3{font-family:var(--font-display);font-size:18px;margin:0;}
@@ -50,7 +50,7 @@
   .order-id{font-family:var(--font-tag);font-size:12px;color:var(--ink-soft);}
   .order-date{font-size:12px;color:var(--ink-soft);}
 
-  .badge{display:inline-block;font-family:var(--font-tag);font-size:10px;padding:3px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:0.04em;font-weight:600;}
+  .badge{display:inline-block;font-family:var(--font-tag);font-size:10px;padding:3px 10px;border-radius:2px;text-transform:uppercase;letter-spacing:0.04em;font-weight:600;}
   .badge-pending{background:#e0dcd9;color:var(--ink-soft);}
   .badge-paid{background:var(--peach-pale);color:var(--peach-dark);}
   .badge-shipped{background:#d4e4d4;color:var(--ok);}
@@ -65,20 +65,22 @@
   .order-items th{text-align:left;padding:6px 0;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);border-bottom:1px solid var(--line);}
   .order-items td{padding:6px 0;border-bottom:1px solid var(--line);}
 
-  .track-link{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--peach-pale);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+  .track-link{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--peach-pale);padding:6px 14px;border-radius:2px;font-size:12px;font-weight:600;}
   .track-link:hover{background:var(--peach-dark);color:#fff;}
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);}
   .empty-state .icon{font-size:48px;margin-bottom:16px;}
+  .empty-state .icon svg{animation:icon-spin 1.2s linear infinite;}
+  @keyframes icon-spin{to{transform:rotate(360deg);}}
   .empty-state h3{font-family:var(--font-display);margin:0 0 8px;color:var(--ink);}
   .empty-state p{font-size:14px;margin:0 0 24px;}
 
-  .btn{display:inline-block;background:var(--peach);color:var(--ink);border:none;border-radius:14px;padding:12px 24px;font-weight:600;font-size:14px;cursor:pointer;text-align:center;}
+  .btn{display:inline-block;background:var(--peach);color:var(--ink);border:none;border-radius:2px;padding:12px 24px;font-weight:600;font-size:14px;cursor:pointer;text-align:center;}
   .btn:hover{background:var(--peach-dark);color:#fff;}
-  .btn-outline{background:transparent;border:1px solid var(--line);padding:8px 18px;border-radius:20px;font-size:13px;font-weight:500;}
+  .btn-outline{background:transparent;border:1px solid var(--line);padding:8px 18px;border-radius:2px;font-size:13px;font-weight:500;}
   .btn-outline:hover{border-color:var(--ink);}
 
-  footer{background:var(--ink);color:rgba(250,248,246,0.5);text-align:center;padding:20px 24px;font-size:12px;margin-top:auto;}
+  footer{background:var(--ink);color:rgba(242,238,230,0.5);text-align:center;padding:20px 24px;font-size:12px;margin-top:auto;}
 
   .error-msg{font-size:13px;color:var(--bad);margin-top:8px;}
 
@@ -104,7 +106,7 @@
 
 <main id="mainContent">
   <div class="empty-state" style="padding:80px 20px;">
-    <div class="icon">⏳</div>
+    <div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.56"/></svg></div>
     <h3>Loading your account...</h3>
   </div>
 </main>
@@ -132,7 +134,7 @@ async function loadAccount(){
   if(!isLoggedIn()){
     main.innerHTML =
       '<div class="empty-state">' +
-        '<div class="icon">&#128274;</div>' +
+        '<div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>' +
         '<h3>Sign in to view your account</h3>' +
         '<p>You need to be logged in to see your orders and tracking info.</p>' +
         '<a href="register.html" class="btn">Sign In or Create Account</a>' +
@@ -147,7 +149,7 @@ async function loadAccount(){
     clearToken();
     main.innerHTML =
       '<div class="empty-state">' +
-        '<div class="icon">&#128274;</div>' +
+        '<div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>' +
         '<h3>Session expired</h3>' +
         '<p>Please sign in again.</p>' +
         '<a href="register.html" class="btn">Sign In</a>' +
@@ -219,7 +221,7 @@ function renderOrderCard(o){
     : '';
 
   var trackingHtml = o.tracking_number && o.status === 'shipped'
-    ? '<div class="order-details" style="margin-top:10px;"><span class="label">Tracking (Courier Guy):</span><span class="value"><a href="https://www.courierguy.co.za/track/' + encodeURIComponent(o.tracking_number) + '" target="_blank" class="track-link">&#128666; ' + escHtml(o.tracking_number) + '</a></span></div>'
+    ? '<div class="order-details" style="margin-top:10px;"><span class="label">Tracking (Courier Guy):</span><span class="value"><a href="https://www.courierguy.co.za/track/' + encodeURIComponent(o.tracking_number) + '" target="_blank" class="track-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l4 4v4h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg> ' + escHtml(o.tracking_number) + '</a></span></div>'
     : '';
 
   return '<div class="card">' +

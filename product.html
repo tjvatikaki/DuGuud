@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DuGuud — Product</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCArZiKtL36i1QelfVUZb_wz4UhZ-SkXkk&libraries=places&callback=initAutocomplete" async defer></script>
 <style>
   :root{
@@ -13,15 +13,15 @@
     --peach-dark:#e8875f;
     --peach-pale:#fbe4d5;
     --peach-tint:#fdf1ea;
-    --ink:#221e1c;
-    --ink-soft:#4a423e;
-    --paper:#faf8f6;
-    --line:rgba(34,30,28,0.12);
+    --ink:#16130f;
+    --ink-soft:#5c564e;
+    --paper:#f2eee6;
+    --line:rgba(22,19,15,0.14);
     --ok:#4c7a5d;
     --bad:#c44;
-    --font-display:'Space Grotesk', sans-serif;
-    --font-body:'Inter', sans-serif;
-    --font-tag:'IBM Plex Mono', monospace;
+    --font-display:'Saira Condensed', sans-serif;
+    --font-body:'Archivo', sans-serif;
+    --font-tag:'Space Mono', monospace;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -47,7 +47,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:20px;
   }
   .logo{display:flex; align-items:center;}
-  .logo-mark{flex-shrink:0;display:block;height:250px;width:auto;margin-top:-50px;margin-bottom:-170px;}
+  .logo-mark{flex-shrink:0;display:block;height:60px;width:auto;}
   .back-link{
     font-size:13px;font-weight:500;opacity:0.7;display:flex;align-items:center;gap:6px;
     transition:opacity .15s ease;
@@ -55,11 +55,11 @@
   .back-link:hover{opacity:1;}
   .header-actions{display:flex;align-items:center;gap:18px;}
   .cart-btn{
-    background:var(--peach);color:var(--ink);border:none;border-radius:30px;
+    background:var(--peach);color:var(--ink);border:none;border-radius:2px;
     padding:9px 16px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;
-    transition:transform .15s ease, background .15s ease;
+    transition:background .15s ease;
   }
-  .cart-btn:hover{background:var(--peach-dark);color:#fff;transform:translateY(-1px);}
+  .cart-btn:hover{background:var(--peach-dark);color:#fff;}
   .cart-count{
     background:var(--ink);color:var(--peach);border-radius:50%;
     width:20px;height:20px;display:flex;align-items:center;justify-content:center;
@@ -75,7 +75,7 @@
   /* ---------- GALLERY ---------- */
   .gallery{position:sticky;top:80px;}
   .gallery-main{
-    width:100%;aspect-ratio:4/5;border-radius:16px;overflow:hidden;
+    width:100%;aspect-ratio:4/5;border-radius:3px;overflow:hidden;
     background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));
     display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:12px;
   }
@@ -93,7 +93,7 @@
   .gallery-nav.next{right:12px;}
   .gallery-thumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
   .gallery-thumb{
-    flex-shrink:0;width:70px;height:88px;border-radius:8px;overflow:hidden;
+    flex-shrink:0;width:70px;height:88px;border-radius:2px;overflow:hidden;
     border:2px solid var(--line);cursor:pointer;
     background:linear-gradient(155deg,var(--peach-tint),var(--peach-pale));
     display:flex;align-items:center;justify-content:center;
@@ -129,7 +129,7 @@
   .detail-desc{font-size:15px;line-height:1.7;color:var(--ink-soft);margin-bottom:24px;}
   .stock-flag{
     font-family:var(--font-tag);font-size:10px;
-    background:var(--ink);color:var(--peach-pale);padding:3px 9px;border-radius:20px;
+    background:var(--ink);color:var(--peach-pale);padding:3px 9px;border-radius:2px;
     text-transform:uppercase;letter-spacing:0.06em;display:inline-block;margin-bottom:20px;
   }
   .stock-flag.low{background:var(--peach-dark);color:#fff;}
@@ -141,12 +141,12 @@
     letter-spacing:0.04em;color:var(--ink-soft);
   }
   .detail-opt-group select, .detail-opt-group input{
-    border:1px solid var(--line);border-radius:10px;padding:10px 14px;
+    border:1px solid var(--line);border-radius:2px;padding:10px 14px;
     font-size:14px;font-family:var(--font-body);background:#fff;max-width:200px;
   }
   .detail-add-btn{
     background:var(--ink);color:var(--peach-pale);border:none;
-    border-radius:14px;padding:16px;font-weight:700;font-size:16px;
+    border-radius:2px;padding:16px;font-weight:700;font-size:16px;
     width:100%;text-transform:uppercase;letter-spacing:0.04em;
     transition:background .15s ease;
   }
@@ -155,7 +155,7 @@
   .detail-stock-note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:10px;}
 
   /* ---------- FOOTER ---------- */
-  footer{background:var(--ink);color:rgba(250,248,246,0.6);padding:40px 24px 26px;border-top:1px solid rgba(250,248,246,0.1);}
+  footer{background:var(--ink);color:rgba(242,238,230,0.6);padding:40px 24px 26px;border-top:1px solid rgba(242,238,230,0.1);}
   .footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
   .footer-inner p{font-size:12px;margin:0;}
 
@@ -163,7 +163,7 @@
 
   /* ---------- CART DRAWER ---------- */
   .overlay{
-    position:fixed;inset:0;background:rgba(34,30,28,0.45);z-index:90;
+    position:fixed;inset:0;background:rgba(22,19,15,0.45);z-index:90;
     opacity:0;pointer-events:none;transition:opacity .2s ease;
   }
   .overlay.show{opacity:1;pointer-events:auto;}
@@ -184,7 +184,7 @@
   .drawer-empty{margin:auto;text-align:center;color:var(--ink-soft);font-size:14px;padding:30px;}
   .cart-item{display:flex;gap:12px;border-bottom:1px solid var(--line);padding-bottom:14px;}
   .cart-item-media{
-    width:60px;height:70px;border-radius:8px;flex-shrink:0;
+    width:60px;height:70px;border-radius:2px;flex-shrink:0;
     background:linear-gradient(155deg,var(--peach-tint), var(--peach-pale));
     display:flex;align-items:center;justify-content:center;
   }
@@ -197,7 +197,7 @@
   .drawer-foot{border-top:1px solid var(--line);padding:18px 22px 24px;}
   .subtotal-row{display:flex;justify-content:space-between;font-size:15px;margin-bottom:14px;font-weight:600;}
   .checkout-btn{
-    width:100%;background:var(--peach);color:var(--ink);border:none;border-radius:14px;
+    width:100%;background:var(--peach);color:var(--ink);border:none;border-radius:2px;
     padding:15px;font-weight:700;font-size:15px;transition:background .15s ease;
   }
   .checkout-btn:hover{background:var(--peach-dark);color:#fff;}
@@ -205,32 +205,32 @@
 
   /* ---------- CHECKOUT MODAL ---------- */
   .modal-overlay{
-    position:fixed;inset:0;background:rgba(34,30,28,0.55);z-index:100;
+    position:fixed;inset:0;background:rgba(22,19,15,0.55);z-index:100;
     display:none;align-items:center;justify-content:center;padding:20px;
   }
   .modal-overlay.show{display:flex;}
   .modal{
-    background:var(--paper);border-radius:20px;max-width:520px;width:100%;
+    background:var(--paper);border-radius:3px;max-width:520px;width:100%;
     max-height:88vh;overflow-y:auto;padding:30px;
   }
   .modal h3{font-family:var(--font-display);font-size:24px;margin:0 0 6px;}
   .modal .sub{font-size:13px;color:var(--ink-soft);margin-bottom:22px;}
   .modal label{font-size:12px;font-weight:600;display:block;margin-bottom:5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.04em;}
   .modal input{
-    width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;
     font-size:14px;margin-bottom:16px;font-family:var(--font-body);
   }
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .pay-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
   .pay-option{
-    border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;
+    border:1.5px solid var(--line);border-radius:2px;padding:12px 14px;
     display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:500;cursor:pointer;
   }
   .pay-option input{width:auto;margin:0;}
   .pay-option.selected{border-color:var(--peach-dark);background:var(--peach-tint);}
   .modal-total{display:flex;justify-content:space-between;font-weight:700;font-size:17px;margin-bottom:18px;padding-top:10px;border-top:1px dashed var(--line);}
   .place-order-btn{
-    width:100%;background:var(--ink);color:var(--peach-pale);border:none;border-radius:14px;
+    width:100%;background:var(--ink);color:var(--peach-pale);border:none;border-radius:2px;
     padding:16px;font-weight:700;font-size:15px;
   }
   .place-order-btn:hover{background:var(--peach-dark);color:#fff;}
@@ -240,10 +240,10 @@
   /* ---------- TOAST ---------- */
   .toast{
     position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
-    background:var(--ink);color:var(--peach-pale);padding:16px 28px;border-radius:16px;
+    background:var(--ink);color:var(--peach-pale);padding:16px 28px;border-radius:3px;
     font-size:15px;font-weight:600;z-index:999;opacity:0;pointer-events:none;
     transition:all .35s ease;display:flex;align-items:center;gap:12px;
-    box-shadow:0 8px 30px rgba(34,30,28,0.2);
+    box-shadow:0 8px 30px rgba(22,19,15,0.2);
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .toast .dot2{width:10px;height:10px;border-radius:50%;background:var(--peach);flex-shrink:0;}
@@ -254,6 +254,12 @@
   .error-state p{color:var(--ink-soft);margin-bottom:24px;}
   .error-state a{color:var(--peach-dark);font-weight:600;text-decoration:underline;}
 
+  /* ---------- TICKER ---------- */
+  .ticker{background:var(--peach);color:var(--ink);overflow:hidden;white-space:nowrap;}
+  .ticker-track{display:inline-block;padding:6px 0;animation:ticker-scroll 24s linear infinite;font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;}
+  .ticker-track span{margin:0 16px;}
+  @keyframes ticker-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
   /* ---------- MOBILE NAV DRAWER ---------- */
   .mobile-nav{
     position:fixed;top:0;left:0;width:100%;height:100%;z-index:96;
@@ -263,7 +269,7 @@
   }
   .mobile-nav.open{transform:translateX(0);}
   .mobile-nav-head{
-    padding:20px 24px;border-bottom:1px solid rgba(250,248,246,0.12);
+    padding:20px 24px;border-bottom:1px solid rgba(242,238,230,0.12);
     display:flex;justify-content:space-between;align-items:center;
   }
   .mobile-nav-head span{font-family:var(--font-display);font-size:18px;font-weight:500;}
@@ -274,11 +280,11 @@
   }
   .mobile-nav-body a{
     color:var(--paper);font-size:17px;font-weight:500;opacity:0.8;padding:6px 0;
-    border-bottom:1px solid rgba(250,248,246,0.08);
+    border-bottom:1px solid rgba(242,238,230,0.08);
   }
   .mobile-nav-body a:hover{opacity:1;}
   .mobile-nav-body hr{
-    border:none;border-top:1px solid rgba(250,248,246,0.12);margin:4px 0;
+    border:none;border-top:1px solid rgba(242,238,230,0.12);margin:4px 0;
   }
 
   @media (max-width:820px){
@@ -290,7 +296,7 @@
     .detail-info h2{font-size:20px;}
     .detail-desc{font-size:14px;}
     .footer-inner{flex-direction:column;text-align:center;}
-    .logo-mark{height:120px;margin-top:-20px;margin-bottom:-80px;}
+    .logo-mark{height:48px;}
     .header-actions{gap:10px;}
     .cart-btn{padding:6px 10px;font-size:12px;gap:6px;}
     .nav-wrap{padding:10px 14px;}
@@ -298,8 +304,8 @@
   }
 
   @media (max-width:450px){
-    .logo-mark{height:80px;margin-top:-12px;margin-bottom:-50px;}
-    .nav-wrap{padding:8px 10px;}
+    .logo-mark{height:40px;}
+    .nav-wrap{padding:8px 10px;gap:12px;}
     .header-actions{gap:6px;}
     .cart-btn{padding:5px 8px;font-size:11px;}
     .cart-btn .cart-count{width:18px;height:18px;font-size:10px;}
@@ -320,10 +326,12 @@
       <button class="cart-btn" onclick="openCart()">
         Basket <span class="cart-count" id="cartCount">0</span>
       </button>
-      <button class="mobile-toggle" onclick="openMobileNav()">☰</button>
+      <button class="mobile-toggle" onclick="openMobileNav()" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     </div>
   </div>
 </header>
+
+<div class="ticker"><div class="ticker-track"><span>Free shipping over R1 000</span><span>✦</span><span>Last stock</span><span>✦</span><span>Honestly priced</span><span>✦</span><span>New drops weekly</span><span>✦</span><span>Free shipping over R1 000</span><span>✦</span><span>Last stock</span><span>✦</span><span>Honestly priced</span><span>✦</span><span>New drops weekly</span><span>✦</span></div></div>
 
 <div id="detailContent"></div>
 
@@ -333,7 +341,7 @@
       <img src="images/logo.png" alt="DuGuud" style="height:28px;width:auto;">
       <span style="color:#fff;font-family:var(--font-display);font-weight:700;font-size:18px;">DuGuud</span>
     </div>
-    <div style="display:flex;gap:16px;font-size:12px;"><a href="terms.html" style="color:rgba(250,248,246,0.6);">Terms</a><a href="refund.html" style="color:rgba(250,248,246,0.6);">Refunds</a><a href="delivery.html" style="color:rgba(250,248,246,0.6);">Delivery</a><a href="contact.html" style="color:rgba(250,248,246,0.6);">Contact</a></div>
+    <div style="display:flex;gap:16px;font-size:12px;"><a href="terms.html" style="color:rgba(242,238,230,0.6);">Terms</a><a href="refund.html" style="color:rgba(242,238,230,0.6);">Refunds</a><a href="delivery.html" style="color:rgba(242,238,230,0.6);">Delivery</a><a href="contact.html" style="color:rgba(242,238,230,0.6);">Contact</a></div>
     <p>© 2026 DuGuud. All rights reserved. Prices shown in ZAR (R).</p>
   </div>
 </footer>
@@ -342,7 +350,7 @@
 <div class="mobile-nav" id="mobileNav">
   <div class="mobile-nav-head">
     <span>Menu</span>
-    <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+    <button class="mobile-nav-close" onclick="closeMobileNav()">×</button>
   </div>
   <div class="mobile-nav-body">
     <a href="index.html">Store</a>
@@ -361,7 +369,7 @@
 <div class="drawer" id="drawer">
   <div class="drawer-head">
     <h3>Your Basket</h3>
-    <button class="drawer-close" onclick="closeCart()">✕</button>
+    <button class="drawer-close" onclick="closeCart()">×</button>
   </div>
   <div class="drawer-items" id="drawerItems"></div>
   <div class="drawer-foot">
@@ -376,7 +384,7 @@
 <!-- CHECKOUT MODAL -->
 <div class="modal-overlay" id="checkoutModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeCheckout()">✕</button>
+    <button class="modal-close" onclick="closeCheckout()">×</button>
     <h3>Checkout</h3>
     <p class="sub">Pay with credit card, Instant EFT, or mobile money — securely processed by PayFast.</p>
 
@@ -398,13 +406,13 @@
 
     <label>Shipping method</label>
     <div class="pay-options" id="shipOptions" style="margin-bottom:16px;">
-      <label class="pay-option selected"><input type="radio" name="ship" value="delivery" checked> 🚚 Delivery — R85 (free over R1 000)</label>
-      <label class="pay-option"><input type="radio" name="ship" value="pickup"> 📍 Local pickup — Gardeniapark, Bloemfontein (free)</label>
+      <label class="pay-option selected"><input type="radio" name="ship" value="delivery" checked> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 3h13v13H1z"/><path d="M14 8h4l4 4v4h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg> Delivery — R85 (free over R1 000)</label>
+      <label class="pay-option"><input type="radio" name="ship" value="pickup"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Local pickup — Gardeniapark, Bloemfontein (free)</label>
     </div>
 
     <label>Payment method</label>
     <div class="pay-options" id="payOptions">
-      <label class="pay-option selected"><input type="radio" name="pay" checked> 💳 PayFast — Credit Card / Instant EFT / Mobile</label>
+      <label class="pay-option selected"><input type="radio" name="pay" checked> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> PayFast — Credit Card / Instant EFT / Mobile</label>
     </div>
 
     <div style="margin:20px 0 10px;">
@@ -413,7 +421,7 @@
       <div class="subtotal-row" style="font-weight:700;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-size:15px;"><span>Total due</span><span id="modalTotal">R 0.00</span></div>
     </div>
     <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
-    <p class="modal-note">🔒 Secured by PayFast — your card details go directly to PayFast, never through DuGuud's servers. We accept credit cards, instant EFT, and mobile money.</p>
+    <p class="modal-note" style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Secured by PayFast — your card details go directly to PayFast, never through DuGuud's servers. We accept credit cards, instant EFT, and mobile money.</p>
   </div>
 </div>
 

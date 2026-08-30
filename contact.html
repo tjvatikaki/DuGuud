@@ -6,13 +6,13 @@
 <title>Contact Us — DuGuud</title>
 <meta name="description" content="Get in touch with DuGuud. Send us a message and we'll get back to you within 24 hours.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --peach:#f4a98c;--peach-dark:#e8875f;--peach-pale:#fbe4d5;--peach-tint:#fdf1ea;
-    --ink:#221e1c;--ink-soft:#4a423e;--paper:#faf8f6;--line:rgba(34,30,28,0.12);
+    --ink:#16130f;--ink-soft:#5c564e;--paper:#f2eee6;--line:rgba(22,19,15,0.14);
     --ok:#4c7a5d;--bad:#c44;
-    --font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;--font-tag:'IBM Plex Mono',monospace;
+    --font-display:'Saira Condensed',sans-serif;--font-body:'Archivo',sans-serif;--font-tag:'Space Mono',monospace;
   }
   *{box-sizing:border-box;}html,body{margin:0;padding:0;}
   body{background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
@@ -30,7 +30,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:20px;
   }
   .logo{display:flex;align-items:center;}
-  .logo-mark{flex-shrink:0;display:block;height:250px;width:auto;margin-top:-50px;margin-bottom:-170px;}
+  .logo-mark{flex-shrink:0;display:block;height:60px;width:auto;}
   .header-actions{display:flex;align-items:center;gap:18px;}
   .nav-back{font-size:13px;font-weight:500;opacity:0.7;transition:opacity .15s;}
   .nav-back:hover{opacity:1;}
@@ -42,19 +42,19 @@
 
   .field{margin-bottom:20px;}
   .field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:6px;}
-  .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;font-family:var(--font-body);background:#fff;transition:border-color .15s;}
+  .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:2px;padding:12px;font-size:14px;font-family:var(--font-body);background:#fff;transition:border-color .15s;}
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--peach-dark);box-shadow:0 0 0 3px var(--peach-pale);}
   .field textarea{resize:vertical;min-height:140px;}
   .field .hint{font-size:11px;color:var(--ink-soft);margin-top:4px;display:block;}
 
   .btn-primary{
-    background:var(--peach);color:var(--ink);border:none;border-radius:30px;
-    padding:14px 32px;font-weight:600;font-size:15px;transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;
+    background:var(--peach);color:var(--ink);border:none;border-radius:2px;
+    padding:14px 32px;font-weight:600;font-size:15px;transition:background .15s ease;display:inline-flex;align-items:center;gap:8px;
   }
-  .btn-primary:hover{background:var(--peach-dark);color:#fff;transform:translateY(-1px);}
-  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+  .btn-primary:hover{background:var(--peach-dark);color:#fff;}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
 
-  .status{font-size:14px;margin-top:16px;display:none;padding:14px 18px;border-radius:12px;line-height:1.5;}
+  .status{font-size:14px;margin-top:16px;display:none;padding:14px 18px;border-radius:2px;line-height:1.5;}
   .status.show{display:block;}
   .status.ok{background:var(--peach-tint);color:var(--ok);border:1px solid rgba(76,122,93,0.2);}
   .status.err{background:#fef0f0;color:var(--bad);border:1px solid rgba(204,68,68,0.15);}
@@ -65,7 +65,7 @@
 
   @media (max-width:700px){
     .page-wrap{padding:30px 16px 60px;}
-    .logo-mark{height:120px;margin-top:-20px;margin-bottom:-80px;}
+    .logo-mark{height:48px;}
     .contact-info{grid-template-columns:1fr;}
   }
 </style>
@@ -106,19 +106,19 @@
 
   <div class="contact-info">
     <div class="item">
-      <strong>📧 Email</strong>
+      <strong style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg> Email</strong>
       <a href="mailto:admin@duguud.co.za" style="color:var(--peach-dark);font-weight:600;">admin@duguud.co.za</a>
     </div>
     <div class="item">
-      <strong>📍 Location</strong>
+      <strong style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.4-7-11a7 7 0 0 1 14 0c0 5.6-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Location</strong>
       Gardeniapark, Bloemfontein<br>South Africa
     </div>
     <div class="item">
-      <strong>🕐 Business hours</strong>
+      <strong style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Business hours</strong>
       Mon – Fri, 9am – 5pm<br>We reply within 24 hours
     </div>
     <div class="item">
-      <strong>📦 Orders</strong>
+      <strong style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg> Orders</strong>
       <a href="account.html" style="color:var(--peach-dark);font-weight:600;">Track your order</a><br>
       <a href="delivery.html" style="color:var(--peach-dark);font-weight:600;">Delivery info</a>
     </div>

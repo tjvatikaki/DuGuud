@@ -30,7 +30,8 @@ function assembleProduct(row) {
     sizes: sizeList,
     sizeStock,
     images: images.map(i => i.url),
-    desc: row.desc || ''
+    desc: row.desc || '',
+    hidden: row.hidden || 0
   };
 }
 
@@ -72,10 +73,10 @@ function computeTotalStock(sizes, sizeStock) {
 
 // ─── Routes ───
 
-// GET /api/products — public list (only in-stock products)
+// GET /api/products — public list (only in-stock, visible products)
 router.get('/', (req, res) => {
   try {
-    const rows = dbAll('SELECT * FROM products WHERE stock > 0 ORDER BY id');
+    const rows = dbAll('SELECT * FROM products WHERE stock > 0 AND hidden = 0 ORDER BY id');
     const products = rows.map(assembleProduct);
     res.json({ products });
   } catch (err) {
@@ -88,7 +89,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   try {
     const row = dbGet('SELECT * FROM products WHERE id = ?', [req.params.id]);
-    if (!row) return res.status(404).json({ error: 'Product not found' });
+    if (!row || row.hidden) return res.status(404).json({ error: 'Product not found' });
     res.json({ product: assembleProduct(row) });
   } catch (err) {
     console.error('Get product error:', err);
@@ -130,11 +131,12 @@ router.put('/:id', authenticate, requireAdmin, (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Product not found' });
 
     const totalStock = computeTotalStock(p.sizes, p.sizeStock);
+    const hidden = p.hidden !== undefined ? (p.hidden ? 1 : 0) : (existing.hidden || 0);
 
     dbRun(
-      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, price=?, cost=?, stock=?, desc=?, updated_at=datetime('now') WHERE id=?",
+      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, price=?, cost=?, stock=?, desc=?, hidden=?, updated_at=datetime('now') WHERE id=?",
       [p.name, p.cat || 'men', p.icon || 'tee', p.tag || 'Tops',
-       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '', productId]
+       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '', hidden, productId]
     );
 
     // Replace sizes and images
@@ -146,6 +148,21 @@ router.put('/:id', authenticate, requireAdmin, (req, res) => {
     res.json({ product: assembleProduct(row) });
   } catch (err) {
     console.error('Update product error:', err);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+// PUT /api/products/:id/hidden — admin hide/unhide toggle
+router.put('/:id/hidden', authenticate, requireAdmin, (req, res) => {
+  try {
+    const existing = dbGet('SELECT id FROM products WHERE id = ?', [req.params.id]);
+    if (!existing) return res.status(404).json({ error: 'Product not found' });
+
+    const hidden = req.body.hidden ? 1 : 0;
+    dbRun("UPDATE products SET hidden = ?, updated_at = datetime('now') WHERE id = ?", [hidden, req.params.id]);
+    res.json({ success: true, hidden });
+  } catch (err) {
+    console.error('Toggle product hidden error:', err);
     res.status(500).json({ error: 'Failed to update product' });
   }
 });

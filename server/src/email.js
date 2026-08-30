@@ -44,16 +44,16 @@ async function sendOrderConfirmation(order, customerEmail) {
   return sendEmail({
     to: customerEmail,
     subject: 'Order Confirmed - DuGuud #' + order.id,
-    html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;">' +
-      '<h2 style="color:#221e1c;">Order Confirmed</h2>' +
-      '<p style="font-size:14px;color:#4a423e;">Thanks for your order! We\'ll notify you when it ships.</p>' +
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
+      '<h2 style="color:#16130f;">Order Confirmed</h2>' +
+      '<p style="font-size:14px;color:#5c564e;">Thanks for your order! We\'ll notify you when it ships.</p>' +
       '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Order</td><td style="font-weight:600;">' + order.id + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Total</td><td style="font-weight:600;">R ' + order.total + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Status</td><td style="font-weight:600;">' + order.status + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Order</td><td style="font-weight:600;">' + order.id + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Total</td><td style="font-weight:600;">R ' + order.total + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Status</td><td style="font-weight:600;">' + order.status + '</td></tr>' +
       '</table>' +
-      '<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' +
-      '<p style="font-size:12px;color:#4a423e;">DuGuud - Last Stock, Honestly Priced</p>' +
+      '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">DuGuud - Last Stock, Honestly Priced</p>' +
     '</div>'
   });
 }
@@ -61,21 +61,21 @@ async function sendOrderConfirmation(order, customerEmail) {
 // Shipment notification for customer (with Courier Guy tracking link)
 async function sendShippingNotification(order, customerEmail) {
   const trackingHtml = order.tracking_number
-    ? '<tr><td style="padding:8px 0;color:#4a423e;">Tracking</td><td style="font-weight:600;"><a href="https://www.courierguy.co.za/track/' + order.tracking_number + '" style="color:#e8875f;">' + order.tracking_number + ' (Courier Guy)</a></td></tr>'
+    ? '<tr><td style="padding:8px 0;color:#5c564e;">Tracking</td><td style="font-weight:600;"><a href="https://www.courierguy.co.za/track/' + order.tracking_number + '" style="color:#e8875f;">' + order.tracking_number + ' (Courier Guy)</a></td></tr>'
     : '';
   return sendEmail({
     to: customerEmail,
     subject: 'Your DuGuud Order Has Shipped!',
-    html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;">' +
-      '<h2 style="color:#221e1c;">On Its Way!</h2>' +
-      '<p style="font-size:14px;color:#4a423e;">Your order <strong>' + order.id + '</strong> is on its way to you.</p>' +
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
+      '<h2 style="color:#16130f;">On Its Way!</h2>' +
+      '<p style="font-size:14px;color:#5c564e;">Your order <strong>' + order.id + '</strong> is on its way to you.</p>' +
       '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Items</td><td style="font-weight:600;">' + (order.items || []).map(function(i){ return i.qty + 'x ' + i.product_name; }).join(', ') + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Shipping to</td><td style="font-weight:600;">' + order.customer_address + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Items</td><td style="font-weight:600;">' + (order.items || []).map(function(i){ return i.qty + 'x ' + i.product_name; }).join(', ') + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Shipping to</td><td style="font-weight:600;">' + order.customer_address + '</td></tr>' +
         trackingHtml +
       '</table>' +
-      '<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' +
-      '<p style="font-size:12px;color:#4a423e;">DuGuud - Last Stock, Honestly Priced</p>' +
+      '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">DuGuud - Last Stock, Honestly Priced</p>' +
     '</div>'
   });
 }
@@ -85,16 +85,16 @@ async function sendAdminNotification(order, adminEmail) {
   return sendEmail({
     to: adminEmail,
     subject: 'New Order - DuGuud #' + order.id,
-    html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;">' +
-      '<h2 style="color:#221e1c;">New Order Received!</h2>' +
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
+      '<h2 style="color:#16130f;">New Order Received!</h2>' +
       '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Order</td><td style="font-weight:600;">' + order.id + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Customer</td><td style="font-weight:600;">' + order.customer_name + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Email</td><td style="font-weight:600;">' + order.customer_email + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#4a423e;">Total</td><td style="font-weight:600;">R ' + order.total + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Order</td><td style="font-weight:600;">' + order.id + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Customer</td><td style="font-weight:600;">' + order.customer_name + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Email</td><td style="font-weight:600;">' + order.customer_email + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Total</td><td style="font-weight:600;">R ' + order.total + '</td></tr>' +
       '</table>' +
-      '<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' +
-      '<p style="font-size:12px;color:#4a423e;">Log in to the admin panel to manage this order.</p>' +
+      '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">Log in to the admin panel to manage this order.</p>' +
     '</div>'
   });
 }

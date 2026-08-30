@@ -37,19 +37,19 @@ router.post('/register', async (req, res) => {
     sendEmail({
       to: email,
       subject: 'Welcome to DuGuud, ' + name + '!',
-      html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid rgba(34,30,28,0.12);padding:40px;">' +
+      html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:3px;border:1px solid rgba(22,19,15,0.14);padding:40px;">' +
         '<div style="text-align:center;margin-bottom:24px;">' +
-          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#221e1c"/></svg>' +
-          '<h1 style="font-family:\'Space Grotesk\',sans-serif;color:#221e1c;font-size:24px;margin:12px 0 4px;">Welcome to DuGuud</h1>' +
-          '<p style="color:#4a423e;font-size:14px;margin:0;">Last stock, honestly priced.</p>' +
+          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#16130f"/></svg>' +
+          '<h1 style="font-family:\'Saira Condensed\',sans-serif;color:#16130f;font-size:24px;margin:12px 0 4px;">Welcome to DuGuud</h1>' +
+          '<p style="color:#5c564e;font-size:14px;margin:0;">Last stock, honestly priced.</p>' +
         '</div>' +
-        '<p style="color:#221e1c;font-size:15px;line-height:1.6;">Hi <strong>' + name + '</strong>,</p>' +
-        '<p style="color:#4a423e;font-size:14px;line-height:1.6;">You\'re all set! Your account has been created and you can now browse our collection of premium last-stock clothing at honest prices.</p>' +
+        '<p style="color:#16130f;font-size:15px;line-height:1.6;">Hi <strong>' + name + '</strong>,</p>' +
+        '<p style="color:#5c564e;font-size:14px;line-height:1.6;">You\'re all set! Your account has been created and you can now browse our collection of premium last-stock clothing at honest prices.</p>' +
         '<div style="text-align:center;margin:28px 0;">' +
-          '<a href="https://www.duguud.co.za/" style="display:inline-block;background:#f4a98c;color:#221e1c;padding:14px 32px;border-radius:30px;font-weight:600;font-size:14px;text-decoration:none;">Start Shopping</a>' +
+          '<a href="https://www.duguud.co.za/" style="display:inline-block;background:#f4a98c;color:#16130f;padding:14px 32px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;">Start Shopping</a>' +
         '</div>' +
-        '<p style="color:#4a423e;font-size:13px;line-height:1.6;">If you have any questions, just reply to this email — we\'re here to help.</p>' +
-        '<hr style="border:none;border-top:1px solid rgba(34,30,28,0.1);margin:24px 0;">' +
+        '<p style="color:#5c564e;font-size:13px;line-height:1.6;">If you have any questions, just reply to this email — we\'re here to help.</p>' +
+        '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:24px 0;">' +
         '<p style="color:#8a8480;font-size:12px;text-align:center;margin:0;">DuGuud — South Africa</p>' +
       '</div>'
     });
@@ -173,18 +173,18 @@ router.post('/forgot-password', (req, res) => {
     sendEmail({
       to: email,
       subject: 'Reset your DuGuud password',
-      html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid rgba(34,30,28,0.12);padding:40px;">' +
+      html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:3px;border:1px solid rgba(22,19,15,0.14);padding:40px;">' +
         '<div style="text-align:center;margin-bottom:24px;">' +
-          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#221e1c"/></svg>' +
-          '<h1 style="font-family:\'Space Grotesk\',sans-serif;color:#221e1c;font-size:24px;margin:12px 0 4px;">Reset your password</h1>' +
+          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#16130f"/></svg>' +
+          '<h1 style="font-family:\'Saira Condensed\',sans-serif;color:#16130f;font-size:24px;margin:12px 0 4px;">Reset your password</h1>' +
         '</div>' +
-        '<p style="color:#221e1c;font-size:15px;line-height:1.6;">Hi <strong>' + user.name + '</strong>,</p>' +
-        '<p style="color:#4a423e;font-size:14px;line-height:1.6;">Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>' +
+        '<p style="color:#16130f;font-size:15px;line-height:1.6;">Hi <strong>' + user.name + '</strong>,</p>' +
+        '<p style="color:#5c564e;font-size:14px;line-height:1.6;">Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>' +
         '<div style="text-align:center;margin:28px 0;">' +
-          '<a href="https://www.duguud.co.za/register.html?reset=' + token + '" style="display:inline-block;background:#f4a98c;color:#221e1c;padding:14px 32px;border-radius:30px;font-weight:600;font-size:14px;text-decoration:none;">Reset Password</a>' +
+          '<a href="https://www.duguud.co.za/register.html?reset=' + token + '" style="display:inline-block;background:#f4a98c;color:#16130f;padding:14px 32px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;">Reset Password</a>' +
         '</div>' +
-        '<p style="color:#4a423e;font-size:13px;line-height:1.6;">If you didn\'t request this, you can ignore this email.</p>' +
-        '<hr style="border:none;border-top:1px solid rgba(34,30,28,0.1);margin:24px 0;">' +
+        '<p style="color:#5c564e;font-size:13px;line-height:1.6;">If you didn\'t request this, you can ignore this email.</p>' +
+        '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:24px 0;">' +
         '<p style="color:#8a8480;font-size:12px;text-align:center;margin:0;">DuGuud — South Africa</p>' +
       '</div>'
     });

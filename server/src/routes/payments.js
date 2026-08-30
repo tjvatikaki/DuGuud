@@ -215,14 +215,14 @@ function paymentPage(success, orderId) {
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
     '<title>' + title + ' — DuGuud</title>' +
     '<style>' +
-      'body{font-family:Inter,sans-serif;background:#faf8f6;color:#221e1c;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;}' +
-      '.card{background:#fff;border:1px solid rgba(34,30,28,0.12);border-radius:20px;padding:48px;max-width:480px;text-align:center;box-shadow:0 14px 40px rgba(34,30,28,0.06);}' +
+      'body{font-family:Archivo,sans-serif;background:#f2eee6;color:#16130f;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;}' +
+      '.card{background:#fff;border:1px solid rgba(22,19,15,0.14);border-radius:3px;padding:48px;max-width:480px;text-align:center;box-shadow:0 10px 30px rgba(22,19,15,0.05);}' +
       '.icon{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;}' +
       '.icon.ok{background:#fbe4d5;color:#e8875f;}' +
       '.icon.fail{background:rgba(204,68,68,0.1);color:#c44;}' +
-      'h2{font-family:Space Grotesk,sans-serif;margin:0 0 8px;}' +
-      'p{font-size:14px;color:#4a423e;line-height:1.6;margin:0 0 24px;}' +
-      '.btn{display:inline-block;padding:12px 28px;border-radius:14px;font-weight:600;font-size:14px;text-decoration:none;background:#f4a98c;color:#221e1c;}' +
+      'h2{font-family:Saira Condensed,sans-serif;margin:0 0 8px;}' +
+      'p{font-size:14px;color:#5c564e;line-height:1.6;margin:0 0 24px;}' +
+      '.btn{display:inline-block;padding:12px 28px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;background:#f4a98c;color:#16130f;}' +
       '.btn:hover{background:#e8875f;color:#fff;}' +
     '</style></head><body>' +
     '<div class="card">' +

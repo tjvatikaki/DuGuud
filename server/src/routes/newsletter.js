@@ -26,15 +26,15 @@ router.post('/subscribe', (req, res) => {
     sendEmail({
       to: email,
       subject: 'You\'re subscribed — DuGuud Deals',
-      html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid rgba(34,30,28,0.12);padding:40px;">' +
+      html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:3px;border:1px solid rgba(22,19,15,0.14);padding:40px;">' +
         '<div style="text-align:center;margin-bottom:24px;">' +
-          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#221e1c"/></svg>' +
-          '<h1 style="font-family:\'Space Grotesk\',sans-serif;color:#221e1c;font-size:24px;margin:12px 0 4px;">You\'re in!</h1>' +
-          '<p style="color:#4a423e;font-size:14px;margin:0;">Thanks for subscribing to DuGuud deals.</p>' +
+          '<svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" transform="rotate(45,12,12)" fill="#f4a98c"/><circle cx="12" cy="12" r="4.5" fill="#16130f"/></svg>' +
+          '<h1 style="font-family:\'Saira Condensed\',sans-serif;color:#16130f;font-size:24px;margin:12px 0 4px;">You\'re in!</h1>' +
+          '<p style="color:#5c564e;font-size:14px;margin:0;">Thanks for subscribing to DuGuud deals.</p>' +
         '</div>' +
-        '<p style="color:#221e1c;font-size:15px;line-height:1.6;">You\'ll be the first to know when new stock lands, deals drop, and fresh arrivals hit the store.</p>' +
-        '<p style="color:#4a423e;font-size:14px;line-height:1.6;">No spam — just the good stuff at honest prices.</p>' +
-        '<hr style="border:none;border-top:1px solid rgba(34,30,28,0.1);margin:24px 0;">' +
+        '<p style="color:#16130f;font-size:15px;line-height:1.6;">You\'ll be the first to know when new stock lands, deals drop, and fresh arrivals hit the store.</p>' +
+        '<p style="color:#5c564e;font-size:14px;line-height:1.6;">No spam — just the good stuff at honest prices.</p>' +
+        '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:24px 0;">' +
         '<p style="color:#8a8480;font-size:12px;text-align:center;margin:0;">DuGuud — Last Stock, Honestly Priced</p>' +
       '</div>'
     });

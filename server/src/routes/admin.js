@@ -23,6 +23,7 @@ router.get('/products', authenticate, requireAdmin, (req, res) => {
         id: row.id, name: row.name, cat: row.cat, icon: row.icon,
         tag: row.tag, subtag: row.subtag,
         price: row.price, cost: row.cost || 0, stock: row.stock,
+        hidden: row.hidden || 0,
         sizes: sizeList, sizeStock,
         images: images.map(i => i.url),
         desc: row.desc || ''
@@ -78,7 +79,7 @@ router.get('/test-email', authenticate, requireAdmin, (req, res) => {
   sendEmail({
     to,
     subject: 'DuGuud — Test email from your store',
-    html: '<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;"><h2 style="color:#221e1c;">✅ Email working!</h2><p style="font-size:14px;color:#4a423e;">This is a test email from your DuGuud store at <strong>' + process.env.SMTP_HOST + '</strong>.</p><hr style="border:none;border-top:1px solid #eee;margin:20px 0;"><p style="font-size:12px;color:#4a423e;">You\'ll now receive order notifications and can send shipping updates to customers.</p></div>'
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;"><h2 style="color:#16130f;">Email working!</h2><p style="font-size:14px;color:#5c564e;">This is a test email from your DuGuud store at <strong>' + process.env.SMTP_HOST + '</strong>.</p><hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;"><p style="font-size:12px;color:#5c564e;">You\'ll now receive order notifications and can send shipping updates to customers.</p></div>'
   }).then(sent => {
     res.json({ success: sent, message: sent ? 'Test email sent successfully' : 'Email failed — check SMTP settings' });
   });

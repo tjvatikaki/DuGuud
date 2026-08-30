@@ -108,6 +108,13 @@ async function updateProduct(id, productData) {
   });
 }
 
+async function setProductHidden(id, hidden) {
+  return apiFetch('/api/products/' + encodeURIComponent(id) + '/hidden', {
+    method: 'PUT',
+    body: JSON.stringify({ hidden })
+  });
+}
+
 async function deleteProduct(id) {
   return apiFetch('/api/products/' + encodeURIComponent(id), {
     method: 'DELETE'
@@ -173,6 +180,27 @@ async function sendContactMessage({ name, email, message }) {
     method: 'POST',
     body: JSON.stringify({ name, email, message })
   });
+}
+
+// Admin: contact-message inbox
+async function getMessages() {
+  const data = await apiFetch('/api/contact/messages');
+  return data.messages || [];
+}
+
+async function markMessageRead(id) {
+  return apiFetch('/api/contact/messages/' + encodeURIComponent(id) + '/read', { method: 'PUT' });
+}
+
+async function replyToMessage(id, reply) {
+  return apiFetch('/api/contact/messages/' + encodeURIComponent(id) + '/reply', {
+    method: 'PUT',
+    body: JSON.stringify({ reply })
+  });
+}
+
+async function deleteMessage(id) {
+  return apiFetch('/api/contact/messages/' + encodeURIComponent(id), { method: 'DELETE' });
 }
 
 // ─── Image Upload ───

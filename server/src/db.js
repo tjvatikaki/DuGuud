@@ -56,8 +56,20 @@ function initSchema() {
     // column already exists — ignore
   }
 
+  // Migration: add hidden column (if not already present)
+  try {
+    db.run("ALTER TABLE products ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0");
+  } catch(e) {
+    // column already exists — ignore
+  }
+
   db.run("CREATE TABLE IF NOT EXISTS newsletter_subscribers (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, subscribed_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS contact_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now')))");
+
+  // Migration: add read/reply/replied_at columns to contact_messages (if not already present)
+  try { db.run("ALTER TABLE contact_messages ADD COLUMN read INTEGER NOT NULL DEFAULT 0"); } catch(e) {}
+  try { db.run("ALTER TABLE contact_messages ADD COLUMN reply TEXT DEFAULT ''"); } catch(e) {}
+  try { db.run("ALTER TABLE contact_messages ADD COLUMN replied_at TEXT DEFAULT ''"); } catch(e) {}
 }
 
 // ─── Query helpers ───
