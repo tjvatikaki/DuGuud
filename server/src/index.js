@@ -3,6 +3,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
 const { getDb, dbGet, dbAll, dbRun, dbBatch } = require('./db');
 const authRoutes = require('./routes/auth');
@@ -90,10 +91,18 @@ app.use('/api/stats', statsRoutes); // mounts /api/stats
 app.use('/api/newsletter', newsletterRoutes); // mounts /api/newsletter/subscribe
 app.use('/api/contact', contactRoutes); // mounts /api/contact
 
-// Image upload route (admin only)
+// ─── Image upload (admin only) ───
+// Uploaded photos are written to server/data/uploads/ — the same gitignored,
+// deploy-durable directory that holds the SQLite DB — so they survive Render
+// redeploys (runtime files in git-tracked folders like images/ get cleaned on
+// every deploy). They're served back to the browser at /uploads/<file>.
 const multer = require('multer');
+const UPLOAD_DIR = path.join(__dirname, '..', 'data', 'uploads'); // server/data/uploads
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '..', '..', 'images'),
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    cb(null, UPLOAD_DIR);
+  },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
     cb(null, Date.now() + '-' + Math.random().toString(36).slice(2, 6) + ext);
@@ -112,9 +121,12 @@ app.post('/api/upload', authenticate, requireAdmin, upload.array('images', 20), 
   if (!req.files || !req.files.length) {
     return res.status(400).json({ error: 'No files uploaded' });
   }
-  const urls = req.files.map(f => 'images/' + f.filename);
+  const urls = req.files.map(f => 'uploads/' + f.filename);
   res.json({ files: urls });
 });
+
+// Serve uploaded images back at /uploads/<file>
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 // POST /api/fetch-images — download images from external URLs to the server (admin only)
 const https = require('https');
@@ -127,7 +139,8 @@ app.post('/api/fetch-images', authenticate, requireAdmin, async (req, res) => {
     }
 
     const results = [];
-    const destDir = path.join(__dirname, '..', '..', 'images');
+    const destDir = UPLOAD_DIR;
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
     for (const url of urls.slice(0, 10)) { // max 10 images per request
       try {
@@ -159,8 +172,8 @@ app.post('/api/fetch-images', authenticate, requireAdmin, async (req, res) => {
           }).on('error', reject);
         });
 
-        require('fs').writeFileSync(dest, imgData);
-        results.push({ url, file: 'images/' + filename, ok: true });
+        fs.writeFileSync(dest, imgData);
+        results.push({ url, file: 'uploads/' + filename, ok: true });
       } catch (e) {
         results.push({ url, error: e.message, ok: false });
       }
