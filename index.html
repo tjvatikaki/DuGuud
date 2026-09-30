@@ -5,18 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DuGuud — Last Stock, Honestly Priced</title>
 <meta name="description" content="DuGuud sells the last remaining stock of premium clothing, sneakers, and accessories at honest prices. South Africa's best deals on sold-out brands.">
+<link rel="canonical" href="https://www.duguud.co.za/">
 <meta property="og:title" content="DuGuud — Last Stock, Honestly Priced">
 <meta property="og:description" content="Last remaining stock of premium clothing, sneakers, and accessories at honest prices. South Africa.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="DuGuud">
-<meta property="og:url" content="https://duguud.co.za/">
+<!-- www, not the bare domain: duguud.co.za has no DNS record and doesn't resolve -->
+<meta property="og:url" content="https://www.duguud.co.za/">
+<meta property="og:locale" content="en_ZA">
+<meta property="og:image" content="https://www.duguud.co.za/images/logo.png">
+<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="1024">
+<meta property="og:image:alt" content="DuGuud — last stock, honestly priced">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DuGuud — Last Stock, Honestly Priced">
+<meta name="twitter:description" content="Last remaining stock of premium clothing, sneakers, and accessories at honest prices. South Africa.">
+<meta name="twitter:image" content="https://www.duguud.co.za/images/logo.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "DuGuud",
   "description": "Last stock, honestly priced — premium clothing and accessories in South Africa.",
-  "url": "https://duguud.co.za/"
+  "url": "https://www.duguud.co.za/",
+  "logo": "https://www.duguud.co.za/images/logo.png",
+  "email": "admin@duguud.co.za",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Bloemfontein",
+    "addressRegion": "Free State",
+    "addressCountry": "ZA"
+  }
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -406,6 +425,16 @@
     .section-label{font-size:17px;}
   }
 
+  /* Checkout is where mobile traffic is lost: at 360px the 30px modal padding
+     plus the two-column form rows squeezed Email|Phone into ~124px each. */
+  @media (max-width:560px){
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal{padding:22px 16px 28px;max-height:94vh;border-radius:3px 3px 0 0;}
+    .modal h3{font-size:21px;}
+    .form-row{grid-template-columns:1fr;gap:0;}
+    .modal input,.modal select,.modal textarea{font-size:16px;} /* 16px stops iOS zooming on focus */
+  }
+
   @media (max-width:450px){
     .logo-mark{height:40px;}
     .grid{gap:6px;}
@@ -604,6 +633,11 @@
       <div class="subtotal-row" style="font-size:13px;"><span>Shipping</span><span id="modalShipping">R 0.00</span></div>
       <div class="subtotal-row" style="font-weight:700;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-size:15px;"><span>Total due</span><span id="modalTotal">R 0.00</span></div>
     </div>
+    <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:0 0 10px;">
+      No account needed — just place your order.
+      <a href="register.html" style="color:var(--peach-dark);font-weight:600;">Have an account? Sign in</a>
+      (your basket is saved either way).
+    </p>
     <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
     <p class="modal-note" style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Secured by PayFast — your card details go directly to PayFast, never through DuGuud's servers. We accept credit cards, instant EFT, and mobile money.</p>
   </div>

@@ -16,6 +16,8 @@ const statsRoutes = require('./routes/stats');
 const newsletterRoutes = require('./routes/newsletter');
 const contactRoutes = require('./routes/contact');
 const { authenticate, requireAdmin } = require('./middleware/auth');
+const { getVisibleProduct } = require('./product-model');
+const { renderProductPage } = require('./render');
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@duguud.co.za';
@@ -92,6 +94,29 @@ app.use((req, res, next) => {
     return res.status(404).type('text/plain').send('Not found');
   }
   next();
+});
+
+// Product pages get their SEO tags injected server-side. This MUST stay above the
+// static mount below — express matches in order, so once static claims
+// /product.html this never runs and shared links go back to previewing as a bare
+// "DuGuud — Product".
+// Every failure path calls next(), which serves the normal shell: worst case the
+// page loses its rich preview, it never breaks.
+app.get(['/product.html', '/product'], (req, res, next) => {
+  const id = req.query.id;
+  if (!id) return next(); // no id — the shell handles it and shows "No product selected"
+  try {
+    const product = getVisibleProduct(String(id));
+    if (!product) return next(); // unknown or hidden — shell shows "Product not found"
+    const html = renderProductPage(product);
+    if (!html) return next();
+    // Short TTL: Cloudflare sits in front, and a long one would serve stale prices.
+    res.set('Cache-Control', 'public, max-age=60');
+    res.type('html').send(html);
+  } catch (err) {
+    console.error('Product SEO render failed:', err);
+    next();
+  }
 });
 
 app.use(express.static(STATIC_ROOT, { dotfiles: 'ignore', index: 'index.html' }));

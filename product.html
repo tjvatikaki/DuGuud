@@ -127,6 +127,13 @@
   }
   .detail-price{margin-bottom:20px;}
   .detail-desc{font-size:15px;line-height:1.7;color:var(--ink-soft);margin-bottom:24px;}
+  /* Delivery + returns, surfaced on the page where the buying decision happens
+     instead of only on the footer policy pages. */
+  .detail-trust{list-style:none;margin:14px 0 0;padding:16px 0 0;border-top:1px solid var(--line);}
+  .detail-trust li{position:relative;padding-left:20px;font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin-bottom:9px;}
+  .detail-trust li:last-child{margin-bottom:0;}
+  .detail-trust li::before{content:"";position:absolute;left:0;top:5px;width:7px;height:7px;background:var(--peach);}
+  .detail-trust li strong{color:var(--ink);font-weight:600;}
   .stock-flag{
     font-family:var(--font-tag);font-size:10px;
     background:var(--ink);color:var(--peach-pale);padding:3px 9px;border-radius:2px;
@@ -303,6 +310,16 @@
     .mobile-toggle{display:block;}
   }
 
+  /* Checkout is where mobile traffic is lost: at 360px the 30px modal padding
+     plus the two-column form rows squeezed Email|Phone into ~124px each. */
+  @media (max-width:560px){
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal{padding:22px 16px 28px;max-height:94vh;border-radius:3px 3px 0 0;}
+    .modal h3{font-size:21px;}
+    .form-row{grid-template-columns:1fr;gap:0;}
+    .modal input,.modal select,.modal textarea{font-size:16px;} /* 16px stops iOS zooming on focus */
+  }
+
   @media (max-width:450px){
     .logo-mark{height:40px;}
     .nav-wrap{padding:8px 10px;gap:12px;}
@@ -420,6 +437,11 @@
       <div class="subtotal-row" style="font-size:13px;"><span>Shipping</span><span id="modalShipping">R 0.00</span></div>
       <div class="subtotal-row" style="font-weight:700;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-size:15px;"><span>Total due</span><span id="modalTotal">R 0.00</span></div>
     </div>
+    <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:0 0 10px;">
+      No account needed — just place your order.
+      <a href="register.html" style="color:var(--peach-dark);font-weight:600;">Have an account? Sign in</a>
+      (your basket is saved either way).
+    </p>
     <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
     <p class="modal-note" style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Secured by PayFast — your card details go directly to PayFast, never through DuGuud's servers. We accept credit cards, instant EFT, and mobile money.</p>
   </div>
@@ -488,10 +510,15 @@ function injectProductSEO(p){
     if(!el){ el = document.createElement('meta'); el.setAttribute('property', prop); head.appendChild(el); }
     el.setAttribute('content', content);
   }
+  // Prefer the canonical URL the server injected, so tracking params in the
+  // address bar don't end up baked into a shared link.
+  var canonEl = document.querySelector('link[rel="canonical"]');
+  var canonical = (canonEl && canonEl.href) || window.location.href;
+
   setMeta('og:title', p.name);
   setMeta('og:description', (p.desc || p.name + ' at DuGuud').substring(0, 200));
   setMeta('og:type', 'product');
-  setMeta('og:url', window.location.href);
+  setMeta('og:url', canonical);
   setMeta('og:site_name', 'DuGuud');
   if(p.images && p.images[0]) setMeta('og:image', window.location.origin + '/' + p.images[0]);
   if(p.price) setMeta('product:price:amount', p.price);
@@ -517,7 +544,7 @@ function injectProductSEO(p){
       price: p.price,
       priceCurrency: 'ZAR',
       availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: window.location.href
+      url: canonical
     }
   });
   head.appendChild(ld);
@@ -596,7 +623,13 @@ async function loadAndRenderProduct(){
         '<button class="detail-add-btn" id="detailAddBtn" ' + (p.stock===0?'disabled':'') + ' onclick="addFromDetail()">' +
           (p.stock === 0 ? 'Sold Out' : 'Add to Basket') +
         '</button>' +
-        '<p class="detail-stock-note">Free delivery on orders over R 1 000</p>' +
+        '<ul class="detail-trust">' +
+          '<li><strong>Free delivery over R 1 000</strong> — otherwise R85 flat, anywhere in SA.</li>' +
+          '<li>Posted from Bloemfontein within <strong>48 working hours</strong>.</li>' +
+          '<li>The Courier Guy, <strong>2–5 working days</strong>, tracked and insured.</li>' +
+          '<li>Tracking number emailed the moment it ships.</li>' +
+          '<li>Wrong or damaged item? Tell us within 48 hours and we\'ll make it right.</li>' +
+        '</ul>' +
       '</div>' +
     '</div>';
 }

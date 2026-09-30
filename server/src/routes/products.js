@@ -1,39 +1,12 @@
 const { Router } = require('express');
 const { dbAll, dbGet, dbRun } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const { assembleProduct } = require('../product-model');
 
 const router = Router();
 
 // ─── Helpers: assemble / disassemble product JSON ───
-
-function assembleProduct(row) {
-  if (!row) return null;
-  const sizes = dbAll('SELECT size, stock FROM product_sizes WHERE product_id = ? ORDER BY id', [row.id]);
-  const images = dbAll('SELECT url FROM product_images WHERE product_id = ? ORDER BY sort_order', [row.id]);
-
-  const sizeStock = {};
-  const sizeList = [];
-  for (const s of sizes) {
-    sizeList.push(s.size);
-    sizeStock[s.size] = s.stock;
-  }
-
-  return {
-    id: row.id,
-    name: row.name,
-    cat: row.cat,
-    icon: row.icon,
-    tag: row.tag,
-    subtag: row.subtag,
-    price: row.price,
-    stock: row.stock,
-    sizes: sizeList,
-    sizeStock,
-    images: images.map(i => i.url),
-    desc: row.desc || '',
-    hidden: row.hidden || 0
-  };
-}
+// assembleProduct lives in product-model.js so the SEO renderer shares it.
 
 // Admin-only version that includes cost (never exposed via public endpoints)
 function assembleAdminProduct(row) {

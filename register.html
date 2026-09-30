@@ -41,6 +41,14 @@
   .logo-mark{flex-shrink:0;display:block;height:60px;width:auto;}
   @media (max-width:820px){.logo-mark{height:48px;}}
   @media (max-width:450px){.logo-mark{height:40px;}}
+  /* No layout breakpoint existed here at all — the 40px/36px card padding left
+     roughly 200px of usable width for inputs on a small phone. */
+  @media (max-width:560px){
+    .register-wrap{padding:20px 14px;}
+    .register-card{padding:28px 20px;}
+    .register-card h2{font-size:21px;}
+    .field input{font-size:16px;} /* 16px stops iOS zooming on focus */
+  }
 
   .register-wrap{
     flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;
