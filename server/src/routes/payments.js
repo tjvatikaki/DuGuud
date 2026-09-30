@@ -3,10 +3,14 @@ const crypto = require('crypto');
 const https = require('https');
 const querystring = require('querystring');
 const { dbGet, dbAll, dbRun, dbBatch } = require('../db');
-const { authenticate } = require('../middleware/auth');
-const { sendOrderConfirmation, sendAdminNotification } = require('../email');
+const { optionalAuth } = require('../middleware/auth');
+const { rateLimit } = require('../middleware/rate-limit');
+const { sendOrderConfirmation, sendOrderPaidReceipt, sendAdminNotification } = require('../email');
 
 const router = Router();
+
+// Guests can check out, so cap how many orders one IP can start.
+const checkoutLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 8 });
 
 // PayFast config from .env
 const PF_MERCHANT_ID   = process.env.PAYFAST_MERCHANT_ID   || '10000100';
@@ -30,7 +34,9 @@ function pfSignature(data) {
 }
 
 // ─── POST /api/checkout — create order + return PayFast redirect data ───
-router.post('/api/checkout', authenticate, (req, res) => {
+// Guest checkout: optionalAuth, so an anonymous shopper can buy. Rate-limited
+// because this creates an order and deducts stock without requiring a login.
+router.post('/api/checkout', checkoutLimiter, optionalAuth, (req, res) => {
   try {
     const { items, customer, shipping, notes } = req.body;
 
@@ -53,7 +59,7 @@ router.post('/api/checkout', authenticate, (req, res) => {
     dbBatch(() => {
       dbRun(
         'INSERT INTO orders (id, user_id, customer_name, customer_email, customer_phone, customer_address, customer_city, customer_postal, notes, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [orderId, req.user.userId, customer.name, customer.email,
+        [orderId, req.user ? req.user.userId : null, customer.name, customer.email,
          customer.phone || '', customer.address || '', customer.city || '',
          customer.postal || '', notes || '', total, 'pending']
       );
@@ -169,7 +175,7 @@ router.post('/api/payments/itn', (req, res) => {
       }
 
       // Verify amount matches
-      const order = dbGet('SELECT total FROM orders WHERE id = ?', [orderId]);
+      const order = dbGet('SELECT * FROM orders WHERE id = ?', [orderId]);
       if (!order) {
         console.warn('ITN: order not found ' + orderId);
         return;
@@ -181,9 +187,22 @@ router.post('/api/payments/itn', (req, res) => {
         return;
       }
 
+      // PayFast retries ITNs, so only act on the first one that flips the order.
+      // Guarding on the previous status avoids sending the receipt more than once.
+      if (order.status === 'paid') {
+        console.log('ITN: order ' + orderId + ' already marked paid — ignoring duplicate');
+        return;
+      }
+
       // All checks passed — mark order as paid
       dbRun("UPDATE orders SET status = 'paid' WHERE id = ?", [orderId]);
       console.log('✓ PayFast payment confirmed for order ' + orderId);
+
+      // Receipt — this is the guest's only proof of purchase, so it matters that
+      // it only goes out once payment has actually cleared.
+      const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+      sendOrderPaidReceipt({ ...order, status: 'paid', items }, order.customer_email)
+        .catch((e) => console.error('Paid receipt failed for ' + orderId + ':', e.message));
     } catch (err) {
       console.error('PayFast ITN error:', err);
     }
@@ -202,14 +221,31 @@ router.get('/payment/cancel', (req, res) => {
   res.send(paymentPage(false, orderId));
 });
 
+// orderId arrives from the query string, so it must be escaped before it goes
+// into HTML.
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function paymentPage(success, orderId) {
+  const safeId = esc(orderId);
   const title = success ? 'Payment Successful' : 'Payment Cancelled';
   const icon = success ? '✓' : '✕';
   const heading = success ? 'Payment received!' : 'Payment cancelled';
   const message = success
-    ? 'Your order <strong>' + orderId + '</strong> is being processed. You\'ll receive a confirmation email shortly.'
+    ? 'Your order <strong>' + safeId + '</strong> is being processed.'
     : 'You cancelled the payment. Your order is still pending — you can try again or contact us.';
-  const btnClass = success ? '' : 'style="background:var(--ink);color:var(--peach-pale);"';
+
+  // Guests have no account to find the order in later, so give them the tracking
+  // link up front and tell them to keep the reference.
+  const trackBtn = orderId
+    ? '<a href="/track?order=' + encodeURIComponent(orderId) + '" class="btn">Track my order</a>'
+    : '';
+  const keepNote = (success && orderId)
+    ? '<p class="note">Keep your order reference <strong>' + safeId + '</strong> — you can track it any ' +
+      'time with this number and your email address.</p>'
+    : '';
 
   return '<!DOCTYPE html><html lang="en"><head>' +
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
@@ -224,12 +260,15 @@ function paymentPage(success, orderId) {
       'p{font-size:14px;color:#5c564e;line-height:1.6;margin:0 0 24px;}' +
       '.btn{display:inline-block;padding:12px 28px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;background:#f4a98c;color:#16130f;}' +
       '.btn:hover{background:#e8875f;color:#fff;}' +
+      '.btn+.btn{margin-left:10px;}' +
+      '.note{font-size:12px;color:#5c564e;margin:20px 0 0;padding-top:16px;border-top:1px solid rgba(22,19,15,0.14);}' +
     '</style></head><body>' +
     '<div class="card">' +
       '<div class="icon ' + (success ? 'ok' : 'fail') + '">' + icon + '</div>' +
       '<h2>' + heading + '</h2>' +
       '<p>' + message + '</p>' +
-      '<a href="/" class="btn">Back to store</a>' +
+      '<a href="/" class="btn">Back to store</a>' + trackBtn +
+      keepNote +
     '</div></body></html>';
 }
 

@@ -1,5 +1,9 @@
 const nodemailer = require('nodemailer');
 
+// Single source of truth for links in emails. Guests have no account to browse
+// back through, so every order email needs a working absolute URL.
+const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://www.duguud.co.za';
+
 let transporter = null;
 
 function getTransporter() {
@@ -39,20 +43,55 @@ async function sendEmail({ to, subject, html }) {
   }
 }
 
-// Order confirmation for customer
+// Sent at order creation, BEFORE PayFast confirms payment — so it must not claim
+// the order is paid. The receipt below is the one that confirms money arrived.
 async function sendOrderConfirmation(order, customerEmail) {
   return sendEmail({
     to: customerEmail,
-    subject: 'Order Confirmed - DuGuud #' + order.id,
+    subject: 'Order received - DuGuud #' + order.id,
     html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
-      '<h2 style="color:#16130f;">Order Confirmed</h2>' +
-      '<p style="font-size:14px;color:#5c564e;">Thanks for your order! We\'ll notify you when it ships.</p>' +
+      '<h2 style="color:#16130f;">Order received</h2>' +
+      '<p style="font-size:14px;color:#5c564e;">Thanks! We\'re waiting for PayFast to confirm your payment — ' +
+        'you\'ll get a receipt as soon as it clears. If you didn\'t complete the payment, this order will expire ' +
+        'and no stock will be held.</p>' +
       '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
         '<tr><td style="padding:8px 0;color:#5c564e;">Order</td><td style="font-weight:600;">' + order.id + '</td></tr>' +
         '<tr><td style="padding:8px 0;color:#5c564e;">Total</td><td style="font-weight:600;">R ' + order.total + '</td></tr>' +
-        '<tr><td style="padding:8px 0;color:#5c564e;">Status</td><td style="font-weight:600;">' + order.status + '</td></tr>' +
+        '<tr><td style="padding:8px 0;color:#5c564e;">Status</td><td style="font-weight:600;">Awaiting payment</td></tr>' +
       '</table>' +
       '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">Keep this reference — you can track your order any time at ' +
+        '<a href="' + BASE_URL + '/track?order=' + encodeURIComponent(order.id) + '" style="color:#e8875f;">' +
+        BASE_URL.replace(/^https?:\/\//, '') + '/track</a> using this order number and your email address.</p>' +
+      '<p style="font-size:12px;color:#5c564e;">DuGuud - Last Stock, Honestly Priced</p>' +
+    '</div>'
+  });
+}
+
+// Receipt sent from the PayFast ITN once payment actually clears.
+async function sendOrderPaidReceipt(order, customerEmail) {
+  const items = order.items || [];
+  const rows = items.map(function(i){
+    return '<tr><td style="padding:6px 0;">' + i.qty + '&times; ' + i.product_name +
+           (i.size ? ' <span style="color:#5c564e;">(' + i.size + ')</span>' : '') + '</td>' +
+           '<td style="padding:6px 0;text-align:right;">R ' + (i.price * i.qty) + '</td></tr>';
+  }).join('');
+
+  return sendEmail({
+    to: customerEmail,
+    subject: 'Payment received - DuGuud #' + order.id,
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
+      '<h2 style="color:#16130f;">Payment received</h2>' +
+      '<p style="font-size:14px;color:#5c564e;">We\'ve got your payment for order <strong>' + order.id +
+        '</strong>. We dispatch within 48 working hours and you\'ll get a tracking number by email as soon as it ships.</p>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:13px;">' + rows +
+        '<tr><td style="padding:10px 0;border-top:1px solid rgba(22,19,15,0.14);font-weight:700;">Total paid</td>' +
+        '<td style="padding:10px 0;border-top:1px solid rgba(22,19,15,0.14);font-weight:700;text-align:right;">R ' + order.total + '</td></tr>' +
+      '</table>' +
+      '<p style="font-size:13px;margin-top:20px;"><a href="' + BASE_URL + '/track?order=' + encodeURIComponent(order.id) +
+        '" style="color:#e8875f;font-weight:600;">Track your order &rarr;</a></p>' +
+      '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">Questions? Just reply to this email.</p>' +
       '<p style="font-size:12px;color:#5c564e;">DuGuud - Last Stock, Honestly Priced</p>' +
     '</div>'
   });
@@ -99,4 +138,4 @@ async function sendAdminNotification(order, adminEmail) {
   });
 }
 
-module.exports = { sendEmail, sendOrderConfirmation, sendShippingNotification, sendAdminNotification };
+module.exports = { sendEmail, sendOrderConfirmation, sendOrderPaidReceipt, sendShippingNotification, sendAdminNotification };

@@ -25,6 +25,21 @@ function authenticate(req, res, next) {
   }
 }
 
+// Like authenticate, but a missing or expired token is not an error — req.user is
+// simply left unset. Used by guest checkout: a stale token should degrade to a
+// guest order rather than cost us the sale.
+function optionalAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      req.user = jwt.verify(header.split(' ')[1], JWT_SECRET);
+    } catch (err) {
+      req.user = null;
+    }
+  }
+  next();
+}
+
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Admin access required' });
@@ -32,4 +47,4 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { signToken, authenticate, requireAdmin };
+module.exports = { signToken, authenticate, optionalAuth, requireAdmin };

@@ -43,6 +43,11 @@ router.post('/lookup', (req, res) => {
 
 // GET /track — serve tracking page
 router.get('/track', (req, res) => {
+  // The payment-success page links here with ?order=<id> so guests land on a
+  // pre-filled form. Escaped for a JS string context: JSON.stringify handles
+  // quotes, and "<" is escaped so the id can't close the <script> tag.
+  const prefillId = JSON.stringify(String(req.query.order || '')).replace(/</g, '\\u003c');
+
   res.send('<!DOCTYPE html><html lang="en"><head>' +
     '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
     '<title>Track Your Order — DuGuud</title>' +
@@ -100,6 +105,7 @@ router.get('/track', (req, res) => {
           '<p style=\'font-size:12px;color:var(--ink-soft);margin-top:12px;\'>Shipping to: "+o.customer_address+"</p></div>";' +
         'rs.classList.remove("hidden");' +
       '}catch(e){er.textContent="Lookup failed. Please try again.";er.style.display="block";}}' +
+      '(function(){var pre=' + prefillId + ';if(pre){document.getElementById("trackId").value=pre;document.getElementById("trackEmail").focus();}})();' +
     '</script></body></html>');
 });
 

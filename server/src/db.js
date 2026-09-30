@@ -38,6 +38,17 @@ function persist() {
   fs.writeFileSync(DB_PATH, Buffer.from(data));
 }
 
+// Adds a column only if it's actually absent. CREATE TABLE IF NOT EXISTS never
+// adds a column to a table that already exists, and on Render the database file
+// is deploy-durable — so any column added to the CREATE statements below also
+// needs an entry in the migrations or existing installs silently lack it.
+function ensureColumn(table, column, definition) {
+  const cols = dbAll('PRAGMA table_info(' + table + ')').map((r) => r.name);
+  if (cols.includes(column)) return;
+  db.run('ALTER TABLE ' + table + ' ADD COLUMN ' + column + ' ' + definition);
+  console.log('✓ Migration: added ' + table + '.' + column);
+}
+
 // ─── Schema ───
 function initSchema() {
   db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL, phone TEXT DEFAULT '', password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'customer', reset_token TEXT DEFAULT '', reset_token_expires TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))");
@@ -49,36 +60,24 @@ function initSchema() {
   db.run("CREATE TABLE IF NOT EXISTS stats (key TEXT PRIMARY KEY, value INTEGER NOT NULL DEFAULT 0)");
   dbRun("INSERT OR IGNORE INTO stats (key, value) VALUES ('page_views', 0)");
 
-  // Migration: add cost column (if not already present)
-  try {
-    db.run("ALTER TABLE products ADD COLUMN cost INTEGER NOT NULL DEFAULT 0");
-  } catch(e) {
-    // column already exists — ignore
-  }
-
-  // Migration: add hidden column (if not already present)
-  try {
-    db.run("ALTER TABLE products ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0");
-  } catch(e) {
-    // column already exists — ignore
-  }
-
-  // Migration: add tracking_number to orders (if not already present).
-  // Databases created before this column existed never get it from
-  // CREATE TABLE IF NOT EXISTS above, which broke admin order updates.
-  try {
-    db.run("ALTER TABLE orders ADD COLUMN tracking_number TEXT DEFAULT ''");
-  } catch(e) {
-    // column already exists — ignore
-  }
+  // ─── Column migrations ───
+  // Each of these was added to the CREATE statements above after the table had
+  // already shipped, so older databases are missing them. Two of these caused
+  // real outages before they were listed here: orders.tracking_number broke
+  // admin order updates, and orders.notes broke checkout entirely.
+  ensureColumn('products', 'cost', "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn('products', 'hidden', "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn('orders', 'tracking_number', "TEXT DEFAULT ''");
+  ensureColumn('orders', 'notes', "TEXT DEFAULT ''");
+  ensureColumn('users', 'reset_token', "TEXT DEFAULT ''");
+  ensureColumn('users', 'reset_token_expires', "TEXT DEFAULT ''");
 
   db.run("CREATE TABLE IF NOT EXISTS newsletter_subscribers (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, subscribed_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS contact_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now')))");
 
-  // Migration: add read/reply/replied_at columns to contact_messages (if not already present)
-  try { db.run("ALTER TABLE contact_messages ADD COLUMN read INTEGER NOT NULL DEFAULT 0"); } catch(e) {}
-  try { db.run("ALTER TABLE contact_messages ADD COLUMN reply TEXT DEFAULT ''"); } catch(e) {}
-  try { db.run("ALTER TABLE contact_messages ADD COLUMN replied_at TEXT DEFAULT ''"); } catch(e) {}
+  ensureColumn('contact_messages', 'read', "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn('contact_messages', 'reply', "TEXT DEFAULT ''");
+  ensureColumn('contact_messages', 'replied_at', "TEXT DEFAULT ''");
 }
 
 // ─── Query helpers ───

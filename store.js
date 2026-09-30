@@ -218,8 +218,24 @@ function closeAll(){ closeCart(); closeMobileNav(); }
 
 function openCheckout(){
   if(cart.length === 0) return;
+  prefillCheckout();
   const m = document.getElementById('checkoutModal');
   if(m) m.classList.add('show');
+}
+
+// Returning customers shouldn't retype what we already know. Only fills blanks,
+// so anything already typed is left alone.
+function prefillCheckout(){
+  if(!currentUser) return;
+  var known = {
+    deliveryName: currentUser.name,
+    deliveryEmail: currentUser.email,
+    deliveryPhone: currentUser.phone
+  };
+  Object.keys(known).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && !el.value.trim() && known[id]) el.value = known[id];
+  });
 }
 function closeCheckout(){
   const m = document.getElementById('checkoutModal');
@@ -227,11 +243,6 @@ function closeCheckout(){
 }
 
 async function placeOrder(){
-  if(!isLoggedIn()){
-    showToast('Please register or log in to place an order');
-    return;
-  }
-
   var nameEl = document.getElementById('deliveryName');
   var emailEl = document.getElementById('deliveryEmail');
   var phoneEl = document.getElementById('deliveryPhone');
@@ -249,12 +260,42 @@ async function placeOrder(){
   }
   if (emailEl) emailEl.style.borderColor = '';
 
+  // The server only requires name + email, so without these a blank address would
+  // sail through as an order we can't actually deliver. Guests have no account to
+  // fall back on, so phone matters too.
+  var name = nameEl ? nameEl.value.trim() : '';
+  if (!name) {
+    showToast('Please enter your full name');
+    if (nameEl) { nameEl.style.borderColor = 'var(--bad)'; nameEl.focus(); }
+    return;
+  }
+  if (nameEl) nameEl.style.borderColor = '';
+
+  var phone = phoneEl ? phoneEl.value.trim() : '';
+  if (!phone) {
+    showToast('Please add a contact number — it’s how we reach you about delivery');
+    if (phoneEl) { phoneEl.style.borderColor = 'var(--bad)'; phoneEl.focus(); }
+    return;
+  }
+  if (phoneEl) phoneEl.style.borderColor = '';
+
+  if (selectedShipping !== 'pickup') {
+    var missing = [];
+    if (!addrEl || !addrEl.value.trim()) missing.push('street address');
+    if (!cityEl || !cityEl.value.trim()) missing.push('city');
+    if (!postalEl || !postalEl.value.trim()) missing.push('postal code');
+    if (missing.length) {
+      showToast('Please complete your delivery details: ' + missing.join(', '));
+      return;
+    }
+  }
+
   var deliveryNote = selectedShipping === 'pickup' ? 'LOCAL PICKUP — ' + PICKUP_LOCATION + ' (free shipping)' : '';
 
   var customer = {
-    name: nameEl ? nameEl.value : '',
-    email: emailEl ? emailEl.value : '',
-    phone: phoneEl ? phoneEl.value : '',
+    name: name,
+    email: email,
+    phone: phone,
     address: selectedShipping === 'pickup' ? ('Local pickup: ' + PICKUP_LOCATION) : (addrEl ? addrEl.value : ''),
     city: selectedShipping === 'pickup' ? 'Bloemfontein' : (cityEl ? cityEl.value : ''),
     postal: selectedShipping === 'pickup' ? '9301' : (postalEl ? postalEl.value : '')
@@ -316,6 +357,7 @@ function showToast(msg, icon){
 }
 
 async function initStore(){
+  await checkAuth(); // populates currentUser — needed by updateNavAuth() and checkout prefill
   renderCart();
 
   const payOpts = document.getElementById('payOptions');
