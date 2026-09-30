@@ -101,6 +101,11 @@ router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
       return res.status(400).json({ error: 'Invalid status. Valid: ' + validStatuses.join(', ') });
     }
 
+    const existing = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!existing) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
     // Require tracking number when marking as shipped
     if (status === 'shipped' && !tracking_number) {
       return res.status(400).json({ error: 'Courier Guy tracking number is required when shipping an order' });

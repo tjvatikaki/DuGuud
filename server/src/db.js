@@ -63,6 +63,15 @@ function initSchema() {
     // column already exists — ignore
   }
 
+  // Migration: add tracking_number to orders (if not already present).
+  // Databases created before this column existed never get it from
+  // CREATE TABLE IF NOT EXISTS above, which broke admin order updates.
+  try {
+    db.run("ALTER TABLE orders ADD COLUMN tracking_number TEXT DEFAULT ''");
+  } catch(e) {
+    // column already exists — ignore
+  }
+
   db.run("CREATE TABLE IF NOT EXISTS newsletter_subscribers (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, subscribed_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS contact_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now')))");
 

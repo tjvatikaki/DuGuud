@@ -78,7 +78,23 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true })); // Needed for PayFast ITN (form POST)
 
 // Static files — serve the project root so HTML/JS/CSS/images all work
-app.use(express.static(path.join(__dirname, '..', '..')));
+const STATIC_ROOT = path.join(__dirname, '..', '..');
+
+// Anything that isn't a web asset must not be reachable over HTTP. Serving the repo
+// root otherwise exposes the SQLite database (customer PII + password hashes) at
+// /server/data/duguud.db, the API source under /server/src/, and README.md.
+// Note: express.static skips dotfiles by default, which is what protects server/.env —
+// this deny-list is what protects everything else.
+const BLOCKED_PATH = /^\/(server|node_modules|\.git|\.claude)(\/|$)/i;
+const BLOCKED_ROOT = /^\/(README\.md|fetch-product\.ps1|wfpstate\.xml|package(-lock)?\.json|\.gitignore)$/i;
+app.use((req, res, next) => {
+  if (BLOCKED_PATH.test(req.path) || BLOCKED_ROOT.test(req.path)) {
+    return res.status(404).type('text/plain').send('Not found');
+  }
+  next();
+});
+
+app.use(express.static(STATIC_ROOT, { dotfiles: 'ignore', index: 'index.html' }));
 
 // API routes
 app.use('/api/auth', authRoutes);
