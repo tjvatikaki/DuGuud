@@ -144,6 +144,11 @@
   .fetch-imgs{display:flex;gap:8px;flex-wrap:wrap;}
   .fetch-imgs img{width:80px;height:100px;object-fit:cover;border-radius:2px;border:2px solid transparent;cursor:pointer;}
   .fetch-imgs img.sel{border-color:var(--peach-dark);box-shadow:0 0 0 2px var(--peach-pale);}
+  .bmk-box{border:1px solid var(--line);border-left:3px solid var(--peach-dark);border-radius:3px;padding:18px 20px;background:var(--peach-pale);}
+  .bmk-head{font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:8px;}
+  .bmk-help{font-size:13px;line-height:1.6;color:var(--ink-soft);margin:0 0 14px;max-width:640px;}
+  .bmk-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .bmk-step{font-size:12px;color:var(--ink-soft);}
 
   /* ---- TOAST ---- */
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--peach-pale);padding:14px 22px;border-radius:3px;font-size:14px;font-weight:600;z-index:110;opacity:0;pointer-events:none;transition:all .25s ease;display:flex;align-items:center;gap:10px;}
@@ -265,11 +270,26 @@
 <!-- ===== FETCH ===== -->
 <div class="tab-panel" id="tab-fetch">
   <div class="toolbar"><h2>Fetch from Product URL</h2></div>
+
+  <div class="bmk-box">
+    <div class="bmk-head">Adidas (and other bot-protected sites)</div>
+    <p class="bmk-help">
+      Adidas blocks our server from reading its pages, so use the bookmarklet: drag the button below
+      to your bookmarks bar, open the product page normally, then click the bookmark. It reads the page
+      in your own browser and fills the form here.
+    </p>
+    <div class="bmk-row">
+      <a class="btn primary" id="bmkLink" href="#" onclick="return false;">Send to DuGuud</a>
+      <span class="bmk-step">← drag this to your bookmarks bar</span>
+    </div>
+  </div>
+
+  <div class="toolbar" style="margin-top:26px;"><h3 style="font-size:15px;">Superbalist &amp; Edgars</h3></div>
   <p style="font-size:14px;color:var(--ink-soft);margin-bottom:16px;">
-    Paste a product URL from Adidas, Superbalist, or Edgars. We'll pull the name, price, description, and images.
+    Paste a product URL and we'll pull the name, price, description, and images.
   </p>
   <div class="url-box">
-    <input type="text" id="fetchUrl" placeholder="https://www.adidas.com.ph/... or superbalist.com/... or edgars.co.za/...">
+    <input type="text" id="fetchUrl" placeholder="https://superbalist.com/... or edgars.co.za/...">
     <button class="btn dark" id="fetchBtn" onclick="fetchProduct()">Fetch Product</button>
   </div>
   <div id="fetchStatus" style="margin-top:12px;"></div>
@@ -1254,109 +1274,122 @@ async function fetchProduct(){
   status.innerHTML = '';
 
   try {
-    var isSuperbalist = /superbalist\.com/i.test(url);
-    var isAdidas = /adidas\./i.test(url);
-    var retailerName = isSuperbalist ? 'Superbalist' : (isAdidas ? 'Adidas' : 'Edgars');
-    var baseUrl = isSuperbalist ? 'https://superbalist.com' : (isAdidas ? url.match(/https?:\/\/[^/]+/i)[0] : 'https://www.edgars.co.za');
+    // Parsing happens server-side — no CORS, no third-party proxy
+    var resp = await fetch('/api/fetch-product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ url: url })
+    });
+    var data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+    showFetchResult(data);
 
-    var cleanUrl = url.replace(/[?&]srsltid=[^&]*/i,'').replace(/[?&]utm_[^&]*/gi,'').replace(/[?&]gclid=[^&]*/i,'');
-
-    var proxyUrl = 'https://proxy.cors.sh/' + cleanUrl;
-    var resp = await fetch(proxyUrl);
-    if(!resp.ok) throw new Error('HTTP ' + resp.status + ' — try the PowerShell script instead');
-    var html = await resp.text();
-
-    var productName = '', price = '', description = '';
-    var jsonImages = [];
-
-    // Parse JSON-LD
-    var ldMatch = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
-    if(ldMatch){
-      for(var mi = 0; mi < ldMatch.length; mi++){
-        try {
-          var json = JSON.parse(ldMatch[mi].replace(/<[^>]+>/g,''));
-          var prod = json['@type']==='Product' ? json : ((json['@graph']||[]).find(function(x){ return x['@type']==='Product'; }));
-          if(prod){
-            productName = prod.name || productName;
-            if(prod.offers){
-              var offer = Array.isArray(prod.offers) ? prod.offers[0] : prod.offers;
-              if(offer) price = offer.price || price;
-            }
-            description = prod.description || description;
-            if(prod.image){
-              var jImgs = Array.isArray(prod.image) ? prod.image : [prod.image];
-              jImgs.forEach(function(img){
-                var src = typeof img === 'string' ? img : (img.url || img.contentUrl || '');
-                if(src) jsonImages.push(src);
-              });
-            }
-          }
-        } catch(e){}
-      }
-    }
-
-    if(!productName){
-      var ogMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i);
-      if(ogMatch) productName = ogMatch[1].trim();
-    }
-    if(!productName){
-      var titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      if(titleMatch) productName = titleMatch[1].replace(/&amp;/g,'&').replace(/\s*[-–|]\s*(Edgars|Superbalist).*$/i,'').trim();
-    }
-
-    if(!description){
-      var ogdMatch = html.match(/<meta\s+property="og:description"\s+content="([^"]+)"/i);
-      if(ogdMatch) description = ogdMatch[1].trim();
-    }
-
-    // Collect images
-    var imgSet = [];
-    var seenUrls = {};
-    function addImg(u){
-      if(!u) return;
-      // Resolve relative URLs
-      if(u.startsWith('//')) u = 'https:' + u;
-      else if(!u.startsWith('http') && u.startsWith('/')) u = baseUrl + u;
-      else if(!u.startsWith('http')) u = baseUrl + '/' + u;
-      var base = u.replace(/\?.*$/,'');
-      if(!seenUrls[base]){
-        seenUrls[base] = u;
-        imgSet.push(u);
-      }
-    }
-
-    jsonImages.forEach(addImg);
-    var ogImgs = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/gi);
-    if(ogImgs){ ogImgs.forEach(function(m){ var u = m.match(/content="([^"]+)"/i); if(u) addImg(u[1]); }); }
-
-    // Images from the page
-    var allImg = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi);
-    if(allImg){
-      allImg.forEach(function(m){
-        var u = m.match(/src=["']([^"']+)["']/i);
-        if(u && /\.(jpg|jpeg|png|webp)/i.test(u[1]) && !/logo|icon|banner|pixel/i.test(u[1])) addImg(u[1]);
-      });
-    }
-
-    document.getElementById('fetchImgs').innerHTML = imgSet.map(function(u,i){
-      return '<img src="' + u + '" class="' + (i===0?'sel':'') + '" onclick="this.classList.toggle(\'sel\')" onerror="this.style.display=\'none\'">';
-    }).join('') || '<span style="font-size:13px;color:var(--ink-soft);">No images found</span>';
-
-    document.getElementById('fetchInfo').innerHTML =
-      '<p><strong>Name:</strong> ' + esc(productName||'Not found') + '</p>' +
-      (price ? '<p><strong>Price:</strong> ' + esc(price) + '</p>' : '') +
-      (description ? '<p><strong>Description:</strong> ' + esc(description.substring(0,200)) + '…</p>' : '') +
-      '<p style="font-size:11px;color:var(--ink-soft);margin-top:8px;">' + imgSet.length + ' image(s) · Click to select</p>';
-
-    result._fetched = { name: productName, price: price, description: description, images: imgSet };
-    result.style.display = 'block';
-    status.innerHTML = '<span style="color:var(--ok);font-size:13px;">✓ Product fetched from ' + retailerName + '</span>';
+    status.innerHTML = '<span style="color:var(--ok);font-size:13px;">✓ Product fetched — ' + (data.images || []).length + ' image(s) found</span>';
   } catch(e) {
     status.innerHTML = '<span style="color:var(--bad);font-size:13px;">✕ Fetch failed: ' + esc(e.message) + '</span>';
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'Fetch Product';
   }
+}
+
+/* Renders the fetched-product preview — used by both the server fetch and the bookmarklet. */
+function showFetchResult(data){
+  var result = document.getElementById('fetchResult');
+
+  // De-duplicate images (the same URL often appears in both JSON-LD and og:image)
+  var imgs = [], seenImg = {};
+  (data.images || []).forEach(function(u){
+    if(!u) return;
+    var key = String(u).replace(/[?#].*$/, '');
+    if(seenImg[key]) return;
+    seenImg[key] = true;
+    imgs.push(u);
+  });
+
+  document.getElementById('fetchImgs').innerHTML = imgs.map(function(u,i){
+    return '<img src="' + u + '" class="' + (i===0?'sel':'') + '" onclick="this.classList.toggle(\'sel\')" onerror="this.style.display=\'none\'">';
+  }).join('') || '<span style="font-size:13px;color:var(--ink-soft);">No images found</span>';
+
+  document.getElementById('fetchInfo').innerHTML =
+    '<p><strong>Name:</strong> ' + esc(data.name||'Not found') + '</p>' +
+    (data.price ? '<p><strong>Price:</strong> ' + esc(data.price) + '</p>' : '') +
+    (data.description ? '<p><strong>Description:</strong> ' + esc(data.description.substring(0,200)) + '…</p>' : '') +
+    '<p style="font-size:11px;color:var(--ink-soft);margin-top:8px;">' + imgs.length + ' image(s) · Click to select</p>';
+
+  result._fetched = {
+    name: data.name || '',
+    price: data.price || '',
+    description: data.description || '',
+    images: imgs
+  };
+  result.style.display = 'block';
+}
+
+/* ========== BOOKMARKLET ==========
+   Adidas blocks our server from reading its pages, so the bookmarklet reads the
+   product page inside the admin's own browser (same-origin — no CORS, and the
+   request looks like normal browsing) then hands the result back to this panel. */
+function buildBookmarklet(){
+  var adminUrl = location.origin + location.pathname;
+  var code = [
+    '(function(){',
+    'var g=function(p){var m=document.getElementsByTagName("meta");for(var i=0;i<m.length;i++){var k=m[i].getAttribute("property")||m[i].getAttribute("name");if(k===p)return m[i].content||""}return ""};',
+    'var name="",price="",desc="",imgs=[],i,j,k;',
+    'var ss=document.getElementsByTagName("script");',
+    'for(i=0;i<ss.length;i++){',
+    'if((ss[i].type||"").toLowerCase()!=="application/ld+json")continue;',
+    'try{j=JSON.parse(ss[i].textContent)}catch(e){continue}',
+    'var q=Array.isArray(j)?j.slice():[j];',
+    'while(q.length){',
+    'var n=q.shift();if(!n||typeof n!=="object")continue;',
+    'if(Array.isArray(n["@graph"]))q=q.concat(n["@graph"]);',
+    'var t=n["@type"];',
+    'if(t!=="Product"&&!(Array.isArray(t)&&t.indexOf("Product")>-1))continue;',
+    'if(!name&&n.name)name=String(n.name);',
+    'if(!desc&&n.description)desc=String(n.description);',
+    'if(!price&&n.offers){var o=Array.isArray(n.offers)?n.offers[0]:n.offers;if(o){var pv=o.price!=null?o.price:(o.priceSpecification&&o.priceSpecification.price);if(pv!=null)price=String(pv)}}',
+    'var im=n.image?(Array.isArray(n.image)?n.image:[n.image]):[];',
+    'for(k=0;k<im.length;k++){var s=typeof im[k]==="string"?im[k]:((im[k]&&(im[k].url||im[k].contentUrl))||"");if(s)imgs.push(s)}',
+    '}',
+    '}',
+    'name=name||g("og:title")||document.title;',
+    'desc=desc||g("og:description");',
+    'var ms=document.getElementsByTagName("meta");',
+    'for(i=0;i<ms.length;i++){var kk=ms[i].getAttribute("property")||ms[i].getAttribute("name");if(kk&&kk.indexOf("og:image")===0&&ms[i].content)imgs.push(ms[i].content)}',
+    'if(!imgs.length){var a=document.getElementsByTagName("img");for(i=0;i<a.length&&imgs.length<12;i++){var u=a[i].src;if(u&&/\\.(jpg|jpeg|png|webp)(\\?|$)/i.test(u)&&!/logo|icon|banner|pixel/i.test(u))imgs.push(u)}}',
+    'var seen={},uniq=[];',
+    'for(i=0;i<imgs.length;i++){var uq=imgs[i].replace(/[?#].*$/,"");if(uq&&uq.indexOf("http")===0&&!seen[uq]){seen[uq]=1;uniq.push(imgs[i])}}',
+    'var d={name:name,price:price,description:desc,images:uniq.slice(0,20),url:location.href};',
+    'var b=btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"");',
+    'window.open("' + adminUrl + '#urlimport="+b,"_blank");',
+    '})()'
+  ].join('');
+  document.getElementById('bmkLink').setAttribute('href', 'javascript:' + code);
+}
+
+/* Picks up a product handed over by the bookmarklet via the URL hash. */
+function handleUrlImport(){
+  var m = location.hash.match(/urlimport=([^&]+)/);
+  if(!m) return;
+
+  var data;
+  try {
+    var b64 = m[1].replace(/-/g,'+').replace(/_/g,'/');
+    data = JSON.parse(decodeURIComponent(escape(atob(b64))));
+  } catch(e) {
+    toast('Could not read the imported product data', true);
+    return;
+  }
+
+  switchTab('fetch');
+  showFetchResult(data);
+  document.getElementById('fetchStatus').innerHTML =
+    '<span style="color:var(--ok);font-size:13px;">✓ Imported from ' + esc(data.url || 'product page') + '</span>';
+
+  // Clear the hash so a refresh doesn't re-import the same product
+  history.replaceState(null, '', location.pathname + location.search);
+  toast('Product imported — check the details, then "Use This — Fill Form"');
 }
 
 async function applyFetched(){
@@ -1416,9 +1449,13 @@ async function applyFetched(){
 
 /* ========== INIT ========== */
 (async function(){
+  buildBookmarklet();
+  window.addEventListener('hashchange', handleUrlImport);
+
   var isAdmin = await requireAdminAuth();
   if(isAdmin){
     await showAdminPanel();
+    handleUrlImport();
   } else {
     renderAdminLogin();
   }
