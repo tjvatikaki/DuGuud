@@ -1,19 +1,13 @@
 const { Router } = require('express');
 const { dbAll, dbGet, dbRun } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { assembleProduct } = require('../product-model');
+const { assembleProduct, assembleAdminProduct } = require('../product-model');
 
 const router = Router();
 
 // ─── Helpers: assemble / disassemble product JSON ───
-// assembleProduct lives in product-model.js so the SEO renderer shares it.
-
-// Admin-only version that includes cost (never exposed via public endpoints)
-function assembleAdminProduct(row) {
-  const p = assembleProduct(row);
-  if (p) p.cost = row.cost || 0;
-  return p;
-}
+// Both assemblers live in product-model.js so the SEO renderer, the admin grid
+// and the public API all share one definition.
 
 function deleteProductSizesAndImages(productId) {
   dbRun('DELETE FROM product_images WHERE product_id = ?', [productId]);
@@ -78,9 +72,9 @@ router.post('/', authenticate, requireAdmin, (req, res) => {
     const totalStock = computeTotalStock(p.sizes, p.sizeStock);
 
     dbRun(
-      'INSERT INTO products (id, name, cat, icon, tag, subtag, price, cost, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO products (id, name, cat, icon, tag, subtag, brand, price, cost, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [productId, p.name, p.cat || 'men', p.icon || 'tee', p.tag || 'Tops',
-       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '']
+       p.subtag || '', p.brand || '', p.price, p.cost || 0, totalStock, p.desc || '']
     );
 
     insertSizes(productId, p.sizes, p.sizeStock);
@@ -104,12 +98,16 @@ router.put('/:id', authenticate, requireAdmin, (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Product not found' });
 
     const totalStock = computeTotalStock(p.sizes, p.sizeStock);
+    // These two keep their existing value when the key is absent from the body.
+    // PUT is a full replace, so without the fallback any older client that
+    // doesn't know about the field would silently blank it.
     const hidden = p.hidden !== undefined ? (p.hidden ? 1 : 0) : (existing.hidden || 0);
+    const brand = p.brand !== undefined ? String(p.brand) : (existing.brand || '');
 
     dbRun(
-      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, price=?, cost=?, stock=?, desc=?, hidden=?, updated_at=datetime('now') WHERE id=?",
+      "UPDATE products SET name=?, cat=?, icon=?, tag=?, subtag=?, brand=?, price=?, cost=?, stock=?, desc=?, hidden=?, updated_at=datetime('now') WHERE id=?",
       [p.name, p.cat || 'men', p.icon || 'tee', p.tag || 'Tops',
-       p.subtag || '', p.price, p.cost || 0, totalStock, p.desc || '', hidden, productId]
+       p.subtag || '', brand, p.price, p.cost || 0, totalStock, p.desc || '', hidden, productId]
     );
 
     // Replace sizes and images

@@ -18,6 +18,7 @@ const contactRoutes = require('./routes/contact');
 const { authenticate, requireAdmin } = require('./middleware/auth');
 const { getVisibleProduct } = require('./product-model');
 const { renderProductPage } = require('./render');
+const { buildFeed } = require('./feed');
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@duguud.co.za';
@@ -50,9 +51,9 @@ function bootstrap() {
     dbBatch(() => {
       for (const p of SEED_PRODUCTS) {
         dbRun(
-          'INSERT INTO products (id, name, cat, icon, tag, subtag, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO products (id, name, cat, icon, tag, subtag, brand, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [p.id, p.name, p.cat, p.icon || 'tee', p.tag || 'Tops',
-           p.subtag || '', p.price, p.stock, p.desc || '']
+           p.subtag || '', p.brand || '', p.price, p.stock, p.desc || '']
         );
         const sizes = p.sizes || ['One Size'];
         for (const size of sizes) {
@@ -279,7 +280,7 @@ function fetchPage(url, redirectsLeft) {
 
 // Pull name/price/description/images out of a product page's HTML.
 function parseProductHtml(html, baseUrl) {
-  const out = { name: '', price: '', description: '', images: [] };
+  const out = { name: '', price: '', description: '', brand: '', images: [] };
   const seen = new Set();
 
   // strict=true only accepts URLs that look like real images (used when scraping <img>)
@@ -316,6 +317,12 @@ function parseProductHtml(html, baseUrl) {
 
       if (!out.name && node.name) out.name = String(node.name).trim();
       if (!out.description && node.description) out.description = String(node.description).trim();
+      // Retailer JSON-LD carries brand as a string or a {name} object.
+      if (!out.brand && node.brand) {
+        const b = Array.isArray(node.brand) ? node.brand[0] : node.brand;
+        const name = typeof b === 'string' ? b : (b && b.name ? String(b.name) : '');
+        if (name) out.brand = name.trim();
+      }
       if (!out.price && node.offers) {
         const offer = Array.isArray(node.offers) ? node.offers[0] : node.offers;
         if (offer) {
@@ -403,7 +410,9 @@ app.get('/robots.txt', (req, res) => {
 });
 
 app.get('/sitemap.xml', (req, res) => {
-  const products = dbAll("SELECT id, updated_at FROM products ORDER BY id");
+  // hidden = 0 only. A hidden product is hidden for a reason (sold, pulled,
+  // duplicate) and advertising its URL to Google invites a thin 404-indexed page.
+  const products = dbAll("SELECT id, updated_at FROM products WHERE hidden = 0 ORDER BY id");
   const baseUrl = req.protocol + '://' + req.get('host');
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -422,6 +431,90 @@ app.get('/sitemap.xml', (req, res) => {
 
   xml += '</urlset>';
   res.header('Content-Type', 'application/xml').send(xml);
+});
+
+// POST /api/admin/replace-upload — overwrite an existing uploaded image in place.
+//
+// Exists for a one-time repair: some uploads are WebP or PNG bytes sitting under
+// a .jpg filename, so express.static infers image/jpeg from the extension and
+// serves a content-type that lies about the bytes. Re-encoding has to happen
+// where the bytes live (Render's disk), but the conversion itself is done
+// offline with ffmpeg — this endpoint only carries the finished result, which
+// avoids adding an image library to the production build.
+//
+// Deliberately narrow: the target must already exist, must sit directly in the
+// uploads dir, and must be referenced by a product. It cannot create files and
+// cannot write anywhere else.
+app.post('/api/admin/replace-upload', authenticate, requireAdmin, (req, res) => {
+  try {
+    const { path: relPath, dataBase64 } = req.body || {};
+    if (!relPath || !dataBase64) {
+      return res.status(400).json({ error: 'path and dataBase64 are required' });
+    }
+    if (relPath.startsWith('uploads/') === false) {
+      return res.status(400).json({ error: 'path must be an uploads/ path' });
+    }
+
+    // basename() collapses any traversal attempt to a plain filename.
+    const file = path.basename(relPath);
+    const full = path.join(UPLOAD_DIR, file);
+    if (path.resolve(full) !== path.resolve(path.join(UPLOAD_DIR, file))) {
+      return res.status(400).json({ error: 'Invalid path' });
+    }
+    if (!fs.existsSync(full)) {
+      return res.status(404).json({ error: 'No such upload: ' + file });
+    }
+    const referenced = dbGet('SELECT id FROM product_images WHERE url = ?', ['uploads/' + file]);
+    if (!referenced) {
+      return res.status(400).json({ error: 'That file is not referenced by any product' });
+    }
+
+    const buf = Buffer.from(dataBase64, 'base64');
+    if (buf.length < 12) return res.status(400).json({ error: 'Decoded data is too small to be an image' });
+    // Only accept an actual JPEG — the whole point is that the bytes match the
+    // .jpg name, so refuse anything else rather than repeating the original bug.
+    if (!(buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff)) {
+      return res.status(400).json({ error: 'Replacement must be genuine JPEG data' });
+    }
+
+    const before = fs.statSync(full).size;
+    const tmp = full + '.tmp';
+    fs.writeFileSync(tmp, buf);
+    fs.renameSync(tmp, full);   // atomic within the same directory
+
+    res.json({ path: 'uploads/' + file, bytesBefore: before, bytesAfter: buf.length });
+  } catch (err) {
+    console.error('Replace upload error:', err);
+    res.status(500).json({ error: 'Replace failed: ' + err.message });
+  }
+});
+
+// Google Merchant Center feed. Registered here rather than under /api/products
+// because that router's GET /:id would swallow a sibling path.
+//
+// Queries the products table directly instead of reusing the public list: the
+// public list filters out zero-stock items, and a feed must keep them so a
+// sold-out variant is marked out_of_stock rather than silently disappearing.
+app.get('/feed/google-merchant.xml', (req, res) => {
+  try {
+    const products = dbAll('SELECT * FROM products WHERE hidden = 0 ORDER BY id');
+    const sizesByProduct = {};
+    for (const s of dbAll('SELECT product_id, size, stock FROM product_sizes ORDER BY id')) {
+      (sizesByProduct[s.product_id] = sizesByProduct[s.product_id] || []).push(s);
+    }
+    const imagesByProduct = {};
+    for (const i of dbAll('SELECT product_id, url FROM product_images ORDER BY sort_order')) {
+      (imagesByProduct[i.product_id] = imagesByProduct[i.product_id] || []).push(i.url);
+    }
+    for (const p of products) p.images = imagesByProduct[p.id] || [];
+
+    res.header('Content-Type', 'application/xml');
+    res.set('Cache-Control', 'public, max-age=900');
+    res.send(buildFeed(products, sizesByProduct));
+  } catch (err) {
+    console.error('Merchant feed error:', err);
+    res.status(500).type('text/plain').send('Feed generation failed');
+  }
 });
 
 // 404 catch-all for unknown API routes

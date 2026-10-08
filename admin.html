@@ -221,7 +221,7 @@
     </div>
   </div>
   <div style="overflow-x:auto;">
-    <table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>
+    <table><thead><tr><th></th><th>Product</th><th>Brand</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>
     <tbody id="invBody"></tbody></table>
   </div>
 </div>
@@ -234,6 +234,7 @@
     <div class="field full"><label>Description</label><textarea id="fDesc" placeholder="A short, punchy description..."></textarea></div>
     <div class="field"><label>Price (ZAR)</label><input type="number" id="fPrice" placeholder="299" min="1"></div>
     <div class="field"><label>What I Paid (Cost)</label><input type="number" id="fCost" placeholder="150" min="0"><span class="hint">Admin-only — what you paid for this item</span></div>
+    <div class="field"><label>Brand</label><input type="text" id="fBrand" list="brandList" placeholder="Puma" autocomplete="off"><span class="hint">Used by the store filter and Google Shopping</span></div>
     <div class="field"><label>Category</label><select id="fCat"><option value="men">Men</option><option value="unisex">Unisex</option></select></div>
     <div class="field"><label>Tag</label><select id="fTag"><option value="Tops">Tops</option><option value="Bottoms">Bottoms</option><option value="Shoes">Shoes</option><option value="Accessories">Accessories</option></select></div>
     <div class="field"><label>Season</label><select id="fSubtag"><option value="Summer">Summer</option><option value="Winter">Winter</option><option value="">N/A</option></select></div>
@@ -265,6 +266,17 @@
   </div>
   <input type="hidden" id="fEditId">
   <input type="hidden" id="fEditOriginalId">
+  <!-- Suggestions only — a new brand can still be typed. Keeps spellings
+       consistent so the storefront filter doesn't split one brand into two. -->
+  <datalist id="brandList">
+    <option value="Adidas"></option><option value="Asics"></option><option value="Converse"></option>
+    <option value="Fila"></option><option value="Fox"></option><option value="GUESS"></option>
+    <option value="Jeep"></option><option value="Kakiebos"></option><option value="Lee Cooper"></option>
+    <option value="Levi's"></option><option value="New Balance"></option><option value="Nike"></option>
+    <option value="Oakley"></option><option value="Polo"></option><option value="Puma"></option>
+    <option value="Reebok"></option><option value="RVCA"></option><option value="Under Armour"></option>
+    <option value="Vans"></option>
+  </datalist>
 </div>
 
 <!-- ===== FETCH ===== -->
@@ -483,7 +495,7 @@ async function showAdminPanel(){
         '</div>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-        '<table><thead><tr><th></th><th>Product</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>' +
+        '<table><thead><tr><th></th><th>Product</th><th>Brand</th><th>Desc</th><th>Price</th><th>Cost</th><th>Margin</th><th>Tag</th><th>Sizes (stock)</th><th>Total</th><th>Actions</th></tr></thead>' +
         '<tbody id="invBody"></tbody></table>' +
       '</div>';
   }
@@ -547,7 +559,7 @@ function renderInventory(){
   document.getElementById('invStats').textContent = products.length + ' product' + (products.length!==1?'s':'') + ' · stored in database';
 
   if(!products.length){
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--ink-soft);">No products yet. <a href="#" onclick="openNewListing();return false;">Create your first listing →</a></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--ink-soft);">No products yet. <a href="#" onclick="openNewListing();return false;">Create your first listing →</a></td></tr>';
     return;
   }
 
@@ -564,6 +576,7 @@ function renderInventory(){
     return '<tr>' +
       '<td>' + (img ? '<img src="' + img + '" class="prod-thumb" onerror="this.style.display=\'none\'">' : '') + '</td>' +
       '<td><span class="prod-name">' + esc(p.name) + '</span>' + (p.hidden ? ' <span class="badge badge-hidden">Hidden</span>' : '') + '</td>' +
+      '<td style="font-size:12px;">' + (p.brand ? esc(p.brand) : '<span style="color:var(--warn);">— set brand</span>') + '</td>' +
       '<td><span class="prod-desc">' + esc(p.desc||'') + '</span></td>' +
       '<td><strong>R ' + p.price + '</strong></td>' +
       '<td style="font-size:12px;">' + costDisplay + '</td>' +
@@ -753,6 +766,7 @@ async function saveProduct(){
       cat: document.getElementById('fCat').value,
       tag: document.getElementById('fTag').value,
       subtag: document.getElementById('fSubtag').value,
+      brand: document.getElementById('fBrand').value.trim(),
       sizes: sizes.length ? sizes : ['One Size'],
       sizeStock: sizes.length ? sizeStock : {'One Size': 1},
       stock: totalStock || 1,
@@ -782,7 +796,7 @@ async function saveProduct(){
 
 /* ========== FORM HELPERS ========== */
 function clearForm(){
-  ['fName','fDesc','fPrice','fCost','fSizes'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fName','fDesc','fPrice','fCost','fSizes','fBrand'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fStock').value = '0';
   document.getElementById('fCat').value = 'men';
   document.getElementById('fTag').value = 'Tops';
@@ -814,6 +828,7 @@ function editProduct(i){
   document.getElementById('fCat').value = p.cat;
   document.getElementById('fTag').value = p.tag || 'Tops';
   document.getElementById('fSubtag').value = p.subtag || 'Summer';
+  document.getElementById('fBrand').value = p.brand || '';
   if(p.sizeStock){
     document.getElementById('fSizes').value = (p.sizes||[]).map(function(s){ return s + ':' + (p.sizeStock[s]||0); }).join(', ');
   } else {
@@ -837,12 +852,13 @@ function cancelEdit(){ clearForm(); }
 /* ========== EXPORT CSV ========== */
 function exportCSV(){
   var products = adminProducts;
-  var csv = 'Name,Tag,Season,Category,Sizes,Total Stock,Cost (ZAR),Price (ZAR),Margin %,Total Value,Total Cost,Profit,Description\n';
+  var csv = 'Name,Brand,Tag,Season,Category,Sizes,Total Stock,Cost (ZAR),Price (ZAR),Margin %,Total Value,Total Cost,Profit,Description\n';
   products.forEach(function(p){
     var sizesStr = (p.sizes||[]).map(function(s){ return s + ':' + ((p.sizeStock&&p.sizeStock[s])||'?'); }).join('; ');
     var cost = p.cost || 0;
     var margin = (p.price > 0) ? Math.round(((p.price - cost) / p.price) * 100) : 0;
     csv += '"' + (p.name||'').replace(/"/g,'""') + '",' +
+      '"' + (p.brand||'').replace(/"/g,'""') + '",' +
       '"' + (p.tag||'') + '",' +
       '"' + (p.subtag||'') + '",' +
       '"' + (p.cat||'') + '",' +
@@ -1399,6 +1415,8 @@ async function applyFetched(){
 
     clearAllImages();
     document.getElementById('fName').value = data.name || '';
+    // Brand comes straight from the retailer's own JSON-LD when they publish it
+    if(data.brand) document.getElementById('fBrand').value = data.brand;
     if(data.price){
       var p = parseFloat(String(data.price).replace(/[^0-9.]/g,''));
       if(p) document.getElementById('fPrice').value = Math.round(p);

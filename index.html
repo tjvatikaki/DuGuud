@@ -168,6 +168,58 @@
   .section-head h2{
     font-family:var(--font-display);font-size:32px;letter-spacing:-0.01em;margin:0;
   }
+  /* ---------- FILTER BAR ----------
+     Deliberately not pill-shaped — this design uses 2px radii and underline
+     tabs (see the tab pattern on register.html). Active facets get a peach
+     underline rather than a filled chip. */
+  .filter-bar{
+    border:1px solid var(--line);border-radius:3px;background:#fff;
+    padding:6px 16px;margin-bottom:28px;
+  }
+  .filter-row{
+    display:flex;align-items:baseline;gap:14px;padding:9px 0;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;
+  }
+  .filter-row:last-of-type{border-bottom:none;}
+  .filter-label{
+    font-family:var(--font-tag);font-size:10px;text-transform:uppercase;
+    letter-spacing:0.1em;color:var(--ink-soft);min-width:50px;flex-shrink:0;
+    padding-top:2px;
+  }
+  .filter-opts{display:flex;flex-wrap:wrap;gap:0 18px;}
+  .filter-opt{
+    appearance:none;background:none;border:none;padding:2px 0;margin-bottom:-2px;
+    font-family:var(--font-body);font-size:13px;color:var(--ink-soft);
+    cursor:pointer;border-bottom:2px solid transparent;
+    transition:color .15s ease,border-color .15s ease;
+  }
+  .filter-opt:hover{color:var(--ink);}
+  .filter-opt.active{color:var(--ink);border-bottom-color:var(--peach-dark);font-weight:600;}
+  .filter-opt .n{font-family:var(--font-tag);font-size:10px;color:var(--ink-soft);margin-left:3px;}
+  .filter-opt.active .n{color:var(--peach-dark);}
+  .filter-opt[disabled]{color:#c9c3bb;cursor:default;}
+  .filter-opt[disabled]:hover{color:#c9c3bb;}
+  .filter-sizegroup{display:flex;flex-wrap:wrap;gap:0 18px;align-items:baseline;}
+  .filter-sizegroup + .filter-sizegroup{margin-top:6px;}
+  .filter-sizegroup-label{
+    font-family:var(--font-tag);font-size:10px;letter-spacing:0.08em;
+    color:var(--peach-dark);min-width:60px;
+  }
+  .filter-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:10px 0 12px;flex-wrap:wrap;
+  }
+  .filter-count{font-family:var(--font-tag);font-size:11px;color:var(--ink-soft);letter-spacing:0.04em;}
+  .filter-clear{
+    appearance:none;background:none;border:none;padding:0;cursor:pointer;
+    font-family:var(--font-body);font-size:12px;color:var(--ink);
+    border-bottom:1px solid var(--ink-soft);
+  }
+  .filter-clear:hover{border-bottom-color:var(--ink);}
+  .filter-empty{
+    grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-soft);
+    font-size:14px;
+  }
   /* ---------- PRODUCT GRID ---------- */
   .section-group{margin-bottom:36px;}
 .section-label{font-family:var(--font-display);font-size:20px;letter-spacing:-0.01em;margin:0 0 16px;padding-bottom:10px;border-bottom:2px solid var(--peach-pale);}
@@ -481,7 +533,19 @@
 
 <section class="section" id="new" style="padding-top:16px;">
   <div class="section-head">
-    <h2>New Clothing</h2>
+    <h2 id="gridHeading">New Clothing</h2>
+  </div>
+  <!-- Facets are built from the loaded catalogue, so they stay correct as
+       inventory changes. Options carry counts against the other active
+       facets, so you can see what a click will actually get you. -->
+  <div class="filter-bar" id="filterBar" hidden>
+    <div class="filter-row"><span class="filter-label">Brand</span><div class="filter-opts" id="facetBrand"></div></div>
+    <div class="filter-row"><span class="filter-label">Type</span><div class="filter-opts" id="facetType"></div></div>
+    <div class="filter-row"><span class="filter-label">Size</span><div class="filter-opts" id="facetSize"></div></div>
+    <div class="filter-foot">
+      <span class="filter-count" id="filterCount"></span>
+      <button class="filter-clear" id="filterClear" onclick="clearFilters()" hidden>Clear all filters</button>
+    </div>
   </div>
   <div id="productGrid"></div>
 </section>
@@ -730,6 +794,182 @@ function initAutocomplete() {
   });
 }
 
+/* ---------------- STOREFRONT FILTER ----------------
+   Entirely client-side: the whole catalogue already arrives in one
+   /api/products response, so a server round-trip would only add latency, and
+   server-side filter routes would mint thousands of thin near-duplicate pages
+   competing with the product pages that actually earn. State lives in the URL
+   via replaceState so a filtered view is shareable; index.html's canonical
+   already points at the bare domain, so those variants consolidate. */
+
+var activeFilters = { brand: [], type: [], size: [] };
+
+// Sizes are not one system — shoes run 8-12, clothing runs S-XXL — so they are
+// grouped by the tag of the products that use them, not by guessing from the
+// label. An "8" is a shoe size here because only shoes carry it.
+var SIZE_ORDER = ['XXS','XS','S','M','L','XL','XXL','XXXL','One Size'];
+
+function sizeSort(a, b){
+  var na = parseFloat(a), nb = parseFloat(b);
+  var aNum = !isNaN(na) && /^[\d.]+$/.test(a), bNum = !isNaN(nb) && /^[\d.]+$/.test(b);
+  if (aNum && bNum) return na - nb;
+  if (aNum !== bNum) return aNum ? -1 : 1;
+  var ia = SIZE_ORDER.indexOf(a.toUpperCase()), ib = SIZE_ORDER.indexOf(b.toUpperCase());
+  if (ia > -1 && ib > -1) return ia - ib;
+  if (ia > -1) return -1;
+  if (ib > -1) return 1;
+  return a.localeCompare(b);
+}
+
+// Sizes actually available on products of the given tags. Only in-stock sizes
+// are offered — a filter that surfaces a sold-out size just wastes the click.
+function sizesForTags(tags){
+  var set = {};
+  PRODUCTS.forEach(function(p){
+    if (tags && tags.indexOf(p.tag || 'Tops') === -1) return;
+    (p.sizes || []).forEach(function(s){
+      if (sizeAvail(p, s) > 0) set[s] = true;
+    });
+  });
+  return Object.keys(set).sort(sizeSort);
+}
+
+function buildSizeGroups(){
+  return {
+    shoes: sizesForTags(['Shoes']),
+    clothing: sizesForTags(['Tops', 'Bottoms', 'Accessories'])
+  };
+}
+
+function matchesFilters(p, filters, skip){
+  if (skip !== 'type' && filters.type.length && filters.type.indexOf(p.tag || 'Tops') === -1) return false;
+  if (skip !== 'brand' && filters.brand.length && filters.brand.indexOf(p.brand || '') === -1) return false;
+  if (skip !== 'size' && filters.size.length) {
+    var hit = (p.sizes || []).some(function(s){
+      return filters.size.indexOf(s) > -1 && sizeAvail(p, s) > 0;
+    });
+    if (!hit) return false;
+  }
+  return true;
+}
+
+function applyFilters(){
+  return PRODUCTS.filter(function(p){ return matchesFilters(p, activeFilters); });
+}
+
+// Count what an option would yield given the *other* active facets — standard
+// faceted behaviour, so the numbers update as you narrow.
+function facetCount(facet, value){
+  return PRODUCTS.filter(function(p){
+    if (!matchesFilters(p, activeFilters, facet)) return false;
+    if (facet === 'brand') return (p.brand || '') === value;
+    if (facet === 'type') return (p.tag || 'Tops') === value;
+    return (p.sizes || []).some(function(s){ return s === value && sizeAvail(p, s) > 0; });
+  }).length;
+}
+
+function toggleFacet(facet, value){
+  var arr = activeFilters[facet];
+  var i = arr.indexOf(value);
+  if (i > -1) arr.splice(i, 1); else arr.push(value);
+  renderFilters();
+  refreshGrid();
+}
+
+function clearFilters(){
+  activeFilters = { brand: [], type: [], size: [] };
+  renderFilters();
+  refreshGrid();
+}
+
+function optBtn(facet, value, label, disabled){
+  var on = activeFilters[facet].indexOf(value) > -1;
+  var n = facetCount(facet, value);
+  return '<button class="filter-opt' + (on ? ' active' : '') + '"' +
+    (disabled || n === 0 && !on ? ' disabled' : '') +
+    ' aria-pressed="' + on + '"' +
+    ' onclick="toggleFacet(\'' + facet + '\',\'' + String(value).replace(/'/g, "\\'") + '\')">' +
+    esc(label) + '<span class="n">' + n + '</span></button>';
+}
+
+function renderFilters(){
+  var bar = document.getElementById('filterBar');
+  if (!bar) return;
+  var hasFilter = activeFilters.brand.length || activeFilters.type.length || activeFilters.size.length;
+
+  // Brand — only brands that are actually present, alphabetical.
+  var brands = {};
+  PRODUCTS.forEach(function(p){ if (p.brand) brands[p.brand] = true; });
+  document.getElementById('facetBrand').innerHTML = Object.keys(brands).sort()
+    .map(function(b){ return optBtn('brand', b, b); }).join('');
+
+  // Type — fixed order, matching the storefront's own section order.
+  document.getElementById('facetType').innerHTML = ['Tops','Bottoms','Shoes','Accessories']
+    .filter(function(t){ return PRODUCTS.some(function(p){ return (p.tag || 'Tops') === t; }); })
+    .map(function(t){ return optBtn('type', t, t); }).join('');
+
+  // Size — auto-scoped to the selected Type. Scoping to the *exact* tag rather
+  // than a Shoes/Clothing split matters: a trouser waist (36) must not appear
+  // as a size option while filtering Tops.
+  var only = activeFilters.type.length === 1 ? activeFilters.type[0] : '';
+  var sizeHtml = '';
+  if (only) {
+    sizeHtml = '<div class="filter-sizegroup">' +
+      sizesForTags([only]).map(function(s){ return optBtn('size', s, s); }).join('') + '</div>';
+  } else {
+    var groups = buildSizeGroups();
+    if (groups.shoes.length) {
+      sizeHtml += '<div class="filter-sizegroup"><span class="filter-sizegroup-label">Shoes</span>' +
+        groups.shoes.map(function(s){ return optBtn('size', s, s); }).join('') + '</div>';
+    }
+    if (groups.clothing.length) {
+      sizeHtml += '<div class="filter-sizegroup"><span class="filter-sizegroup-label">Clothing</span>' +
+        groups.clothing.map(function(s){ return optBtn('size', s, s); }).join('') + '</div>';
+    }
+  }
+  document.getElementById('facetSize').innerHTML = sizeHtml;
+
+  document.getElementById('filterClear').hidden = !hasFilter;
+  bar.hidden = !PRODUCTS.length;
+  updateFilterCount();
+}
+
+function updateFilterCount(){
+  var n = applyFilters().length;
+  var total = PRODUCTS.length;
+  var el = document.getElementById('filterCount');
+  var h2 = document.getElementById('gridHeading');
+  var active = activeFilters.brand.length + activeFilters.type.length + activeFilters.size.length;
+  if (el) el.textContent = active ? n + ' of ' + total + ' products match' : total + ' products in stock';
+  if (h2) h2.textContent = active ? 'Filtered' : 'New Clothing';
+}
+
+function refreshGrid(){
+  var list = applyFilters();
+  renderGrid(list);
+  updateFilterCount();
+  syncFilterUrl();
+}
+
+// replaceState, not pushState — otherwise every facet click becomes a history
+// entry and the back button stops meaning "leave the shop".
+function syncFilterUrl(){
+  var qs = [];
+  ['brand','type','size'].forEach(function(f){
+    if (activeFilters[f].length) qs.push(f + '=' + encodeURIComponent(activeFilters[f].join(',')));
+  });
+  var url = location.pathname + (qs.length ? '?' + qs.join('&') : '');
+  history.replaceState(null, '', url);
+}
+
+function readFilterUrl(){
+  var params = new URLSearchParams(location.search);
+  ['brand','type','size'].forEach(function(f){
+    var v = params.get(f);
+    if (v) activeFilters[f] = v.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  });
+}
+
 /* ---------------- CARD PHOTO BROWSER ---------------- */
 window._cardImgs = {};
 const ARROW_L = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
@@ -747,9 +987,16 @@ function cycleCardImage(e, id, dir){
 }
 
 /* ---------------- PRODUCT GRID ---------------- */
-function renderGrid(){
+// `list` is a filtered subset, or omitted for everything. It must never be the
+// PRODUCTS global mutated in place: addToCart() resolves products out of
+// PRODUCTS by id, so shrinking it would break Add to Basket for anything hidden
+// by a filter. Callers pass a copy.
+function renderGrid(list){
   var grid = document.getElementById('productGrid');
-  var items = PRODUCTS.slice();
+  var items = (list || PRODUCTS).slice();
+  // Accumulator that image cycling reads from; rebuild it from scratch each
+  // render so a filtered-out product's photos don't linger.
+  window._cardImgs = {};
 
   // Sort by tag order, then Summer before Winter within each tag
   var tagOrder = ['Tops','Bottoms','Shoes','Accessories'];
@@ -791,13 +1038,13 @@ function renderGrid(){
               : '') +
           '</div>' +
           '<div class="card-body">' +
-            '<span class="card-cat">' + p.cat + '</span>' +
-            '<a class="card-name" href="product.html?id=' + p.id + '">' + p.name + '</a>' +
+            '<span class="card-cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(p.cat) + '</span>' +
+            '<a class="card-name" href="product.html?id=' + p.id + '">' + esc(p.name) + '</a>' +
             (p.desc ? '<span class="card-desc">' + p.desc + '</span>' : '') +
             '<span class="price-tag">' + fmt(p.price) + '</span>' +
             '<div class="option-row" onclick="event.stopPropagation()">' +
               '<select id="size-' + p.id + '" ' + (p.stock===0?'disabled':'') + '>' +
-                p.sizes.map(function(s){ var q = (p.sizeStock && p.sizeStock[s]) ? p.sizeStock[s] : p.stock; var label = q <= 3 ? s + ' (' + q + ' left)' : s; return '<option value="' + s + '" ' + (q===0?'disabled':'') + '>' + label + '</option>'; }).join('') +
+                p.sizes.map(function(s){ var q = sizeAvail(p, s); var label = q <= LOW_SIZE_STOCK ? s + ' (' + q + ' left)' : s; return '<option value="' + s + '" ' + (q===0?'disabled':'') + '>' + label + '</option>'; }).join('') +
               '</select>' +
               '<input type="number" class="qty-input" id="qty-' + p.id + '" value="1" min="1" max="' + p.stock + '" ' + (p.stock===0?'disabled':'') + ' onclick="event.stopPropagation()">' +
             '</div>' +
@@ -809,12 +1056,20 @@ function renderGrid(){
       }).join('') +
     '</div></div>';
   }).join('');
+
+  if (!items.length) {
+    grid.innerHTML = '<div class="filter-empty">Nothing in stock matches that combination.' +
+      '<br><button class="filter-clear" style="margin-top:12px;" onclick="clearFilters()">Clear all filters</button></div>';
+  }
 }
 
 (async function(){
   await loadProducts();
   await initStore();
-  renderGrid();
+  readFilterUrl();      // restore a shared ?brand=&type=&size= before first paint
+  renderFilters();
+  renderGrid(applyFilters());
+  updateFilterCount();
   updateNavAuth();
 })();
 </script>

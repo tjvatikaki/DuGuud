@@ -3,40 +3,82 @@ const { dbAll, dbGet, dbRun, dbBatch } = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { SEED_PRODUCTS } = require('../seed');
 const { sendEmail } = require('../email');
+const { assembleAdminProduct } = require('../product-model');
+const { resolveBrand, normaliseBrand } = require('../brand-map');
 
 const router = Router();
 
-// GET /api/admin/products — list all products WITH cost (admin only)
+// GET /api/admin/products — list all products WITH cost (admin only).
+// Unfiltered: includes hidden and zero-stock rows, unlike the public list.
 router.get('/products', authenticate, requireAdmin, (req, res) => {
   try {
     const rows = dbAll('SELECT * FROM products ORDER BY id');
-    const products = rows.map(row => {
-      const sizes = dbAll('SELECT size, stock FROM product_sizes WHERE product_id = ? ORDER BY id', [row.id]);
-      const images = dbAll('SELECT url FROM product_images WHERE product_id = ? ORDER BY sort_order', [row.id]);
-      const sizeStock = {};
-      const sizeList = [];
-      for (const s of sizes) {
-        sizeList.push(s.size);
-        sizeStock[s.size] = s.stock;
-      }
-      return {
-        id: row.id, name: row.name, cat: row.cat, icon: row.icon,
-        tag: row.tag, subtag: row.subtag,
-        price: row.price, cost: row.cost || 0, stock: row.stock,
-        hidden: row.hidden || 0,
-        sizes: sizeList, sizeStock,
-        images: images.map(i => i.url),
-        desc: row.desc || ''
-      };
-    });
-    res.json({ products });
+    res.json({ products: rows.map(assembleAdminProduct) });
   } catch (err) {
     console.error('Admin products error:', err);
     res.status(500).json({ error: 'Failed to load products' });
   }
 });
 
+// POST /api/admin/backfill-brands — fill in `products.brand` from product names.
+//
+// Runs against whatever database the server is pointed at, which for production
+// is the only one that matters: the local dev copy is a stale snapshot. Defaults
+// to a dry run — pass { "dryRun": false } to actually write. By default it only
+// touches rows whose brand is currently empty, so re-running is safe and it will
+// never clobber a brand you set by hand; pass { "overwrite": true } to force.
+router.post('/backfill-brands', authenticate, requireAdmin, (req, res) => {
+  try {
+    const dryRun = req.body ? req.body.dryRun !== false : true;
+    const overwrite = !!(req.body && req.body.overwrite);
+
+    const rows = dbAll('SELECT id, name, brand FROM products ORDER BY id');
+    const changes = [];
+    const skipped = [];
+
+    for (const row of rows) {
+      const current = normaliseBrand(row.brand);
+      const { brand: proposed, source } = resolveBrand(row);
+
+      if (!proposed) {
+        skipped.push({ id: row.id, name: row.name, reason: 'no brand could be inferred' });
+        continue;
+      }
+      // Normalising "RCVA" -> "RVCA" counts as a change even when a value exists.
+      if (current === proposed) continue;
+      if (current && !overwrite) {
+        skipped.push({ id: row.id, name: row.name, reason: 'already set to "' + current + '"', proposed });
+        continue;
+      }
+      changes.push({ id: row.id, name: row.name, from: current, to: proposed, source });
+    }
+
+    if (!dryRun) {
+      dbBatch(() => {
+        for (const c of changes) {
+          dbRun('UPDATE products SET brand = ? WHERE id = ?', [c.to, c.id]);
+        }
+      });
+    }
+
+    res.json({
+      dryRun,
+      scanned: rows.length,
+      changed: changes.length,
+      applied: dryRun ? 0 : changes.length,
+      needsAttention: skipped.length,
+      changes,
+      skipped,
+    });
+  } catch (err) {
+    console.error('Backfill brands error:', err);
+    res.status(500).json({ error: 'Backfill failed' });
+  }
+});
+
 // POST /api/admin/seed — re-seed the database with all default products
+// NOTE: this DELETEs every product first. It is a first-run bootstrap, not a
+// migration — never call it on a live catalogue.
 router.post('/seed', authenticate, requireAdmin, (req, res) => {
   try {
     dbBatch(() => {
@@ -47,9 +89,9 @@ router.post('/seed', authenticate, requireAdmin, (req, res) => {
 
       for (const p of SEED_PRODUCTS) {
         dbRun(
-          'INSERT INTO products (id, name, cat, icon, tag, subtag, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO products (id, name, cat, icon, tag, subtag, brand, price, stock, desc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [p.id, p.name, p.cat, p.icon || 'tee', p.tag || 'Tops',
-           p.subtag || '', p.price, p.stock, p.desc || '']
+           p.subtag || '', p.brand || '', p.price, p.stock, p.desc || '']
         );
 
         const sizes = p.sizes || ['One Size'];

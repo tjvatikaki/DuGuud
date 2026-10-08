@@ -106,10 +106,32 @@ function setShipping(method) {
 }
 
 function fmt(n){ return 'R ' + n.toLocaleString('en-ZA', {minimumFractionDigits:2}); }
+
+// Escape for HTML text/attribute context. Review bodies and display names are
+// customer-supplied, so anything rendering them must go through this.
+function esc(s){
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Thresholds live here so the card flag and the size dropdown can't disagree.
+const LOW_STOCK = 5;        // product-level "Only N left" flag
+const LOW_SIZE_STOCK = 3;   // per-size hint inside the dropdown
+
 function stockFlag(stock){
   if(stock === 0) return '<span class="stock-flag out">Sold out</span>';
-  if(stock <= 5) return '<span class="stock-flag low">Only ' + stock + ' left</span>';
+  if(stock <= LOW_STOCK) return '<span class="stock-flag low">Only ' + stock + ' left</span>';
   return '';
+}
+
+// Stock for one size. Must test !== undefined rather than truthiness: a size
+// with 0 left is falsy, and the old truthiness check fell through to the
+// product's total, so a sold-out size advertised the whole product's stock
+// and stayed selectable. Only bites once a multi-size product partially sells out.
+function sizeAvail(p, size){
+  if(p && p.sizeStock && p.sizeStock[size] !== undefined) return p.sizeStock[size];
+  return p ? p.stock : 0;
 }
 
 /* ---------------- CART ACTIONS ---------------- */

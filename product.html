@@ -612,7 +612,7 @@ async function loadAndRenderProduct(){
           '<div class="detail-opt-group">' +
             '<label>Size</label>' +
             '<select id="detailSize" ' + (p.stock===0?'disabled':'') + '>' +
-              p.sizes.map(function(s){ var q = (p.sizeStock && p.sizeStock[s]) ? p.sizeStock[s] : p.stock; var label = q <= 3 ? s + ' (' + q + ' left)' : s; return '<option value="' + s + '" ' + (q===0?'disabled':'') + '>' + label + '</option>'; }).join('') +
+              p.sizes.map(function(s){ var q = sizeAvail(p, s); var label = q <= LOW_SIZE_STOCK ? s + ' (' + q + ' left)' : s; return '<option value="' + s + '" ' + (q===0?'disabled':'') + '>' + label + '</option>'; }).join('') +
             '</select>' +
           '</div>' +
           '<div class="detail-opt-group">' +

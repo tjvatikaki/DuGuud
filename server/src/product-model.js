@@ -24,6 +24,7 @@ function assembleProduct(row) {
     icon: row.icon,
     tag: row.tag,
     subtag: row.subtag,
+    brand: row.brand || '',
     price: row.price,
     stock: row.stock,
     sizes: sizeList,
@@ -32,6 +33,16 @@ function assembleProduct(row) {
     desc: row.desc || '',
     hidden: row.hidden || 0
   };
+}
+
+// Admin-only shape: same product plus cost, which must never reach a public
+// endpoint. Delegate rather than re-assemble — this used to be duplicated in
+// routes/admin.js and the two copies drifted.
+function assembleAdminProduct(row) {
+  const p = assembleProduct(row);
+  if (!p) return null;
+  p.cost = row.cost || 0;
+  return p;
 }
 
 // Publicly visible products only — same filter the storefront API uses.
@@ -45,4 +56,4 @@ function getVisibleProduct(id) {
   return assembleProduct(row);
 }
 
-module.exports = { assembleProduct, listVisibleProducts, getVisibleProduct };
+module.exports = { assembleProduct, assembleAdminProduct, listVisibleProducts, getVisibleProduct };
