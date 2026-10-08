@@ -208,6 +208,7 @@
   <button class="tab-btn" data-tab="users">Users</button>
   <button class="tab-btn" data-tab="subscribers">Subscribers</button>
   <button class="tab-btn" data-tab="messages">Messages</button>
+  <button class="tab-btn" data-tab="reviews">Reviews</button>
   <button class="tab-btn" data-tab="settings">Settings</button>
 </div>
 
@@ -359,6 +360,19 @@
     <div class="msg-list" id="msgList"></div>
     <div class="msg-detail" id="msgDetail"></div>
   </div>
+</div>
+
+<!-- ===== REVIEWS ===== -->
+<div class="tab-panel" id="tab-reviews">
+  <div class="toolbar">
+    <div><h2>Reviews</h2><span class="stats" id="revStats"></span></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn outline sm" onclick="loadReviewsAdmin('pending')">Pending</button>
+      <button class="btn outline sm" onclick="loadReviewsAdmin('approved')">Approved</button>
+      <button class="btn outline sm" onclick="loadReviewsAdmin('')">All</button>
+    </div>
+  </div>
+  <div id="revList"></div>
 </div>
 
 <!-- ===== SETTINGS ===== -->
@@ -1258,8 +1272,69 @@ document.querySelectorAll('.tab-btn').forEach(function(b){
     if(b.dataset.tab === 'users') renderUsers();
     if(b.dataset.tab === 'subscribers') renderSubscribers();
     if(b.dataset.tab === 'messages') loadMessages();
+    if(b.dataset.tab === 'reviews') loadReviewsAdmin();
   });
 });
+
+/* ========== REVIEWS ========== */
+window._revFilter = 'pending';
+
+async function loadReviewsAdmin(status){
+  if(status !== undefined) window._revFilter = status;
+  var list = document.getElementById('revList');
+  var stats = document.getElementById('revStats');
+  if(!list) return;
+  list.innerHTML = '<p style="color:var(--ink-soft);font-size:13px;">Loading…</p>';
+  try {
+    var data = await apiFetch('/api/reviews/admin' + (window._revFilter ? '?status=' + window._revFilter : ''));
+    var reviews = data.reviews || [];
+    stats.textContent = reviews.length + ' ' + (window._revFilter || 'total') + ' review' + (reviews.length===1?'':'s');
+
+    if(!reviews.length){
+      list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ink-soft);font-size:13px;">Nothing here yet. Reviews appear once an order is marked <strong>delivered</strong> and the customer writes one.</div>';
+      return;
+    }
+
+    list.innerHTML = reviews.map(function(r){
+      var badge = r.status === 'approved' ? '<span class="badge badge-stock">Approved</span>'
+                : r.status === 'rejected' ? '<span class="badge badge-out">Rejected</span>'
+                : r.status === 'invited'  ? '<span class="badge badge-low">Awaiting customer</span>'
+                : '<span class="badge badge-low">Pending</span>';
+      var stars = '';
+      for(var i=1;i<=5;i++) stars += (i <= r.rating ? '★' : '☆');
+      var actions = r.status === 'invited' ? '' :
+        (r.status !== 'approved' ? '<button class="btn outline sm" onclick="moderateReview(' + r.id + ',\'approved\')">Approve</button>' : '') +
+        (r.status !== 'rejected' ? '<button class="btn outline sm" onclick="moderateReview(' + r.id + ',\'rejected\')">Reject</button>' : '') +
+        (r.status !== 'pending'  ? '<button class="btn outline sm" onclick="moderateReview(' + r.id + ',\'pending\')">Back to pending</button>' : '');
+      return '<div style="border:1px solid var(--line);border-radius:3px;padding:16px;margin-bottom:12px;background:#fff;">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">' +
+          '<span style="color:var(--peach-dark);font-size:15px;letter-spacing:1px;">' + stars + '</span>' +
+          '<strong style="font-size:14px;">' + esc(r.name) + '</strong>' +
+          '<span style="font-size:12px;color:var(--ink-soft);">' + esc(r.productId) + '</span>' +
+          (r.verified ? '<span style="font-size:10px;color:var(--ok);border:1px solid rgba(76,122,93,0.35);border-radius:2px;padding:2px 6px;text-transform:uppercase;letter-spacing:0.06em;">Verified</span>' : '') +
+          badge +
+          '<span style="margin-left:auto;font-size:11px;color:var(--ink-soft);font-family:var(--font-tag);">' + esc(r.date || '') + '</span>' +
+        '</div>' +
+        (r.title ? '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + esc(r.title) + '</div>' : '') +
+        (r.body ? '<p style="margin:0 0 10px;font-size:13.5px;color:var(--ink-soft);line-height:1.6;white-space:pre-wrap;">' + esc(r.body) + '</p>' : '<p style="margin:0 0 10px;font-size:13px;color:var(--ink-soft);font-style:italic;">No review written yet — invitation sent.</p>') +
+        (r.email ? '<div style="font-size:11px;color:var(--ink-soft);font-family:var(--font-tag);margin-bottom:10px;">' + esc(r.email) + ' · order ' + esc(r.orderId) + '</div>' : '') +
+        (actions ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actions + '</div>' : '') +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<p style="color:var(--bad);font-size:13px;">Could not load reviews: ' + esc(e.message) + '</p>';
+  }
+}
+
+async function moderateReview(id, status){
+  try {
+    await apiFetch('/api/reviews/admin/' + id, { method:'PUT', body: JSON.stringify({ status: status }) });
+    toast('Review ' + status + ' ✓');
+    loadReviewsAdmin();
+  } catch(e) {
+    toast('Failed: ' + e.message, true);
+  }
+}
 
 function switchTab(name){
   var btn = document.querySelector('.tab-btn[data-tab="' + name + '"]');

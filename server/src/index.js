@@ -15,6 +15,7 @@ const trackingRoutes = require('./routes/tracking');
 const statsRoutes = require('./routes/stats');
 const newsletterRoutes = require('./routes/newsletter');
 const contactRoutes = require('./routes/contact');
+const reviewRoutes = require('./routes/reviews');
 const { authenticate, requireAdmin } = require('./middleware/auth');
 const { getVisibleProduct } = require('./product-model');
 const { renderProductPage } = require('./render');
@@ -132,6 +133,7 @@ app.use(trackingRoutes); // mounts /api/tracking/lookup, /track
 app.use('/api/stats', statsRoutes); // mounts /api/stats
 app.use('/api/newsletter', newsletterRoutes); // mounts /api/newsletter/subscribe
 app.use('/api/contact', contactRoutes); // mounts /api/contact
+app.use('/api/reviews', reviewRoutes); // mounts /api/reviews/*
 
 // ─── Image upload (admin only) ───
 // Uploaded photos are written to server/data/uploads/ — the same gitignored,

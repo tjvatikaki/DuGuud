@@ -67,6 +67,23 @@
     transition:transform .2s ease;
   }
 
+  /* ---------- REVIEWS ---------- */
+  #reviewsBlock:not(:empty){max-width:1100px;margin:0 auto;padding:0 24px 70px;}
+  .reviews-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:2px solid var(--peach-pale);margin-bottom:6px;}
+  .reviews-head h2{font-family:var(--font-display);font-size:24px;margin:0;letter-spacing:-0.01em;}
+  .reviews-avg{display:flex;align-items:center;gap:8px;}
+  .reviews-stars{display:inline-flex;gap:1px;line-height:0;}
+  .reviews-score{font-family:var(--font-tag);font-size:14px;font-weight:700;}
+  .reviews-count{font-size:12px;color:var(--ink-soft);}
+  .review{padding:18px 0;border-bottom:1px solid var(--line);}
+  .review:last-child{border-bottom:none;}
+  .review-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px;}
+  .review-stars{display:inline-flex;gap:1px;line-height:0;}
+  .review-name{font-weight:600;font-size:13.5px;}
+  .review-verified{font-family:var(--font-tag);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ok);border:1px solid rgba(76,122,93,0.35);border-radius:2px;padding:2px 6px;}
+  .review-date{font-family:var(--font-tag);font-size:11px;color:var(--ink-soft);margin-left:auto;}
+  .review-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+  .review-body{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.65;white-space:pre-wrap;}
   /* ---------- PRODUCT DETAIL ---------- */
   .detail-wrap{
     max-width:1100px;margin:0 auto;padding:40px 24px 80px;
@@ -351,6 +368,7 @@
 <div class="ticker"><div class="ticker-track"><span>Free shipping over R1 000</span><span>✦</span><span>Last stock</span><span>✦</span><span>Honestly priced</span><span>✦</span><span>New drops weekly</span><span>✦</span><span>Free shipping over R1 000</span><span>✦</span><span>Last stock</span><span>✦</span><span>Honestly priced</span><span>✦</span><span>New drops weekly</span><span>✦</span></div></div>
 
 <div id="detailContent"></div>
+<div id="reviewsBlock"></div>
 
 <footer>
   <div class="footer-inner">
@@ -449,8 +467,10 @@
 
 <div class="toast" id="toast"><span class="dot2"></span><span id="toastMsg">Added to basket</span></div>
 
+<script src="analytics.js"></script>
 <script src="api.js"></script>
 <script src="store.js"></script>
+<script src="product-jsonld.js"></script>
 <script>
 /* ---------------- PAGE VIEW TRACKING ---------------- */
 fetch('/api/stats/track').catch(function(){});
@@ -525,29 +545,82 @@ function injectProductSEO(p){
   setMeta('product:price:currency', 'ZAR');
   setMeta('product:availability', p.stock > 0 ? 'in stock' : 'out of stock');
 
-  // Remove old JSON-LD if any
+  // Rebuild JSON-LD through the shared builder — the same one render.js uses
+  // server-side. The only thing that differs between the two call sites is the
+  // base URL, which is why the old duplicated versions drifted.
   var oldLd = document.getElementById('productLd');
   if(oldLd) oldLd.remove();
 
-  // Inject JSON-LD
   var ld = document.createElement('script');
   ld.id = 'productLd';
   ld.type = 'application/ld+json';
-  ld.textContent = JSON.stringify({
-    '@context': 'https://schema.org/',
-    '@type': 'Product',
-    name: p.name,
-    description: p.desc || p.name,
-    image: (p.images || []).map(function(u){ return window.location.origin + '/' + u; }),
-    offers: {
-      '@type': 'Offer',
-      price: p.price,
-      priceCurrency: 'ZAR',
-      availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: canonical
-    }
-  });
+  ld.textContent = JSON.stringify(window.ProductJsonLd.build(p, {
+    baseUrl: window.location.origin,
+    url: canonical,
+    rating: window._productRating || null
+  }));
   head.appendChild(ld);
+}
+
+/* ---------------- REVIEWS ---------------- */
+
+// Sets window._productRating so injectProductSEO can include aggregateRating,
+// and renders the block under the product. The block is hidden entirely when
+// there are no reviews — an empty five-star row reads as a zero-star rating.
+async function loadReviews(productId){
+  window._productRating = null;
+  var block = document.getElementById('reviewsBlock');
+  if(block) block.innerHTML = '';
+  try {
+    var res = await fetch('/api/reviews/product/' + encodeURIComponent(productId));
+    if(!res.ok) return;
+    var data = await res.json();
+    window._productRating = data.rating || null;
+    renderReviews(data);
+  } catch(e) { /* reviews are an enhancement; never block the product */ }
+}
+
+function starRow(rating){
+  var full = Math.round(rating);
+  var out = '';
+  for(var i = 1; i <= 5; i++){
+    out += '<svg viewBox="0 0 24 24" width="14" height="14" fill="' + (i <= full ? 'var(--peach-dark)' : '#d9d3ca') + '" aria-hidden="true">' +
+      '<path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>';
+  }
+  return out;
+}
+
+// Review text is written by customers, so every field goes through esc().
+function renderReviews(data){
+  var block = document.getElementById('reviewsBlock');
+  if(!block) return;
+  var reviews = data.reviews || [];
+  if(!reviews.length){ block.innerHTML = ''; return; }
+
+  var avg = data.rating ? data.rating.ratingValue : 0;
+  var count = data.rating ? data.rating.reviewCount : reviews.length;
+
+  block.innerHTML =
+    '<div class="reviews-head">' +
+      '<h2>Reviews</h2>' +
+      '<div class="reviews-avg">' +
+        '<span class="reviews-stars">' + starRow(avg) + '</span>' +
+        '<span class="reviews-score">' + avg.toFixed(1) + '</span>' +
+        '<span class="reviews-count">' + count + ' verified ' + (count === 1 ? 'review' : 'reviews') + '</span>' +
+      '</div>' +
+    '</div>' +
+    reviews.map(function(r){
+      return '<div class="review">' +
+        '<div class="review-top">' +
+          '<span class="review-stars">' + starRow(r.rating) + '</span>' +
+          '<span class="review-name">' + esc(r.name) + '</span>' +
+          (r.verified ? '<span class="review-verified">Verified purchase</span>' : '') +
+          '<span class="review-date">' + esc(r.date) + '</span>' +
+        '</div>' +
+        (r.title ? '<div class="review-title">' + esc(r.title) + '</div>' : '') +
+        '<p class="review-body">' + esc(r.body) + '</p>' +
+      '</div>';
+    }).join('');
 }
 
 async function loadAndRenderProduct(){
@@ -569,7 +642,12 @@ async function loadAndRenderProduct(){
 
   currentProduct = p;
   currentImageIndex = 0;
+
+  // Reviews are fetched before the SEO injection so aggregateRating is present
+  // in the first JSON-LD write, rather than appearing a beat later.
+  await loadReviews(p.id);
   injectProductSEO(p);
+
   const images = (p.images && p.images.length > 0) ? p.images : null;
   const hasImages = images && images.length > 0;
 

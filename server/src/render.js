@@ -11,6 +11,8 @@
 // same tags in place, so users see no difference.
 const fs = require('fs');
 const path = require('path');
+const ProductJsonLd = require('../../product-jsonld');
+const { getProductRating } = require('./review-model');
 
 const ROOT = path.join(__dirname, '..', '..');
 const BASE_URL = (process.env.PUBLIC_BASE_URL || 'https://www.duguud.co.za').replace(/\/+$/, '');
@@ -75,20 +77,20 @@ function renderProductPage(product) {
   const hero = images[0] || '';
   const inStock = product.stock > 0;
 
-  const jsonLd = {
-    '@context': 'https://schema.org/',
-    '@type': 'Product',
-    name: product.name,
-    description: stripTags(product.desc) || product.name,
-    image: images,
-    offers: {
-      '@type': 'Offer',
+  // Built by the shared module so this and product.html's client-side rebuild
+  // cannot drift (they used to be two independent copies of the same object).
+  const jsonLd = ProductJsonLd.build(
+    {
+      id: product.id,
+      name: product.name,
+      description: stripTags(product.desc),
+      images: product.images || [],
       price: product.price,
-      priceCurrency: 'ZAR',
-      availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url
-    }
-  };
+      stock: product.stock,
+      brand: product.brand,
+    },
+    { baseUrl: BASE_URL, url, rating: getProductRating(product.id) }
+  );
 
   const tags = [
     '<title>' + esc(product.name) + ' — DuGuud</title>',
@@ -108,9 +110,9 @@ function renderProductPage(product) {
     '<meta property="product:price:amount" content="' + esc(product.price) + '">',
     '<meta property="product:price:currency" content="ZAR">',
     '<meta property="product:availability" content="' + (inStock ? 'in stock' : 'out of stock') + '">',
-    // '<' escaped so a product name containing "</script>" can't break out
-    '<script type="application/ld+json" id="productLd">' +
-      JSON.stringify(jsonLd).replace(/</g, '\\u003c') + '</script>'
+    // Shared builder escapes '<' so a product name containing "</script>"
+    // cannot break out of the tag.
+    ProductJsonLd.toScriptTag(jsonLd, 'productLd')
   ].filter(Boolean).join('\n');
 
   return tpl.replace(/<title>[\s\S]*?<\/title>/i, tags);

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Write a Review — DuGuud</title>
+<!-- The URL carries a one-time review token. no-referrer stops that token
+     leaking in the Referer header if the reviewer clicks any outbound link;
+     noindex keeps a tokenized URL out of search results. -->
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Saira+Condensed:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--peach:#f4a98c;--peach-dark:#e8875f;--peach-pale:#fbe4d5;--peach-tint:#fdf1ea;--ink:#16130f;--ink-soft:#5c564e;--paper:#f2eee6;--line:rgba(22,19,15,0.14);--ok:#4c7a5d;--bad:#c44;--font-display:'Saira Condensed',sans-serif;--font-body:'Archivo',sans-serif;--font-tag:'Space Mono',monospace;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;line-height:1.6;}
+  .wrap{max-width:620px;margin:0 auto;padding:36px 24px 80px;}
+  .back{display:inline-block;margin-bottom:24px;font-size:13px;color:var(--peach-dark);font-weight:600;text-decoration:none;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:3px;padding:24px;}
+  h1{font-family:var(--font-display);font-size:26px;letter-spacing:-0.01em;margin:0 0 6px;}
+  .sub{font-size:13.5px;color:var(--ink-soft);margin:0 0 20px;}
+  .prod{display:flex;gap:14px;align-items:center;padding-bottom:18px;margin-bottom:20px;border-bottom:1px solid var(--line);}
+  .prod img{width:64px;height:80px;object-fit:cover;border-radius:2px;background:var(--peach-tint);flex-shrink:0;}
+  .prod-name{font-weight:600;font-size:14.5px;}
+  .label{display:block;font-family:var(--font-tag);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin:16px 0 6px;}
+  input[type=text],textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:2px;background:#fff;font-family:var(--font-body);font-size:14px;color:var(--ink);}
+  textarea{min-height:120px;resize:vertical;line-height:1.6;}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--peach-dark);}
+  .stars{display:flex;gap:4px;margin-top:2px;}
+  .star{appearance:none;background:none;border:none;padding:2px;cursor:pointer;line-height:0;color:#d9d3ca;transition:color .12s ease,transform .12s ease;}
+  .star:hover{transform:scale(1.08);}
+  .star.on{color:var(--peach-dark);}
+  .star svg{width:30px;height:30px;display:block;}
+  .rating-word{font-size:12.5px;color:var(--ink-soft);margin-left:8px;align-self:center;}
+  button.submit{appearance:none;border:none;border-radius:2px;background:var(--ink);color:var(--peach-pale);font-family:var(--font-body);font-size:14px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;padding:13px 22px;cursor:pointer;margin-top:22px;width:100%;}
+  button.submit:hover{background:#2a251d;}
+  button.submit:disabled{background:#b8b2a8;cursor:default;}
+  .note{font-size:12px;color:var(--ink-soft);margin-top:14px;}
+  .msg{border-radius:2px;padding:14px 16px;font-size:14px;margin-bottom:18px;display:none;}
+  .msg.err{background:#fdf0f0;border:1px solid #f0c8c8;color:var(--bad);}
+  .msg.ok{background:#f0f7f2;border:1px solid #c8e0d1;color:var(--ok);}
+  .state{text-align:center;padding:30px 10px;}
+  .state h2{font-family:var(--font-display);font-size:22px;margin:0 0 10px;}
+  .state p{font-size:14px;color:var(--ink-soft);margin:0 0 20px;}
+  .btn-link{display:inline-block;background:var(--ink);color:var(--peach-pale);text-decoration:none;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:12px 20px;border-radius:2px;}
+  .spinner{text-align:center;padding:50px 0;color:var(--ink-soft);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">&larr; Back to store</a>
+  <div class="card">
+    <div id="loading" class="spinner">Loading your review&hellip;</div>
+
+    <div id="invalid" class="state" style="display:none;">
+      <h2>This link isn't usable</h2>
+      <p id="invalidWhy">This review link is no longer valid.</p>
+      <a class="btn-link" href="/">Back to the shop</a>
+    </div>
+
+    <div id="done" class="state" style="display:none;">
+      <h2>Thanks — that's in.</h2>
+      <p>Your review is with us for a quick check and will appear on the product page shortly.</p>
+      <a class="btn-link" href="/">Keep shopping</a>
+    </div>
+
+    <form id="form" style="display:none;" onsubmit="return submitReview(event)">
+      <h1>How was it?</h1>
+      <p class="sub">Your review is tied to a real order, so it'll show as a verified purchase.</p>
+
+      <div class="msg err" id="err"></div>
+
+      <div class="prod" id="prod"></div>
+
+      <label class="label">Your rating</label>
+      <div style="display:flex;align-items:center;">
+        <div class="stars" id="stars"></div>
+        <span class="rating-word" id="ratingWord"></span>
+      </div>
+
+      <label class="label" for="fName">Your name</label>
+      <input type="text" id="fName" maxlength="80" placeholder="How you'd like to appear">
+
+      <label class="label" for="fTitle">Headline <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input type="text" id="fTitle" maxlength="120" placeholder="Sums it up in a few words">
+
+      <label class="label" for="fBody">Your review</label>
+      <textarea id="fBody" maxlength="4000" placeholder="How does it fit? Is the quality what you expected?"></textarea>
+
+      <button type="submit" class="submit" id="submitBtn" disabled>Submit review</button>
+      <p class="note">We read every review before it goes live. A sentence is plenty.</p>
+    </form>
+  </div>
+</div>
+
+<script>
+var TOKEN = new URLSearchParams(location.search).get('t') || '';
+var RATING = 0;
+var WORDS = { 1:'Not for me', 2:'Could be better', 3:'Decent', 4:'Really good', 5:'Excellent' };
+var STAR_PATH = 'M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z';
+
+function el(id){ return document.getElementById(id); }
+function show(id){ ['loading','invalid','done','form'].forEach(function(k){ el(k).style.display = (k === id ? (k === 'form' ? 'block' : 'block') : 'none'); }); }
+function fail(why){ el('invalidWhy').textContent = why; show('invalid'); }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderStars(){
+  el('stars').innerHTML = [1,2,3,4,5].map(function(n){
+    return '<button type="button" class="star' + (n <= RATING ? ' on' : '') + '" data-n="' + n + '" ' +
+      'aria-label="' + n + ' star' + (n>1?'s':'') + '" onclick="setRating(' + n + ')">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg></button>';
+  }).join('');
+  el('ratingWord').textContent = RATING ? WORDS[RATING] : '';
+  el('submitBtn').disabled = !RATING;
+}
+
+function setRating(n){ RATING = n; renderStars(); }
+
+function submitReview(e){
+  e.preventDefault();
+  var err = el('err');
+  err.style.display = 'none';
+  var body = el('fBody').value.trim();
+  if (!RATING) { err.textContent = 'Please pick a rating.'; err.style.display = 'block'; return false; }
+  if (body.length < 10) { err.textContent = 'Please write at least a sentence.'; err.style.display = 'block'; return false; }
+
+  el('submitBtn').disabled = true;
+  el('submitBtn').textContent = 'Submitting…';
+
+  fetch('/api/reviews/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token: TOKEN,
+      rating: RATING,
+      title: el('fTitle').value.trim(),
+      body: body,
+      name: el('fName').value.trim()
+    })
+  })
+  .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+  .then(function(res){
+    if (res.ok) { show('done'); return; }
+    err.textContent = res.j.error || 'Something went wrong. Please try again.';
+    err.style.display = 'block';
+    el('submitBtn').disabled = false;
+    el('submitBtn').textContent = 'Submit review';
+  })
+  .catch(function(){
+    err.textContent = 'Network problem — please try again.';
+    err.style.display = 'block';
+    el('submitBtn').disabled = false;
+    el('submitBtn').textContent = 'Submit review';
+  });
+  return false;
+}
+
+(function init(){
+  if (!TOKEN) { fail('This page needs the link from your review email.'); return; }
+  fetch('/api/reviews/invite/' + encodeURIComponent(TOKEN), { cache: 'no-store' })
+    .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+    .then(function(res){
+      if (!res.ok || !res.j.valid) { fail(res.j.reason || 'This review link is no longer valid.'); return; }
+      if (res.j.alreadySubmitted) {
+        el('invalidWhy').textContent = 'This review has already been submitted — thank you.';
+        show('invalid');
+        return;
+      }
+      if (!res.j.product) { fail('That product is no longer listed.'); return; }
+      el('prod').innerHTML =
+        (res.j.product.image ? '<img src="' + esc(res.j.product.image) + '" alt="">' : '') +
+        '<span class="prod-name">' + esc(res.j.product.name) + '</span>';
+      el('fName').value = res.j.invitedName || '';
+      renderStars();
+      show('form');
+    })
+    .catch(function(){ fail('Could not load your review invitation.'); });
+})();
+</script>
+</body>
+</html>

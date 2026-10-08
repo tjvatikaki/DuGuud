@@ -57,6 +57,13 @@ function initSchema() {
   db.run("CREATE TABLE IF NOT EXISTS product_images (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, url TEXT NOT NULL, sort_order INTEGER NOT NULL DEFAULT 0)");
   db.run("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, user_id INTEGER REFERENCES users(id), customer_name TEXT NOT NULL, customer_email TEXT NOT NULL, customer_phone TEXT DEFAULT '', customer_address TEXT DEFAULT '', customer_city TEXT DEFAULT '', customer_postal TEXT DEFAULT '', notes TEXT DEFAULT '', total INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', tracking_number TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')))");
   db.run("CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE, product_id TEXT NOT NULL, product_name TEXT NOT NULL, product_icon TEXT DEFAULT '', product_image TEXT DEFAULT '', size TEXT NOT NULL, qty INTEGER NOT NULL, price INTEGER NOT NULL)");
+  // Product reviews. Rows are created ONLY by the order-delivered transition in
+  // routes/orders.js, never by a public submission, which is what makes
+  // "verified purchase" structurally true rather than a claim the reviewer makes.
+  // There is deliberately no open "write a review" endpoint.
+  db.run("CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE, user_id INTEGER, customer_name TEXT NOT NULL DEFAULT '', customer_email TEXT NOT NULL DEFAULT '', rating INTEGER NOT NULL DEFAULT 0, title TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'invited', token_hash TEXT, token_expires TEXT NOT NULL DEFAULT '', verified INTEGER NOT NULL DEFAULT 0, admin_note TEXT NOT NULL DEFAULT '', created_at TEXT DEFAULT (datetime('now')), submitted_at TEXT NOT NULL DEFAULT '', moderated_at TEXT NOT NULL DEFAULT '', UNIQUE(order_id, product_id))");
+  db.run("CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id, status)");
+
   db.run("CREATE TABLE IF NOT EXISTS stats (key TEXT PRIMARY KEY, value INTEGER NOT NULL DEFAULT 0)");
   dbRun("INSERT OR IGNORE INTO stats (key, value) VALUES ('page_views', 0)");
 
@@ -73,6 +80,9 @@ function initSchema() {
   ensureColumn('products', 'brand', "TEXT DEFAULT ''");
   ensureColumn('orders', 'tracking_number', "TEXT DEFAULT ''");
   ensureColumn('orders', 'notes', "TEXT DEFAULT ''");
+  // Stamped when an order is marked delivered, so the review invitation is sent
+  // once rather than on every re-save of the status.
+  ensureColumn('orders', 'delivered_at', "TEXT DEFAULT ''");
   ensureColumn('users', 'reset_token', "TEXT DEFAULT ''");
   ensureColumn('users', 'reset_token_expires', "TEXT DEFAULT ''");
 

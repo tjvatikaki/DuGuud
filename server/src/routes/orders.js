@@ -2,7 +2,8 @@ const { Router } = require('express');
 const { dbAll, dbGet, dbRun, dbBatch } = require('../db');
 
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { sendShippingNotification } = require('../email');
+const { sendShippingNotification, sendReviewRequest } = require('../email');
+const { createReviewInvites } = require('../review-model');
 
 
 const router = Router();
@@ -138,6 +139,24 @@ router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
       const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [req.params.id]);
       const updated = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
       sendShippingNotification({ ...updated, items }, updated.customer_email);
+    }
+
+    // Marking delivered is what creates the review invitations — it is the only
+    // place review rows come from, which is what makes "verified purchase" true
+    // rather than something a reviewer asserts.
+    //
+    // Three guards, because this route is a plain admin button that gets
+    // re-clicked: the status transition test below, the UNIQUE(order_id,
+    // product_id) constraint inside createReviewInvites, and only emailing when
+    // new rows were actually created.
+    if (status === 'delivered' && existing.status !== 'delivered') {
+      dbRun("UPDATE orders SET delivered_at = datetime('now') WHERE id = ?", [req.params.id]);
+      const items = dbAll('SELECT * FROM order_items WHERE order_id = ?', [req.params.id]);
+      const updated = dbGet('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+      const invites = createReviewInvites(updated, items);
+      // sendEmail never throws — an SMTP failure degrades to a log line and must
+      // not fail the status change the admin just made.
+      if (invites.length) sendReviewRequest(updated, invites);
     }
 
     res.json({

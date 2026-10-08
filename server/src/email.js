@@ -138,4 +138,31 @@ async function sendAdminNotification(order, adminEmail) {
   });
 }
 
-module.exports = { sendEmail, sendOrderConfirmation, sendOrderPaidReceipt, sendShippingNotification, sendAdminNotification };
+// Review invitation, sent once when an order is marked delivered.
+//
+// One email per order listing every item, each with its own link — not one
+// email per item. The token in the URL is the only credential the review form
+// needs, which is what lets a guest who checked out without an account leave a
+// review at all.
+async function sendReviewRequest(order, invites) {
+  const rows = invites.map(function (i) {
+    return '<tr><td style="padding:10px 0;border-bottom:1px solid rgba(22,19,15,0.10);">' +
+      '<div style="font-weight:600;font-size:14px;color:#16130f;">' + i.product_name + '</div>' +
+      '<a href="' + BASE_URL + '/review.html?t=' + i.token + '" style="color:#e8875f;font-size:13px;">Write a review</a>' +
+      '</td></tr>';
+  }).join('');
+
+  return sendEmail({
+    to: order.customer_email,
+    subject: 'How was your DuGuud order?',
+    html: '<div style="font-family:Archivo,sans-serif;max-width:560px;margin:0 auto;">' +
+      '<h2 style="color:#16130f;">Did it fit the bill?</h2>' +
+      '<p style="font-size:14px;color:#5c564e;">Thanks for your order. If you have a minute, a short review helps the next person decide — and it tells us what to keep hunting for.</p>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:13px;">' + rows + '</table>' +
+      '<hr style="border:none;border-top:1px solid rgba(22,19,15,0.14);margin:20px 0;">' +
+      '<p style="font-size:12px;color:#5c564e;">DuGuud - Last Stock, Honestly Priced</p>' +
+    '</div>'
+  });
+}
+
+module.exports = { sendEmail, sendOrderConfirmation, sendOrderPaidReceipt, sendShippingNotification, sendAdminNotification, sendReviewRequest };
