@@ -19,6 +19,7 @@ const reviewRoutes = require('./routes/reviews');
 const { authenticate, requireAdmin } = require('./middleware/auth');
 const { getVisibleProduct } = require('./product-model');
 const { renderProductPage } = require('./render');
+const { renderIndexPage } = require('./render-index');
 const { buildFeed } = require('./feed');
 
 const PORT = process.env.PORT || 3000;
@@ -117,6 +118,25 @@ app.get(['/product.html', '/product'], (req, res, next) => {
     res.type('html').send(html);
   } catch (err) {
     console.error('Product SEO render failed:', err);
+    next();
+  }
+});
+
+// The storefront homepage gets its product grid rendered server-side, for the
+// same reason and with the same position requirement as the product route above.
+// Without it the crawler behind Merchant Center's website flow downloads an
+// empty shell and sees a handful of products instead of the whole catalogue.
+app.get(['/', '/index.html'], (req, res, next) => {
+  // A filtered view (?brand=…) is a client concern; serve the shell and let the
+  // filter apply on load rather than baking one combination into the HTML.
+  if (Object.keys(req.query).length) return next();
+  try {
+    const html = renderIndexPage();
+    if (!html) return next();
+    res.set('Cache-Control', 'public, max-age=300');
+    res.type('html').send(html);
+  } catch (err) {
+    console.error('Storefront render failed:', err);
     next();
   }
 });

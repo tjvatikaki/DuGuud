@@ -71,15 +71,10 @@ async function loadProduct(id) {
 }
 
 /* ---------------- ICONS ---------------- */
-const ICONS = {
-  hoodie: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M20 10 L12 18 L16 24 L20 20 V54 H44 V20 L48 24 L52 18 L44 10 C40 14 24 14 20 10Z" stroke-linejoin="round"/><circle cx="32" cy="18" r="3"/></svg>`,
-  tee: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M22 8 L10 16 L16 26 L22 22 V56 H42 V22 L48 26 L54 16 L42 8 C40 12 24 12 22 8Z" stroke-linejoin="round"/></svg>`,
-  dress: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M26 8 H38 L40 20 L52 54 H12 L24 20 Z" stroke-linejoin="round"/><path d="M26 8 C26 14 38 14 38 8"/></svg>`,
-  jeans: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M18 8 H46 L48 56 L34 56 L32 30 L30 56 L16 56 Z" stroke-linejoin="round"/></svg>`,
-  jacket: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M20 10 L8 18 L14 28 L20 22 V54 H44 V22 L50 28 L56 18 L44 10 H36 L32 16 L28 10 Z" stroke-linejoin="round"/></svg>`,
-  sneaker: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><path d="M6 42 C10 34 16 30 22 30 L30 22 C34 18 40 18 42 22 L46 30 H54 C58 30 58 38 54 40 L48 44 H8 Z" stroke-linejoin="round"/></svg>`,
-  flipflop: `<svg viewBox="0 0 64 64" fill="none" stroke-width="2"><ellipse cx="32" cy="44" rx="22" ry="10" stroke-linejoin="round"/><path d="M14 44 C16 36 18 22 30 14 C30 14 34 14 34 14 C46 22 48 36 50 44" stroke-linejoin="round"/><path d="M26 14 L28 42" stroke-linejoin="round"/><path d="M38 14 L36 42" stroke-linejoin="round"/><path d="M20 30 L22 46" stroke-linejoin="round"/><path d="M44 30 L42 46" stroke-linejoin="round"/></svg>`,
-};
+// Card markup, icons and the stock helpers live in product-card.js so the
+// server can render the same grid the browser does. Re-exported here under the
+// names the pages already use.
+const ICONS = ProductCard.ICONS;
 
 /* ---------------- CART (persisted to localStorage) ---------------- */
 const CART_KEY = 'duguud_cart';
@@ -105,34 +100,23 @@ function setShipping(method) {
   renderCart();
 }
 
-function fmt(n){ return 'R ' + n.toLocaleString('en-ZA', {minimumFractionDigits:2}); }
+function fmt(n){ return ProductCard.fmt(n); }
 
 // Escape for HTML text/attribute context. Review bodies and display names are
 // customer-supplied, so anything rendering them must go through this.
-function esc(s){
-  return String(s === null || s === undefined ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+function esc(s){ return ProductCard.esc(s); }
 
-// Thresholds live here so the card flag and the size dropdown can't disagree.
-const LOW_STOCK = 5;        // product-level "Only N left" flag
-const LOW_SIZE_STOCK = 3;   // per-size hint inside the dropdown
+// Shared with the server-side renderer so the card flag and the size dropdown
+// can't disagree about what "low" means.
+const LOW_STOCK = ProductCard.LOW_STOCK;
+const LOW_SIZE_STOCK = ProductCard.LOW_SIZE_STOCK;
 
-function stockFlag(stock){
-  if(stock === 0) return '<span class="stock-flag out">Sold out</span>';
-  if(stock <= LOW_STOCK) return '<span class="stock-flag low">Only ' + stock + ' left</span>';
-  return '';
-}
+function stockFlag(stock){ return ProductCard.stockFlag(stock); }
 
-// Stock for one size. Must test !== undefined rather than truthiness: a size
-// with 0 left is falsy, and the old truthiness check fell through to the
-// product's total, so a sold-out size advertised the whole product's stock
-// and stayed selectable. Only bites once a multi-size product partially sells out.
-function sizeAvail(p, size){
-  if(p && p.sizeStock && p.sizeStock[size] !== undefined) return p.sizeStock[size];
-  return p ? p.stock : 0;
-}
+// Tests !== undefined rather than truthiness: a size with 0 left is falsy, and
+// a truthiness check falls through to the product's total, so a sold-out size
+// would advertise the whole product's stock and stay selectable.
+function sizeAvail(p, size){ return ProductCard.sizeAvail(p, size); }
 
 /* ---------------- CART ACTIONS ---------------- */
 function addToCart(id){

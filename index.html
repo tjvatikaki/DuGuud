@@ -715,6 +715,7 @@
 <div class="toast" id="toast"><span class="dot2"></span><span id="toastMsg">Added to basket</span></div>
 
 <script src="analytics.js"></script>
+<script src="product-card.js"></script>
 <script src="api.js"></script>
 <script src="store.js"></script>
 <script>
@@ -978,8 +979,6 @@ function readFilterUrl(){
 
 /* ---------------- CARD PHOTO BROWSER ---------------- */
 window._cardImgs = {};
-const ARROW_L = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
-const ARROW_R = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
 function cycleCardImage(e, id, dir){
   e.preventDefault();
   e.stopPropagation();
@@ -993,80 +992,29 @@ function cycleCardImage(e, id, dir){
 }
 
 /* ---------------- PRODUCT GRID ---------------- */
+// Card and grid markup live in product-card.js, shared with the server-side
+// renderer that puts the catalogue into the initial HTML for crawlers. This
+// wrapper only handles the things that are browser concerns: the image registry
+// used by the photo arrows, and the filter empty state.
+//
 // `list` is a filtered subset, or omitted for everything. It must never be the
 // PRODUCTS global mutated in place: addToCart() resolves products out of
-// PRODUCTS by id, so shrinking it would break Add to Basket for anything hidden
-// by a filter. Callers pass a copy.
+// PRODUCTS by id, so shrinking it would break Add to Basket for anything a
+// filter hid. Callers pass a copy.
 function renderGrid(list){
   var grid = document.getElementById('productGrid');
   var items = (list || PRODUCTS).slice();
-  // Accumulator that image cycling reads from; rebuild it from scratch each
-  // render so a filtered-out product's photos don't linger.
+
+  // Rebuild the registry from scratch each render so a filtered-out product's
+  // photos don't linger.
   window._cardImgs = {};
-
-  // Sort by tag order, then Summer before Winter within each tag
-  var tagOrder = ['Tops','Bottoms','Shoes','Accessories'];
-  items.sort(function(a,b){
-    var ta = tagOrder.indexOf(a.tag || 'Tops');
-    var tb = tagOrder.indexOf(b.tag || 'Tops');
-    if(ta !== tb) return ta - tb;
-    // Summer first within same tag (only matters for Tops/Bottoms)
-    if(a.subtag === 'Summer' && b.subtag !== 'Summer') return -1;
-    if(a.subtag !== 'Summer' && b.subtag === 'Summer') return 1;
-    return 0;
-  });
-
-  var sections = {};
   items.forEach(function(p){
-    var sec = p.tag || 'Tops';
-    if(!sections[sec]) sections[sec] = [];
-    sections[sec].push(p);
+    if(p.images && p.images.length) window._cardImgs[p.id] = p.images;
   });
 
-  var order = ['Tops','Bottoms','Shoes','Accessories'];
-
-  grid.innerHTML = order.map(function(sec){
-    var prods = sections[sec];
-    if(!prods || prods.length === 0) return '';
-    return '<div class="section-group"><h3 class="section-label">' + sec + '</h3><div class="grid">' +
-      prods.map(function(p){
-        var cardImgs = p.images && p.images.length ? p.images : [];
-        if(cardImgs.length) window._cardImgs[p.id] = cardImgs;
-        return '<div class="card" onclick="location.href=\'product.html?id=' + p.id + '\'" style="cursor:pointer">' +
-          '<div class="card-media">' +
-            stockFlag(p.stock) +
-            '<a class="card-link" href="product.html?id=' + p.id + '" aria-label="Open ' + p.name + '">' +
-              (cardImgs.length ? '<img src="' + cardImgs[0] + '" alt="' + p.name + '" class="card-img" id="cardimg-' + p.id + '" data-idx="0">' : ICONS[p.icon]) +
-            '</a>' +
-            (cardImgs.length > 1
-              ? '<button class="card-arrow prev" onclick="cycleCardImage(event,\'' + p.id + '\',-1)" aria-label="Previous photo">' + ARROW_L + '</button>' +
-                '<button class="card-arrow next" onclick="cycleCardImage(event,\'' + p.id + '\',1)" aria-label="Next photo">' + ARROW_R + '</button>'
-              : '') +
-          '</div>' +
-          '<div class="card-body">' +
-            '<span class="card-cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(p.cat) + '</span>' +
-            '<a class="card-name" href="product.html?id=' + p.id + '">' + esc(p.name) + '</a>' +
-            (p.desc ? '<span class="card-desc">' + p.desc + '</span>' : '') +
-            '<span class="price-tag">' + fmt(p.price) + '</span>' +
-            '<div class="option-row" onclick="event.stopPropagation()">' +
-              '<select id="size-' + p.id + '" ' + (p.stock===0?'disabled':'') + '>' +
-                p.sizes.map(function(s){ var q = sizeAvail(p, s); var label = q <= LOW_SIZE_STOCK ? s + ' (' + q + ' left)' : s; return '<option value="' + s + '" ' + (q===0?'disabled':'') + '>' + label + '</option>'; }).join('') +
-              '</select>' +
-              '<input type="number" class="qty-input" id="qty-' + p.id + '" value="1" min="1" max="' + p.stock + '" ' + (p.stock===0?'disabled':'') + ' onclick="event.stopPropagation()">' +
-            '</div>' +
-            '<button class="add-btn" ' + (p.stock===0?'disabled':'') + ' onclick="event.stopPropagation();addToCart(\'' + p.id + '\')">' +
-              (p.stock===0 ? 'Sold Out' : 'Add to Basket') +
-            '</button>' +
-          '</div>' +
-        '</div>';
-      }).join('') +
-    '</div></div>';
-  }).join('');
-
-  if (!items.length) {
-    grid.innerHTML = '<div class="filter-empty">Nothing in stock matches that combination.' +
-      '<br><button class="filter-clear" style="margin-top:12px;" onclick="clearFilters()">Clear all filters</button></div>';
-  }
+  grid.innerHTML = ProductCard.renderGrid(items,
+    '<div class="filter-empty">Nothing in stock matches that combination.' +
+    '<br><button class="filter-clear" style="margin-top:12px;" onclick="clearFilters()">Clear all filters</button></div>');
 }
 
 (async function(){
